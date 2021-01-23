@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "name": "people",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/toxeeec/people.git",
+  "author": "toxeeec <bartosz.kapciak@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "server": "yarn workspace server",
+    "frontend": "yarn workspace frontend",
+    "common": "yarn workspace @people/common"
+  }
+}

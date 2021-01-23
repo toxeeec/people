@@ -1,0 +1,12 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@people/common": "1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.1.3"
+  }
+}
