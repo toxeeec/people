@@ -3,3 +3,4 @@ dist
 .eslintrc.json
 .eslintcache
 *.tsbuildinfo
+.env
