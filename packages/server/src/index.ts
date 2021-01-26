@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import { createConnection } from 'typeorm';
-import authRouter from './routes/auth';
+import authRouter from './routes/auth.js';
 
 const { NODE_ENV } = process.env;
 

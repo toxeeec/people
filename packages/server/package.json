@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "type": "module",
   "license": "MIT",
   "scripts": {
     "build": "set NODE_ENV=dev&& tsc",
     "start": "set NODE_ENV=dev&& tsc-watch --onSuccess \"node dist/index.js\"",
-    "test": "set NODE_ENV=test&& jest"
+    "test": "set NODE_ENV=test&& jest --detectOpenHandles"
   },
   "dependencies": {
     "@people/common": "1.0.0",
