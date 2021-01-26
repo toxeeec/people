@@ -1,10 +1,20 @@
 import dotenv from 'dotenv';
-import app from './server.js';
+import express from 'express';
+import { createConnection } from 'typeorm';
 
-dotenv.config();
+dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 
-const { PORT } = process.env;
+const app = express();
+app.use(express.json());
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+createConnection();
+
+const { PORT, NODE_ENV } = process.env;
+
+if (NODE_ENV === 'prod' || NODE_ENV === 'dev') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+export default app;
