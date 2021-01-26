@@ -1,6 +1,5 @@
 node_modules
 dist
-.eslintrc.json
 .eslintcache
 *.tsbuildinfo
 .env
