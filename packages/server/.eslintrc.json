@@ -7,6 +7,11 @@
   "rules": {
     "linebreak-style": ["error", "windows"],
     "import/prefer-default-export": "off",
-    "no-console": "off"
+    "no-console": "off",
+    "consistent-return": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "argsIgnorePattern": "next" }
+    ]
   }
 }

@@ -1,4 +1,4 @@
-export class ApiError {
+class ApiError {
   status: number;
 
   message: string;
@@ -8,19 +8,21 @@ export class ApiError {
     this.message = message;
   }
 
-  static 401() {
+  static unauthorized() {
     return new ApiError(401, 'Unauthorized');
   }
 
-  static 403() {
+  static forbidden() {
     return new ApiError(403, 'Forbidden');
   }
 
-  static 404() {
+  static notFound() {
     return new ApiError(404, 'Not Found');
   }
 
-  static 500() {
+  static internal() {
     return new ApiError(500, 'Internal Server Error');
   }
 }
+
+export default ApiError;

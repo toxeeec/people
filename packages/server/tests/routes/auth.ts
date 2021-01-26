@@ -1,5 +1,6 @@
 import supertest from 'supertest';
-import app from '../../dist/index';
+import { createConnection, getConnection } from 'typeorm';
+import app from '../../dist/server';
 
 const request = supertest(app);
 
@@ -9,6 +10,10 @@ const testUser = {
   email: 'test@test.com',
   password: 'TestPassword123',
 };
+
+beforeAll(async () => {
+  await createConnection();
+});
 
 describe('auth routes', () => {
   it('should return acess token when correct email and password', async (done) => {
@@ -91,4 +96,8 @@ describe('auth routes', () => {
     expect(res.body).toHaveProperty('accesstoken');
     done();
   });
+});
+
+afterAll(async () => {
+  await getConnection().close();
 });
