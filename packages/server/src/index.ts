@@ -1,15 +1,23 @@
 import dotenv from 'dotenv';
 import express from 'express';
 import { createConnection } from 'typeorm';
+import authRouter from './routes/auth';
 
-dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+const { NODE_ENV } = process.env;
+
+dotenv.config({ path: `.env.${NODE_ENV}` });
 
 const app = express();
-app.use(express.json());
 
 createConnection();
 
-const { PORT, NODE_ENV } = process.env;
+app.use(express.json());
+const api = express.Router();
+app.use('/api', api);
+
+api.use('/', authRouter);
+
+const { PORT } = process.env;
 
 if (NODE_ENV === 'prod' || NODE_ENV === 'dev') {
   app.listen(PORT, () => {
