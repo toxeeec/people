@@ -1,9 +1,9 @@
-import { createConnection } from 'typeorm';
+import createTypeOrmConnection from './helpers/createTypeOrmConnection';
 import app from './server';
 
-const { PORT, NODE_ENV } = process.env;
+const { PORT } = process.env;
 
-createConnection(NODE_ENV).then(() => {
+createTypeOrmConnection().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });

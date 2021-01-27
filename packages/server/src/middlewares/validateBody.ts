@@ -5,7 +5,7 @@ import ApiError from '../helpers/ApiError';
 const validateBody = (schema: ObjectSchema<any>) => async (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   try {
     const validatedBody = await schema.validate(req.body);

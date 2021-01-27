@@ -1,14 +1,25 @@
 {
-  "extends": ["airbnb-typescript/base"],
+  "extends": [
+    "airbnb-typescript/base",
+    "prettier",
+    "prettier/@typescript-eslint",
+    "plugin:prettier/recommended"
+  ],
   "ignorePatterns": ["dist", "jest.config.js"],
   "parserOptions": {
     "project": "packages/server/tsconfig.json"
   },
   "rules": {
-    "linebreak-style": ["error", "windows"],
+    "prettier/prettier": [
+      "warn",
+      {
+        "endOfLine": "auto",
+        "singleQuote": true
+      }
+    ],
     "import/prefer-default-export": "off",
     "no-console": "off",
     "consistent-return": "off",
-    "@typescript-eslint/no-unused-vars": "off"
+    "@typescript-eslint/no-unused-vars": ["error", { "args": "none" }]
   }
 }

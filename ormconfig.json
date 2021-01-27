@@ -1,5 +1,6 @@
 [
   {
+    "default": "default",
     "name": "dev",
     "type": "postgres",
     "host": "localhost",
@@ -7,8 +8,9 @@
     "password": "zaq1@WSX",
     "port": 5432,
     "synchronize": true,
-    "logging": ["error"],
-    "entities": ["entity/**"],
+    "logging": ["error", "query"],
+    "entities": ["**/dist/entity/*.js"],
+    "migrations": ["**/dist/migration/*.js"],
     "database": "People"
   },
   {
@@ -20,7 +22,8 @@
     "port": 5432,
     "synchronize": true,
     "logging": ["error"],
-    "entities": ["entity/**"],
+    "entities": ["**/dist/entity/*.js"],
+    "migrations": ["**/dist/migration/*.js"],
     "database": "PeopleTest"
   }
 ]

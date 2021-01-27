@@ -1,8 +1,7 @@
 import supertest from 'supertest';
-import { createConnection, getConnection } from 'typeorm';
+import { getConnection } from 'typeorm';
+import createTypeOrmConnection from '../../dist/helpers/createTypeOrmConnection';
 import app from '../../dist/server';
-
-const { NODE_ENV } = process.env;
 
 const request = supertest(app);
 
@@ -13,26 +12,32 @@ const testUser = {
   password: 'TestPassword123',
 };
 beforeAll(async () => {
-  await createConnection(NODE_ENV!);
+  await createTypeOrmConnection();
 });
 
 describe('auth routes', () => {
   it('should return acess token when correct email and password', async (done) => {
     const res = await request
-      .post('/login')
+      .post('/api/login')
       .set('Accept', 'application/json')
       .send({
         email: testUser.email,
         password: testUser.password,
       })
       .expect(200);
-    expect(res.body).toHaveProperty('accessToken');
+    expect(res.body).toHaveProperty([
+      'accessToken',
+      'name',
+      'surname',
+      'email',
+      'id',
+    ]);
     done();
   });
 
   it('should return 401 error when wrong email', async (done) => {
     const res = await request
-      .post('/login')
+      .post('/api/login')
       .set('Accept', 'application/json')
       .send({
         email: 'wrongEmail',
@@ -45,7 +50,7 @@ describe('auth routes', () => {
 
   it('should return 401 error when wrong password', async (done) => {
     const res = await request
-      .post('/login')
+      .post('/api/login')
       .set('Accept', 'application/json')
       .send({
         email: testUser.email,
@@ -58,7 +63,7 @@ describe('auth routes', () => {
 
   it('should return 400 error when required field is not passed', async (done) => {
     const res = await request
-      .post('/login')
+      .post('/api/login')
       .set('Accept', 'application/json')
       .send({
         email: testUser.email,
@@ -68,19 +73,25 @@ describe('auth routes', () => {
     done();
   });
 
-  it('should create user and send access token when correct register credentials', async (done) => {
+  it('should create user and send access token with user info when correct register credentials', async (done) => {
     const res = await request
-      .post('/register')
+      .post('/api/register')
       .set('Accept', 'application/json')
       .send(testUser)
       .expect(201);
-    expect(res.body).toHaveProperty('accessToken');
+    expect(res.body).toHaveProperty([
+      'accessToken',
+      'name',
+      'surname',
+      'email',
+      'password',
+    ]);
     done();
   });
 
   it('should return 400 error when wrong register credentials', async (done) => {
     const res = await request
-      .post('/register')
+      .post('/api/register')
       .set('accept', 'application/json')
       .send({ ...testUser, email: 'wrongemail' })
       .expect(400);
@@ -100,5 +111,5 @@ describe('auth routes', () => {
 });
 
 afterAll(async () => {
-  await getConnection(NODE_ENV).close();
+  await getConnection().close();
 });
