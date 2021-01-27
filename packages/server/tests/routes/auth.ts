@@ -25,12 +25,11 @@ describe('auth routes', () => {
         password: testUser.password,
       })
       .expect(200);
-    expect(res.body).toHaveProperty([
+    expect(res.body).toContainAllKeys([
       'accessToken',
       'name',
       'surname',
       'email',
-      'id',
     ]);
     done();
   });
@@ -79,12 +78,11 @@ describe('auth routes', () => {
       .set('Accept', 'application/json')
       .send(testUser)
       .expect(201);
-    expect(res.body).toHaveProperty([
+    expect(res.body).toContainAllKeys([
       'accessToken',
       'name',
       'surname',
       'email',
-      'password',
     ]);
     done();
   });

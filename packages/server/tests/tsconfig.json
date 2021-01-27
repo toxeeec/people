@@ -8,5 +8,5 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true
   },
-  "include": ["."]
+  "include": [".", "../global.d.ts"]
 }
