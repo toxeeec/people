@@ -1,4 +1,4 @@
-import { registerUserSchema } from '@people/common';
+import { authenticateUserSchema, registerUserSchema } from '@people/common';
 import argon2 from 'argon2';
 import express from 'express';
 import jwt from 'jsonwebtoken';
@@ -28,6 +28,32 @@ router.post(
       );
       res.status(201).json({ name, surname, email, accessToken });
     } catch (err) {
+      next(ApiError.internal());
+    }
+  }
+);
+
+router.post(
+  '/login',
+  validateBody(authenticateUserSchema),
+  async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+      const user = await User.findOne({ email });
+      if (!user) {
+        return next(new ApiError(401, 'Wrong username or password'));
+      }
+      if (!(await argon2.verify(user.password, password))) {
+        return next(new ApiError(401, 'Wrong username or password'));
+      }
+      const { name, surname } = user;
+      const accessToken = jwt.sign(
+        { id: user.id },
+        process.env.ACCESS_TOKEN_SECRET
+      );
+      res.status(200).json({ name, surname, email, accessToken });
+    } catch (err) {
+      console.log(err);
       next(ApiError.internal());
     }
   }

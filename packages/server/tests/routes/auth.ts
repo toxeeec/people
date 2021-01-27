@@ -1,5 +1,7 @@
+import argon2 from 'argon2';
 import supertest from 'supertest';
 import { getConnection } from 'typeorm';
+import { User } from '../../dist/entity/User';
 import createTypeOrmConnection from '../../dist/helpers/createTypeOrmConnection';
 import app from '../../dist/server';
 
@@ -11,8 +13,18 @@ const testUser = {
   email: 'test@test.com',
   password: 'TestPassword123',
 };
+
+const existingUser = {
+  name: 'ExistingName',
+  surname: 'ExistingSurname',
+  email: 'existingemail@test.com',
+  password: 'ExistingPassword123',
+};
 beforeAll(async () => {
   await createTypeOrmConnection();
+  const { name, surname, email, password } = existingUser;
+  const hashedPassword = await argon2.hash(password);
+  await User.create({ name, surname, email, password: hashedPassword }).save();
 });
 
 describe('auth routes', () => {
@@ -21,8 +33,8 @@ describe('auth routes', () => {
       .post('/api/login')
       .set('Accept', 'application/json')
       .send({
-        email: testUser.email,
-        password: testUser.password,
+        email: existingUser.email,
+        password: existingUser.password,
       })
       .expect(200);
     expect(res.body).toContainAllKeys([
@@ -39,8 +51,8 @@ describe('auth routes', () => {
       .post('/api/login')
       .set('Accept', 'application/json')
       .send({
-        email: 'wrongEmail',
-        password: testUser.password,
+        email: 'wrongEmail@gmail.com',
+        password: existingUser.password,
       })
       .expect(401);
     expect(res.body).toHaveProperty('message');
@@ -52,7 +64,7 @@ describe('auth routes', () => {
       .post('/api/login')
       .set('Accept', 'application/json')
       .send({
-        email: testUser.email,
+        email: existingUser.email,
         password: 'wrongPassword',
       })
       .expect(401);
@@ -65,9 +77,9 @@ describe('auth routes', () => {
       .post('/api/login')
       .set('Accept', 'application/json')
       .send({
-        email: testUser.email,
+        email: existingUser.email,
       })
-      .expect(401);
+      .expect(400);
     expect(res.body).toHaveProperty('message');
     done();
   });

@@ -14,7 +14,8 @@
       "warn",
       {
         "endOfLine": "auto",
-        "singleQuote": true
+        "singleQuote": true,
+        "trailingComma": "es5"
       }
     ],
     "import/prefer-default-export": "off",
