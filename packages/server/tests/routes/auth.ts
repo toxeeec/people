@@ -2,6 +2,8 @@ import supertest from 'supertest';
 import { createConnection, getConnection } from 'typeorm';
 import app from '../../dist/server';
 
+const { NODE_ENV } = process.env;
+
 const request = supertest(app);
 
 const testUser = {
@@ -10,9 +12,8 @@ const testUser = {
   email: 'test@test.com',
   password: 'TestPassword123',
 };
-
 beforeAll(async () => {
-  await createConnection();
+  await createConnection(NODE_ENV!);
 });
 
 describe('auth routes', () => {
@@ -82,22 +83,22 @@ describe('auth routes', () => {
       .post('/register')
       .set('accept', 'application/json')
       .send({ ...testUser, email: 'wrongemail' })
-      .expect(201);
-    expect(res.body).toHaveProperty('accesstoken');
+      .expect(400);
+    expect(res.body).toHaveProperty('message');
     done();
   });
 
   it('should return 400 error when required field is not passed', async (done) => {
     const res = await request
-      .post('/register')
+      .post('/api/register')
       .set('accept', 'application/json')
       .send({ email: testUser.email, password: testUser.password })
-      .expect(201);
-    expect(res.body).toHaveProperty('accesstoken');
+      .expect(400);
+    expect(res.body).toHaveProperty('message');
     done();
   });
 });
 
 afterAll(async () => {
-  await getConnection().close();
+  await getConnection(NODE_ENV).close();
 });

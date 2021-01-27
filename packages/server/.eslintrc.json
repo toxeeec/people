@@ -9,9 +9,6 @@
     "import/prefer-default-export": "off",
     "no-console": "off",
     "consistent-return": "off",
-    "@typescript-eslint/no-unused-vars": [
-      "error",
-      { "argsIgnorePattern": "next" }
-    ]
+    "@typescript-eslint/no-unused-vars": "off"
   }
 }

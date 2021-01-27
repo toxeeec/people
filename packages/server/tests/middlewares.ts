@@ -2,10 +2,12 @@ import supertest from 'supertest';
 import { createConnection, getConnection } from 'typeorm';
 import app from '../dist/server';
 
+const { NODE_ENV } = process.env;
+
 const request = supertest(app);
 
 beforeAll(async () => {
-  await createConnection();
+  await createConnection(NODE_ENV!);
 });
 
 it('should return 404 when resource not found', async (done) => {
@@ -15,5 +17,5 @@ it('should return 404 when resource not found', async (done) => {
 });
 
 afterAll(async () => {
-  await getConnection().close();
+  await getConnection(NODE_ENV).close();
 });

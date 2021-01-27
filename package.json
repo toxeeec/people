@@ -1,8 +1,10 @@
 {
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  },
   "name": "people",
   "version": "1.0.0",
   "main": "index.js",

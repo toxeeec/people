@@ -1,0 +1,26 @@
+[
+  {
+    "name": "dev",
+    "type": "postgres",
+    "host": "localhost",
+    "username": "postgres",
+    "password": "zaq1@WSX",
+    "port": 5432,
+    "synchronize": true,
+    "logging": ["error"],
+    "entities": ["entity/**"],
+    "database": "People"
+  },
+  {
+    "name": "test",
+    "type": "postgres",
+    "host": "localhost",
+    "username": "postgres",
+    "password": "zaq1@WSX",
+    "port": 5432,
+    "synchronize": true,
+    "logging": ["error"],
+    "entities": ["entity/**"],
+    "database": "PeopleTest"
+  }
+]
