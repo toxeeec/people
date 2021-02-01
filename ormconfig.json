@@ -24,7 +24,6 @@
     "dropSchema": true,
     "logging": ["error"],
     "entities": ["**/dist/entity/*.js"],
-    "migrations": ["**/dist/migration/*.js"],
     "database": "PeopleTest"
   }
 ]

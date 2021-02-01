@@ -7,7 +7,7 @@
   "scripts": {
     "build": "set NODE_ENV=dev&& tsc",
     "start": "set NODE_ENV=dev&& tsc-watch --onSuccess \"node dist/index.js\"",
-    "test": "set NODE_ENV=test&& jest --verbose --runInBand"
+    "test": "set NODE_ENV=test&& jest --verbose --runInBand --detectOpenHandles"
   },
   "dependencies": {
     "@people/common": "1.0.0",

@@ -20,15 +20,21 @@ const existingUser = {
   email: 'existingemail@test.com',
   password: 'ExistingPassword123',
 };
+
 beforeAll(async () => {
   await createTypeOrmConnection();
   const { name, surname, email, password } = existingUser;
   const hashedPassword = await argon2.hash(password);
-  await User.create({ name, surname, email, password: hashedPassword }).save();
+  await User.create({
+    name,
+    surname,
+    email,
+    password: hashedPassword,
+  }).save();
 });
 
 describe('auth routes', () => {
-  it('should return acess token when correct email and password', async (done) => {
+  it('should return user info and tokens when given correct email and password', async (done) => {
     const res = await request
       .post('/api/login')
       .set('Accept', 'application/json')
@@ -38,16 +44,17 @@ describe('auth routes', () => {
       })
       .expect(200);
     expect(res.body).toContainAllKeys([
-      'accessToken',
       'name',
       'surname',
       'email',
+      'refreshToken',
+      'accessToken',
     ]);
     done();
   });
 
-  it('should return 401 error when wrong email', async (done) => {
-    const res = await request
+  it('should return 401 error when given wrong email', async (done) => {
+    await request
       .post('/api/login')
       .set('Accept', 'application/json')
       .send({
@@ -55,12 +62,11 @@ describe('auth routes', () => {
         password: existingUser.password,
       })
       .expect(401);
-    expect(res.body).toHaveProperty('message');
     done();
   });
 
-  it('should return 401 error when wrong password', async (done) => {
-    const res = await request
+  it('should return 401 error when given wrong password', async (done) => {
+    await request
       .post('/api/login')
       .set('Accept', 'application/json')
       .send({
@@ -68,54 +74,51 @@ describe('auth routes', () => {
         password: 'wrongPassword',
       })
       .expect(401);
-    expect(res.body).toHaveProperty('message');
     done();
   });
 
-  it('should return 400 error when required field is not passed', async (done) => {
-    const res = await request
+  it('should return 400 error when required field is not given', async (done) => {
+    await request
       .post('/api/login')
       .set('Accept', 'application/json')
       .send({
         email: existingUser.email,
       })
       .expect(400);
-    expect(res.body).toHaveProperty('message');
     done();
   });
 
-  it('should create user and send access token with user info when correct register credentials', async (done) => {
+  it('should create user, return user info and tokens when given correct register credentials', async (done) => {
     const res = await request
       .post('/api/register')
       .set('Accept', 'application/json')
       .send(testUser)
       .expect(201);
     expect(res.body).toContainAllKeys([
-      'accessToken',
       'name',
       'surname',
       'email',
+      'refreshToken',
+      'accessToken',
     ]);
     done();
   });
 
-  it('should return 400 error when wrong register credentials', async (done) => {
-    const res = await request
+  it('should return 400 error when given wrong register credentials', async (done) => {
+    await request
       .post('/api/register')
       .set('accept', 'application/json')
       .send({ ...testUser, email: 'wrongemail' })
       .expect(400);
-    expect(res.body).toHaveProperty('message');
     done();
   });
 
-  it('should return 400 error when required field is not passed', async (done) => {
-    const res = await request
+  it('should return 400 error when required field is not given', async (done) => {
+    await request
       .post('/api/register')
       .set('accept', 'application/json')
       .send({ email: testUser.email, password: testUser.password })
       .expect(400);
-    expect(res.body).toHaveProperty('message');
     done();
   });
 });
