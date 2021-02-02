@@ -1,9 +1,9 @@
 import dotenv from 'dotenv';
 import express from 'express';
-import ApiError from './helpers/ApiError.js';
-import errorHandler from './helpers/errorHandler.js';
-import authRouter from './routes/auth.js';
-import usersRouter from './routes/users.js';
+import ApiError from './helpers/ApiError';
+import errorHandler from './helpers/errorHandler';
+import authRouter from './routes/auth';
+import usersRouter from './routes/users';
 
 const { NODE_ENV } = process.env;
 

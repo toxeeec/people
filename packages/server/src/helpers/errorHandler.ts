@@ -1,5 +1,5 @@
 import { ErrorRequestHandler } from 'express';
-import ApiError from './ApiError.js';
+import ApiError from './ApiError';
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   if (err instanceof ApiError) {
