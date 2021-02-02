@@ -16,6 +16,8 @@ router.post(
   async (req, res, next) => {
     try {
       const { name, surname, email, password } = req.body;
+      const emailCount = await User.count({ email });
+      if (emailCount) return next(new ApiError(400, 'E-mail is already taken'));
       const hashedPassword = await argon2.hash(password);
       const user = User.create({
         name,

@@ -104,6 +104,15 @@ describe('auth routes', () => {
     done();
   });
 
+  it('should return 400 error when given email is not unique', async (done) => {
+    await request
+      .post('/api/register')
+      .set('Accept', 'application/json')
+      .send(testUser)
+      .expect(400);
+    done();
+  });
+
   it('should return 400 error when given wrong register credentials', async (done) => {
     await request
       .post('/api/register')
