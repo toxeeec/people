@@ -1,4 +1,5 @@
 import argon2 from 'argon2';
+import faker from 'faker';
 import supertest from 'supertest';
 import { getConnection } from 'typeorm';
 import { User } from '../../dist/entity/User';
@@ -8,17 +9,17 @@ import app from '../../dist/server';
 const request = supertest(app);
 
 const testUser = {
-  name: 'TestName',
-  surname: 'TestSurname',
-  email: 'test@test.com',
-  password: 'TestPassword123',
+  name: faker.name.firstName(),
+  surname: faker.name.lastName(),
+  email: faker.internet.email(),
+  password: faker.internet.password(),
 };
 
 const existingUser = {
-  name: 'ExistingName',
-  surname: 'ExistingSurname',
-  email: 'existingemail@test.com',
-  password: 'ExistingPassword123',
+  name: faker.name.firstName(),
+  surname: faker.name.lastName(),
+  email: faker.internet.email(),
+  password: faker.internet.password(),
 };
 
 beforeAll(async () => {

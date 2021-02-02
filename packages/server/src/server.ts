@@ -3,6 +3,7 @@ import express from 'express';
 import ApiError from './helpers/ApiError.js';
 import errorHandler from './helpers/errorHandler.js';
 import authRouter from './routes/auth.js';
+import usersRouter from './routes/users.js';
 
 const { NODE_ENV } = process.env;
 
@@ -15,6 +16,7 @@ const api = express.Router();
 app.use('/api', api);
 
 api.use('/', authRouter);
+api.use('/users', usersRouter);
 
 app.use((req, res, next) => {
   next(ApiError.notFound());
