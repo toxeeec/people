@@ -4,7 +4,7 @@ import { User } from '../entity/User';
 
 const createTokens = async (user: User) => {
   const accessToken = jwt.sign(
-    { id: user.id },
+    { id: user.id, name: user.name, surname: user.surname },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: '15m' }
   );
