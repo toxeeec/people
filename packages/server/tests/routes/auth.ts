@@ -34,10 +34,12 @@ beforeAll(async () => {
   }).save();
 });
 
-describe('auth routes', () => {
+describe('login route', () => {
+  const path = '/api/login';
+
   it('should return user info and tokens when given correct email and password', async (done) => {
     const res = await request
-      .post('/api/login')
+      .post(path)
       .set('Accept', 'application/json')
       .send({
         email: existingUser.email,
@@ -56,7 +58,7 @@ describe('auth routes', () => {
 
   it('should return 401 error when given wrong email', async (done) => {
     await request
-      .post('/api/login')
+      .post(path)
       .set('Accept', 'application/json')
       .send({
         email: 'wrongEmail@gmail.com',
@@ -68,7 +70,7 @@ describe('auth routes', () => {
 
   it('should return 401 error when given wrong password', async (done) => {
     await request
-      .post('/api/login')
+      .post(path)
       .set('Accept', 'application/json')
       .send({
         email: existingUser.email,
@@ -80,7 +82,7 @@ describe('auth routes', () => {
 
   it('should return 400 error when required field is not given', async (done) => {
     await request
-      .post('/api/login')
+      .post(path)
       .set('Accept', 'application/json')
       .send({
         email: existingUser.email,
@@ -88,10 +90,14 @@ describe('auth routes', () => {
       .expect(400);
     done();
   });
+});
+
+describe('register route', () => {
+  const path = '/api/register';
 
   it('should create user, return user info and tokens when given correct register credentials', async (done) => {
     const res = await request
-      .post('/api/register')
+      .post(path)
       .set('Accept', 'application/json')
       .send(testUser)
       .expect(201);
@@ -107,7 +113,7 @@ describe('auth routes', () => {
 
   it('should return 400 error when given email is not unique', async (done) => {
     await request
-      .post('/api/register')
+      .post(path)
       .set('Accept', 'application/json')
       .send(testUser)
       .expect(400);
@@ -116,7 +122,7 @@ describe('auth routes', () => {
 
   it('should return 400 error when given wrong register credentials', async (done) => {
     await request
-      .post('/api/register')
+      .post(path)
       .set('accept', 'application/json')
       .send({ ...testUser, email: 'wrongemail' })
       .expect(400);
@@ -125,7 +131,7 @@ describe('auth routes', () => {
 
   it('should return 400 error when required field is not given', async (done) => {
     await request
-      .post('/api/register')
+      .post(path)
       .set('accept', 'application/json')
       .send({ email: testUser.email, password: testUser.password })
       .expect(400);

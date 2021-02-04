@@ -31,8 +31,10 @@ beforeAll(async () => {
 });
 
 describe('token route', () => {
+  const path = '/api/token';
+
   it('should return 401 error when refresh token is not given', async (done) => {
-    await request.post('/api/token').expect(401);
+    await request.post(path).expect(401);
     done();
   });
 
@@ -41,25 +43,22 @@ describe('token route', () => {
       { id: user.id },
       process.env.REFRESH_TOKEN_SECRET!
     );
-    await request
-      .post('/api/token')
-      .auth(refreshToken, { type: 'bearer' })
-      .expect(403);
+    await request.post(path).auth(refreshToken, { type: 'bearer' }).expect(403);
     done();
   });
 
-  it('should return 403 error when given wrong refresh token', async (done) => {
+  it('should return 403 error when given invalid refresh token', async (done) => {
     await request
-      .post('/api/token')
+      .post(path)
       .auth('refreshToken', { type: 'bearer' })
       .expect(403);
     done();
   });
 
-  it('should return access token when given refresh token', async (done) => {
+  it('should return access token when given valid refresh token', async (done) => {
     const { refreshToken } = await createTokens(user);
     const res = await request
-      .post('/api/token')
+      .post(path)
       .auth(refreshToken, { type: 'bearer' })
       .expect(200);
     expect(res.body).toHaveProperty('accessToken');

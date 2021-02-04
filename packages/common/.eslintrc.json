@@ -10,6 +10,7 @@
         "endOfLine": "auto",
         "singleQuote": true
       }
-    ]
+    ],
+    "import/prefer-default-export": "off"
   }
 }

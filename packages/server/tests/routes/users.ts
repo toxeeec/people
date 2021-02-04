@@ -8,8 +8,6 @@ import app from '../../dist/server';
 
 const request = supertest(app);
 
-const path = '/api/users';
-
 const existingUser = {
   name: faker.name.firstName(),
   surname: faker.name.lastName(),
@@ -18,7 +16,6 @@ const existingUser = {
 };
 
 let id: string;
-const fakeId = faker.random.uuid();
 
 beforeAll(async () => {
   await createTypeOrmConnection();
@@ -33,20 +30,25 @@ beforeAll(async () => {
   id = user.id;
 });
 
-it('should return user info when given correct id and user exists', async (done) => {
-  const res = await request.get(`${path}/${id}`).expect(200);
-  expect(res.body).toContainAllKeys(['id', 'name', 'surname']);
-  done();
-});
+describe('auth routes', () => {
+  const path = '/api/users';
+  const fakeId = faker.random.uuid();
 
-it('should return 404 error when given correct id and user does not exist', async (done) => {
-  await request.get(`${path}/${fakeId}`).expect(404);
-  done();
-});
+  it('should return user info when given correct id and user exists', async (done) => {
+    const res = await request.get(`${path}/${id}`).expect(200);
+    expect(res.body).toContainAllKeys(['id', 'name', 'surname']);
+    done();
+  });
 
-it('should return 400 error when given wrong id', async (done) => {
-  await request.get(`${path}/wrongId`).expect(400);
-  done();
+  it('should return 404 error when given correct id and user does not exist', async (done) => {
+    await request.get(`${path}/${fakeId}`).expect(404);
+    done();
+  });
+
+  it('should return 400 error when given wrong id', async (done) => {
+    await request.get(`${path}/wrongId`).expect(400);
+    done();
+  });
 });
 
 afterAll(async () => {

@@ -1,11 +1,13 @@
+import { validateIdSchema } from '@people/common';
 import { NextFunction, Request, Response } from 'express';
-import validator from 'validator';
 import ApiError from '../helpers/ApiError';
 
-const validateId = (req: Request, res: Response, next: NextFunction) => {
-  const { id } = req.params;
-  if (!validator.isUUID(id, 4))
-    return next(new ApiError(400, 'Id is not in valid format'));
-  next();
+const validateId = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await validateIdSchema.validate(req.params);
+    return next();
+  } catch (err) {
+    return next(new ApiError(400, err.errors[0]));
+  }
 };
 export default validateId;

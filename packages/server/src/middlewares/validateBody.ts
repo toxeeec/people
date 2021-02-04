@@ -10,9 +10,9 @@ const validateBody = (schema: ObjectSchema<any>) => async (
   try {
     const validatedBody = await schema.validate(req.body);
     req.body = validatedBody;
-    next();
+    return next();
   } catch (err) {
-    next(new ApiError(400, err.errors[0]));
+    return next(new ApiError(400, err.errors[0]));
   }
 };
 export default validateBody;
