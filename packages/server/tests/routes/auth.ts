@@ -8,7 +8,7 @@ import app from '../../dist/server';
 
 const request = supertest(app);
 
-const testUser = {
+const sampleUser = {
   name: faker.name.firstName(),
   surname: faker.name.lastName(),
   email: faker.internet.email(),
@@ -99,7 +99,7 @@ describe('register route', () => {
     const res = await request
       .post(path)
       .set('Accept', 'application/json')
-      .send(testUser)
+      .send(sampleUser)
       .expect(201);
     expect(res.body).toContainAllKeys([
       'name',
@@ -115,7 +115,7 @@ describe('register route', () => {
     await request
       .post(path)
       .set('Accept', 'application/json')
-      .send(testUser)
+      .send(sampleUser)
       .expect(400);
     done();
   });
@@ -124,7 +124,7 @@ describe('register route', () => {
     await request
       .post(path)
       .set('accept', 'application/json')
-      .send({ ...testUser, email: 'wrongemail' })
+      .send({ ...sampleUser, email: 'wrongemail' })
       .expect(400);
     done();
   });
@@ -133,7 +133,7 @@ describe('register route', () => {
     await request
       .post(path)
       .set('accept', 'application/json')
-      .send({ email: testUser.email, password: testUser.password })
+      .send({ email: sampleUser.email, password: sampleUser.password })
       .expect(400);
     done();
   });
