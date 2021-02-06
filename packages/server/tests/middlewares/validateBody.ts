@@ -18,13 +18,12 @@ describe('validateBody middleware', () => {
   });
 
   it('should call next function when given valid input', async (done) => {
-    const middleware = validateBody(authenticateUserSchema);
     const sampleUser = {
       email: faker.internet.email(),
       password: faker.internet.password(),
     };
     mockRequest.body = sampleUser;
-    await middleware(
+    await validateBody(authenticateUserSchema)(
       mockRequest as Request,
       mockResponse as Response,
       nextFunction
@@ -34,13 +33,12 @@ describe('validateBody middleware', () => {
   });
 
   it('should call next function with 400 ApiError when given input is not valid', async (done) => {
-    const middleware = validateBody(authenticateUserSchema);
     const wrongUser = {
       email: 'notAnEmail',
       password: 'wrong',
     };
     mockRequest.body = wrongUser;
-    await middleware(
+    await validateBody(authenticateUserSchema)(
       mockRequest as Request,
       mockResponse as Response,
       nextFunction
@@ -52,12 +50,11 @@ describe('validateBody middleware', () => {
   });
 
   it('should call next function with 400 ApiError when required field is not given', async (done) => {
-    const middleware = validateBody(authenticateUserSchema);
     const wrongUser = {
       password: 'notAnEmail',
     };
     mockRequest.body = wrongUser;
-    await middleware(
+    await validateBody(authenticateUserSchema)(
       mockRequest as Request,
       mockResponse as Response,
       nextFunction

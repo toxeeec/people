@@ -1,11 +1,12 @@
+import { idSchema } from '@people/common';
 import express from 'express';
 import { User } from '../entity/User';
 import ApiError from '../helpers/ApiError';
-import validateId from '../middlewares/validateId';
+import validateParams from '../middlewares/validateParams';
 
 const router = express.Router();
 
-router.get('/:id', validateId, async (req, res, next) => {
+router.get('/:id', validateParams(idSchema), async (req, res, next) => {
   try {
     const user = await User.findOne({ id: req.params.id });
     if (!user) return next(ApiError.notFound());
