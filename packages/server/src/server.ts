@@ -3,6 +3,7 @@ import express from 'express';
 import ApiError from './helpers/ApiError';
 import errorHandler from './helpers/errorHandler';
 import authRouter from './routes/auth';
+import tokenRouter from './routes/token';
 import usersRouter from './routes/users';
 
 const { NODE_ENV } = process.env;
@@ -16,6 +17,7 @@ const api = express.Router();
 app.use('/api', api);
 
 api.use('/', authRouter);
+api.use('/', tokenRouter);
 api.use('/users', usersRouter);
 
 app.use((req, res, next) => {
