@@ -5,5 +5,8 @@
   "extends": ["plugin:jest/style"],
   "env": {
     "jest/globals": true
+  },
+  "rules": {
+    "no-restricted-syntax": "off"
   }
 }
