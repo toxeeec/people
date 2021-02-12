@@ -2,7 +2,6 @@ import argon2 from 'argon2';
 import { NextFunction } from 'express';
 import faker from 'faker';
 import { User } from '../../dist/entity/User';
-import ApiError from '../../dist/helpers/ApiError';
 import createTypeOrmConnection from '../../dist/helpers/createTypeOrmConnection';
 import paginate from '../../dist/helpers/paginate';
 
@@ -83,14 +82,6 @@ describe('validate helper function', () => {
     expect(res).toHaveProperty('count', 40);
     expect(res).toHaveProperty('previous');
     expect(res.data).toHaveLength(0);
-    done();
-  });
-
-  it('should return 400 error when page is lower than 1', async (done) => {
-    await paginate(nextFunction, User, { page: 0, limit: 20 });
-    expect(nextFunction).toHaveBeenLastCalledWith(
-      new ApiError(400, 'page must be a positive number')
-    );
     done();
   });
 });
