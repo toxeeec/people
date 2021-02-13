@@ -79,17 +79,6 @@ describe('login route', () => {
       .expect(401);
     done();
   });
-
-  it('should return 400 error when required field is not given', async (done) => {
-    await request
-      .post(path)
-      .set('Accept', 'application/json')
-      .send({
-        email: existingUser.email,
-      })
-      .expect(400);
-    done();
-  });
 });
 
 describe('register route', () => {
@@ -116,24 +105,6 @@ describe('register route', () => {
       .post(path)
       .set('Accept', 'application/json')
       .send(sampleUser)
-      .expect(400);
-    done();
-  });
-
-  it('should return 400 error when given wrong register credentials', async (done) => {
-    await request
-      .post(path)
-      .set('accept', 'application/json')
-      .send({ ...sampleUser, email: 'wrongemail' })
-      .expect(400);
-    done();
-  });
-
-  it('should return 400 error when required field is not given', async (done) => {
-    await request
-      .post(path)
-      .set('accept', 'application/json')
-      .send({ email: sampleUser.email, password: sampleUser.password })
       .expect(400);
     done();
   });
