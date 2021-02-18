@@ -1,4 +1,10 @@
-import { BaseEntity, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import IUser from './IUser';
 
 @Entity('friendRequests')
@@ -11,4 +17,7 @@ export class FriendRequest extends BaseEntity {
 
   @ManyToOne('User', 'friendRequestsReceived')
   receiver: IUser;
+
+  @Column({ default: 'pending' })
+  status: 'pending' | 'friends' | 'blocked';
 }

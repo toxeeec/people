@@ -9,7 +9,7 @@ const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
     if (err) return next(ApiError.forbidden());
-    req.user = user as { id: number };
+    req.user = user as { id: string; name: string; surname: string };
     return next();
   });
 };

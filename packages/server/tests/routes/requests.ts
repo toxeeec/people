@@ -32,13 +32,13 @@ beforeAll(async () => {
   for await (const user of users) {
     user.password = await argon2.hash(faker.internet.password());
   }
-  const dbUsers = User.create(users);
+  let dbUsers = User.create(users);
+  dbUsers = await User.save(dbUsers);
   for await (const [i, user] of users.entries()) {
     user.id = dbUsers[i].id;
     const { accessToken } = await createTokens(user as User);
     user.accessToken = accessToken;
   }
-  await User.save(dbUsers);
 });
 
 describe('requests route', () => {
@@ -69,15 +69,15 @@ describe('requests route', () => {
 
   it('should return 400 error when this user already sent you a friend request', async (done) => {
     await request
-      .post(`${path}/${users[0].id}`)
+      .post(`${path}/${users[2].id}`)
       .auth(users[1].accessToken!, { type: 'bearer' });
     const res = await request
       .post(`${path}/${users[1].id}`)
-      .auth(users[0].accessToken!, { type: 'bearer' })
+      .auth(users[2].accessToken!, { type: 'bearer' })
       .expect(400);
     expect(res.body).toHaveProperty(
       'message',
-      'Request to this user was already sent'
+      'This user already sent u a friend request'
     );
     done();
   });
