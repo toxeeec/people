@@ -1,8 +1,9 @@
-import { idSchema } from '@people/common';
+import { idSchema, paginateSchema } from '@people/common';
 import express, { Request } from 'express';
 import { FriendRequest } from '../entity/FriendRequest';
 import IUser from '../entity/IUser';
 import ApiError from '../helpers/ApiError';
+import paginate from '../helpers/paginate';
 import authenticateToken from '../middlewares/authenticateToken';
 import getEntityById from '../middlewares/getEntityById';
 import validateParams from '../middlewares/validateParams';
@@ -17,6 +18,11 @@ router.post(
   async (req: Request, res, next) => {
     const target = req.entity;
     const { user } = req;
+    if (target.id === user.id) {
+      return next(
+        new ApiError(400, 'You cannot send a friend request to yourself')
+      );
+    }
     try {
       const existingRequest = await FriendRequest.findOne({
         relations: ['sender', 'receiver'],
@@ -43,9 +49,44 @@ router.post(
       await request.save();
       res.json({ message: 'Request sent successfully' });
     } catch (err) {
-      console.log(err);
       return next(ApiError.internal());
     }
+  }
+);
+
+router.get(
+  '/sent',
+  authenticateToken,
+  validateParams(paginateSchema),
+  async (req: Request, res, next) => {
+    const page = req.params.page && parseInt(req.params.page, 10);
+    const limit = req.params.limit && parseInt(req.params.limit, 10);
+    const result = await paginate(next, FriendRequest, {
+      queryOptions: {
+        where: { sender: req.user!.id },
+      },
+      page,
+      limit,
+    });
+    res.json(result);
+  }
+);
+
+router.get(
+  '/received',
+  authenticateToken,
+  validateParams(paginateSchema),
+  async (req: Request, res, next) => {
+    const page = req.params.page && parseInt(req.params.page, 10);
+    const limit = req.params.limit && parseInt(req.params.limit, 10);
+    const result = await paginate(next, FriendRequest, {
+      queryOptions: {
+        where: { receiver: req.user!.id },
+      },
+      page,
+      limit,
+    });
+    res.json(result);
   }
 );
 

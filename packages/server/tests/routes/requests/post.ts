@@ -2,10 +2,10 @@ import argon2 from 'argon2';
 import faker from 'faker';
 import supertest from 'supertest';
 import { getConnection } from 'typeorm';
-import { User } from '../../dist/entity/User';
-import createTokens from '../../dist/helpers/createTokens';
-import createTypeOrmConnection from '../../dist/helpers/createTypeOrmConnection';
-import app from '../../dist/server';
+import { User } from '../../../dist/entity/User';
+import createTokens from '../../../dist/helpers/createTokens';
+import createTypeOrmConnection from '../../../dist/helpers/createTypeOrmConnection';
+import app from '../../../dist/server';
 
 const request = supertest(app);
 
@@ -41,7 +41,7 @@ beforeAll(async () => {
   }
 });
 
-describe('requests route', () => {
+describe('requests route post', () => {
   const path = '/api/requests';
   it('should send friend request to the user', async (done) => {
     const res = await request
