@@ -7,6 +7,12 @@ import {
 } from 'typeorm';
 import IUser from './IUser';
 
+export enum FriendRequestStatus {
+  PENDING,
+  ACCEPTED,
+  BLOCKED,
+}
+
 @Entity('friendRequests')
 export class FriendRequest extends BaseEntity {
   @PrimaryGeneratedColumn()
@@ -18,6 +24,6 @@ export class FriendRequest extends BaseEntity {
   @ManyToOne('User', 'friendRequestsReceived')
   receiver: IUser;
 
-  @Column({ default: 'pending' })
-  status: 'pending' | 'friends' | 'blocked';
+  @Column({ default: FriendRequestStatus.PENDING })
+  status: FriendRequestStatus;
 }
