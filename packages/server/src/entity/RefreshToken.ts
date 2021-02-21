@@ -15,6 +15,9 @@ export class RefreshToken extends BaseEntity {
   @Column()
   token: string;
 
+  @Column({ nullable: true })
+  userId: string;
+
   @ManyToOne('User', 'tokens')
   user: IUser;
 }

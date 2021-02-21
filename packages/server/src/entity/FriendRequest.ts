@@ -18,8 +18,14 @@ export class FriendRequest extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ nullable: true })
+  senderId: string;
+
   @ManyToOne('User', 'friendRequestsSent')
   sender: IUser;
+
+  @Column({ nullable: true })
+  receiverId: string;
 
   @ManyToOne('User', 'friendRequestsReceived')
   receiver: IUser;
