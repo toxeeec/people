@@ -2,11 +2,14 @@ import {
   BaseEntity,
   Column,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { IFriendRequest } from './IFriendRequest';
 import IRefreshToken from './IRefreshToken';
+import IUser from './IUser';
 
 @Entity('users')
 export class User extends BaseEntity {
@@ -33,4 +36,8 @@ export class User extends BaseEntity {
 
   @OneToMany('RefreshToken', 'receiver')
   friendRequestsReceiver: IFriendRequest[];
+
+  @ManyToMany('User')
+  @JoinTable()
+  friends: IUser[];
 }
