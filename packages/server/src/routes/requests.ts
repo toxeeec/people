@@ -1,6 +1,6 @@
 import { idSchema, paginateSchema } from '@people/common';
 import express, { Request } from 'express';
-import { FriendRequest } from '../entity/FriendRequest';
+import { FriendRequest, FriendRequestStatus } from '../entity/FriendRequest';
 import ApiError from '../helpers/ApiError';
 import paginate from '../helpers/paginate';
 import authenticateToken from '../middlewares/authenticateToken';
@@ -9,9 +9,10 @@ import validateParams from '../middlewares/validateParams';
 
 const router = express.Router();
 
+router.use(authenticateToken);
+
 router.get(
   '/sent',
-  authenticateToken,
   validateParams(paginateSchema),
   async (req: Request, res, next) => {
     const page = req.params.page && parseInt(req.params.page, 10);
@@ -29,7 +30,6 @@ router.get(
 
 router.get(
   '/received',
-  authenticateToken,
   validateParams(paginateSchema),
   async (req: Request, res, next) => {
     const page = req.params.page && parseInt(req.params.page, 10);
@@ -47,7 +47,6 @@ router.get(
 
 router.post(
   '/:id',
-  authenticateToken,
   validateParams(idSchema),
   getEntityById('User'),
   async (req: Request, res, next) => {
@@ -66,6 +65,10 @@ router.post(
         ],
       });
       if (existingRequest) {
+        if (existingRequest.status === FriendRequestStatus.ACCEPTED)
+          return next(
+            new ApiError(400, 'You are already friends with this user')
+          );
         if (existingRequest.senderId === user.id) {
           return next(
             new ApiError(400, 'Request to this user was already sent')
@@ -90,21 +93,27 @@ router.post(
 
 router.delete(
   '/:id',
-  authenticateToken,
   validateParams(idSchema),
-  getEntityById('User'),
   async (req: Request, res, next) => {
     const { user } = req;
-    const target = req.entity!;
     try {
       await FriendRequest.delete({
         senderId: user.id,
-        receiverId: target.id,
+        receiverId: req.params.id,
       });
       res.json({ message: 'Request deleted successfully' });
     } catch (err) {
       return next(ApiError.internal());
     }
+  }
+);
+
+router.patch(
+  '/:id',
+  validateParams(idSchema),
+  getEntityById('User'),
+  async (req, res, next) => {
+    res.json({});
   }
 );
 
