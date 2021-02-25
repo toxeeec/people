@@ -4,7 +4,9 @@ import {
   paginateSchema,
 } from '@people/common';
 import express, { Request } from 'express';
+import { createQueryBuilder } from 'typeorm';
 import { FriendRequest, FriendRequestStatus } from '../entity/FriendRequest';
+import { User } from '../entity/User';
 import ApiError from '../helpers/ApiError';
 import paginate from '../helpers/paginate';
 import authenticateToken from '../middlewares/authenticateToken';
@@ -117,9 +119,46 @@ router.patch(
   '/:id',
   validateParams(idSchema),
   validateBody(friendRequestActionSchema),
-  getEntityById('User'),
-  async (req, res, next) => {
-    res.json({});
+  async (req: Request, res, next) => {
+    try {
+      const targetId = req.params.id;
+      const { user } = req;
+      const { action }: { action: 'accept' | 'decline' } = req.body;
+      const request = await FriendRequest.findOne({
+        where: [
+          { senderId: user.id, receiverId: targetId },
+          { senderId: targetId, receiverId: user.id },
+        ],
+      });
+      if (!request) {
+        return next(ApiError.notFound());
+      }
+      if (request.status === FriendRequestStatus.ACCEPTED) {
+        return next(
+          new ApiError(400, 'You are already friends with this user')
+        );
+      }
+      if (action === 'accept') {
+        await createQueryBuilder()
+          .relation(User, 'friends')
+          .of(targetId)
+          .add(user.id);
+        await createQueryBuilder()
+          .relation(User, 'friends')
+          .of(user.id)
+          .add(targetId);
+        request.status = FriendRequestStatus.ACCEPTED;
+        await request.save();
+        return res.json({ message: 'Request accepted successfully' });
+      }
+      if (action === 'decline') {
+        await request.remove();
+        return res.json({ message: 'Request declined successfully' });
+      }
+    } catch (err) {
+      console.log(err);
+      return next(ApiError.internal());
+    }
   }
 );
 
