@@ -1,10 +1,15 @@
-import { idSchema, paginateSchema } from '@people/common';
+import {
+  friendRequestActionSchema,
+  idSchema,
+  paginateSchema,
+} from '@people/common';
 import express, { Request } from 'express';
 import { FriendRequest, FriendRequestStatus } from '../entity/FriendRequest';
 import ApiError from '../helpers/ApiError';
 import paginate from '../helpers/paginate';
 import authenticateToken from '../middlewares/authenticateToken';
 import getEntityById from '../middlewares/getEntityById';
+import validateBody from '../middlewares/validateBody';
 import validateParams from '../middlewares/validateParams';
 
 const router = express.Router();
@@ -111,6 +116,7 @@ router.delete(
 router.patch(
   '/:id',
   validateParams(idSchema),
+  validateBody(friendRequestActionSchema),
   getEntityById('User'),
   async (req, res, next) => {
     res.json({});

@@ -80,7 +80,7 @@ describe('requests route patch', () => {
       .expect(400);
     expect(res.body).toHaveProperty(
       'message',
-      'Action must be equal to "accept" or "decline"'
+      'action must be one of the following values: accept, decline'
     );
     done();
   });
