@@ -1,29 +1,39 @@
 [
-  {
-    "default": "default",
-    "name": "dev",
-    "type": "postgres",
-    "host": "localhost",
-    "username": "postgres",
-    "password": "zaq1@WSX",
-    "port": 5432,
-    "synchronize": true,
-    "logging": ["error"],
-    "entities": ["**/dist/entity/*.js"],
-    "migrations": ["**/dist/migration/*.js"],
-    "database": "People"
-  },
-  {
-    "name": "test",
-    "type": "postgres",
-    "host": "localhost",
-    "username": "postgres",
-    "password": "zaq1@WSX",
-    "port": 5432,
-    "synchronize": true,
-    "dropSchema": true,
-    "logging": ["error"],
-    "entities": ["**/dist/entity/*.js"],
-    "database": "PeopleTest"
-  }
+	{
+		"default": "default",
+		"name": "dev",
+		"type": "postgres",
+		"host": "localhost",
+		"username": "postgres",
+		"password": "zaq1@WSX",
+		"port": 5432,
+		"synchronize": true,
+		"logging": [
+			"error"
+		],
+		"entities": [
+			"**/dist/entity/*.js"
+		],
+		"migrations": [
+			"**/dist/migration/*.js"
+		],
+		"database": "People"
+	},
+	{
+		"name": "test",
+		"type": "postgres",
+		"host": "localhost",
+		"username": "postgres",
+		"password": "zaq1@WSX",
+		"port": 5432,
+		"synchronize": true,
+		"dropSchema": true,
+		"logging": [
+			"error"
+		],
+		"entities": [
+			"**/src/entity/*.ts"
+		],
+		"database": "PeopleTest"
+	}
 ]

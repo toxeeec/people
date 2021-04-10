@@ -3,10 +3,10 @@ import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import faker from 'faker';
 import { getConnection } from 'typeorm';
-import { User } from '../../dist/entity/User';
-import ApiError from '../../dist/helpers/ApiError';
-import createTypeOrmConnection from '../../dist/helpers/createTypeOrmConnection';
-import getEntityById from '../../dist/middlewares/getEntityById';
+import { User } from '../../src/entity/User';
+import ApiError from '../../src/helpers/ApiError';
+import createTypeOrmConnection from '../../src/helpers/createTypeOrmConnection';
+import getEntityById from '../../src/middlewares/getEntityById';
 
 dotenv.config({ path: '.env.test' });
 
@@ -52,7 +52,7 @@ describe('getEntityById middleware', () => {
   });
 
   it('should call next function with 404 ApiError error when user does not exist', async (done) => {
-    mockRequest.params!.id = faker.random.uuid();
+    mockRequest.params!.id = faker.datatype.uuid();
     await getEntityById('User')(
       mockRequest as Request,
       mockResponse as Response,

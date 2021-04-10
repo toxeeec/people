@@ -2,9 +2,9 @@ import argon2 from 'argon2';
 import { NextFunction } from 'express';
 import faker from 'faker';
 import { getConnection } from 'typeorm';
-import { User } from '../../dist/entity/User';
-import createTypeOrmConnection from '../../dist/helpers/createTypeOrmConnection';
-import paginate from '../../dist/helpers/paginate';
+import { User } from '../../src/entity/User';
+import createTypeOrmConnection from '../../src/helpers/createTypeOrmConnection';
+import paginate from '../../src/helpers/paginate';
 
 interface IUser {
   name: string;

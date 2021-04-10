@@ -2,8 +2,8 @@ import { authenticateUserSchema } from '@people/common';
 import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import faker from 'faker';
-import ApiError from '../../dist/helpers/ApiError';
-import validateBody from '../../dist/middlewares/validateBody';
+import ApiError from '../../src/helpers/ApiError';
+import validateBody from '../../src/middlewares/validateBody';
 
 dotenv.config({ path: '.env.test' });
 

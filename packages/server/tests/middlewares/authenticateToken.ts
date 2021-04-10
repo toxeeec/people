@@ -2,14 +2,14 @@ import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import faker from 'faker';
 import jwt from 'jsonwebtoken';
-import ApiError from '../../dist/helpers/ApiError';
-import authenticateToken from '../../dist/middlewares/authenticateToken';
+import ApiError from '../../src/helpers/ApiError';
+import authenticateToken from '../../src/middlewares/authenticateToken';
 
 dotenv.config({ path: '.env.test' });
 
 describe('authenticateToken middleware', () => {
   const sampleUser = {
-    id: faker.random.uuid(),
+    id: faker.datatype.uuid(),
     name: faker.name.firstName(),
     surname: faker.name.lastName(),
   };

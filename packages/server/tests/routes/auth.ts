@@ -2,9 +2,9 @@ import argon2 from 'argon2';
 import faker from 'faker';
 import supertest from 'supertest';
 import { getConnection } from 'typeorm';
-import { User } from '../../dist/entity/User';
-import createTypeOrmConnection from '../../dist/helpers/createTypeOrmConnection';
-import app from '../../dist/server';
+import { User } from '../../src/entity/User';
+import createTypeOrmConnection from '../../src/helpers/createTypeOrmConnection';
+import app from '../../src/server';
 
 const request = supertest(app);
 

@@ -2,9 +2,9 @@ import dotenv from 'dotenv';
 import faker from 'faker';
 import jwt from 'jsonwebtoken';
 import { getConnection } from 'typeorm';
-import { User } from '../../dist/entity/User';
-import createTokens from '../../dist/helpers/createTokens';
-import createTypeOrmConnection from '../../dist/helpers/createTypeOrmConnection';
+import { User } from '../../src/entity/User';
+import createTokens from '../../src/helpers/createTokens';
+import createTypeOrmConnection from '../../src/helpers/createTypeOrmConnection';
 
 dotenv.config({ path: '.env.test' });
 

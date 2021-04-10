@@ -2,8 +2,8 @@ import { idSchema } from '@people/common';
 import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import faker from 'faker';
-import ApiError from '../../dist/helpers/ApiError';
-import validateParams from '../../dist/middlewares/validateParams';
+import ApiError from '../../src/helpers/ApiError';
+import validateParams from '../../src/middlewares/validateParams';
 
 dotenv.config({ path: '.env.test' });
 
@@ -18,7 +18,7 @@ describe('validateId middleware', () => {
   });
 
   it('should call next function when given valid id', async (done) => {
-    const uuid = faker.random.uuid();
+    const uuid = faker.datatype.uuid();
     mockRequest.params!.id = uuid;
     await validateParams(idSchema)(
       mockRequest as Request,

@@ -1,7 +1,7 @@
 import supertest from 'supertest';
 import { getConnection } from 'typeorm';
-import createTypeOrmConnection from '../dist/helpers/createTypeOrmConnection';
-import app from '../dist/server';
+import createTypeOrmConnection from '../src/helpers/createTypeOrmConnection';
+import app from '../src/server';
 
 const request = supertest(app);
 
