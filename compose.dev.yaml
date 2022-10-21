@@ -1,0 +1,10 @@
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    image: backend-dev
+    ports:
+      - 8000:8000
+    volumes:
+      - ./backend:/app
