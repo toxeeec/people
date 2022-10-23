@@ -1,31 +1,27 @@
 services:
   backend:
-    build: 
+    build:
       context: ./backend
-      dockerfile: Dockerfile.dev
-    image: backend-dev
+      dockerfile: Dockerfile.test
+    image: backend-test
     depends_on:
       - db
     environment:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=people
-      - POSTGRES_PORT=5432
+      - POSTGRES_DB=people-test
+      - POSTGRES_PORT=5433
       - ACCESS_TOKEN_SECRET=ACCESS_SECRET
       - REFRESH_TOKEN_SECRET=REFRESH_SECRET
-    ports:
-      - 8000:8000
-    volumes:
-      - ./backend:/app
-        
+
   db:
     environment:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=postgres
-      - POSTGRES_DB=people
+      - POSTGRES_DB=people-test
     image: postgres:alpine
     ports: 
-      - 5432:5432
+      - 5433:5432
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
       - db-data:/var/lib/postgresql/data

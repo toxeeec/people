@@ -1,4 +1,4 @@
 [build]
   cmd = "go generate ./... && go build -o ./tmp/main cmd/main.go"
   include_ext = ["go", "yaml"]
-  exclude_file = ["spec/spec.gen.go"]
+  exclude_file = ["spec.gen.go", "models.gen.go"]

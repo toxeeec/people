@@ -1,0 +1,98 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: People API
+
+paths:
+  /register:
+    post:
+      requestBody:
+        $ref: '#/components/requestBodies/AuthUserBody'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tokens'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Tokens:
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+      required:
+        - accessToken
+        - refreshToken
+
+    User:
+      properties:
+        id:
+          type: integer
+          x-go-name: ID
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: user_id
+            fake: skip
+            json: '-'
+        handle:
+          type: string
+          x-oapi-codegen-extra-tags:
+            db: handle
+        password:
+          type: string
+          x-oapi-codegen-extra-tags:
+            json: '-'
+        hash:
+          type: string
+          x-oapi-codegen-extra-tags:
+            db: hash
+            json: '-'
+      required:
+        - id
+        - handle
+        - password
+        - hash
+    
+    AuthUser:
+      properties:
+        handle:
+          type: string
+          minLength: 5
+          maxLength: 15
+          x-oapi-codegen-extra-tags:
+            fake: '{lettern:10}'
+        password:
+          type: string
+          format: password
+          minLength: 12
+          x-go-type: Password
+          x-oapi-codegen-extra-tags:
+            fake: '{password:true,true,true,true,false,12}'
+      required:
+        - handle
+        - password
+
+    Error:
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+  requestBodies:
+    AuthUserBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthUser'

@@ -1,4 +1,5 @@
 FROM golang:alpine
 WORKDIR /app
 RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
 CMD ["air"]

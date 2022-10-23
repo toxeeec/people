@@ -1,0 +1,5 @@
+package: people
+output: spec.gen.go
+generate:
+  echo-server: true
+  embedded-spec: true
