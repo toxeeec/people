@@ -7,5 +7,6 @@ import (
 )
 
 var (
-	ErrHandleTaken = echo.NewHTTPError(http.StatusBadRequest, "Handle is already taken")
+	ErrHandleTaken        = echo.NewHTTPError(http.StatusBadRequest, "Handle is already taken")
+	ErrInvalidCredentials = echo.NewHTTPError(http.StatusUnauthorized, "Invalid handle or password")
 )

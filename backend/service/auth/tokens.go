@@ -75,3 +75,17 @@ func (s *service) NewTokens(id uint) (people.Tokens, error) {
 
 	return people.Tokens{AccessToken: at, RefreshToken: rt.Value}, nil
 }
+
+// VerifyCredentials returns id of the user.
+func (s *service) VerifyCredentials(u people.AuthUser) (uint, error) {
+	expected, err := s.us.Get(u.Handle)
+	if err != nil {
+		return 0, err
+	}
+
+	if err := u.Password.Compare(expected.Hash); err != nil {
+		return 0, err
+	}
+
+	return expected.ID, nil
+}

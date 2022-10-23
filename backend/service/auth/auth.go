@@ -7,8 +7,9 @@ import (
 
 type service struct {
 	db *sqlx.DB
+	us people.UserService
 }
 
-func NewService(db *sqlx.DB) people.AuthService {
-	return &service{db}
+func NewService(db *sqlx.DB, us people.UserService) people.AuthService {
+	return &service{db, us}
 }

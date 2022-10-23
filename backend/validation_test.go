@@ -11,21 +11,8 @@ import (
 func TestUserValidate(t *testing.T) {
 	t.Parallel()
 
-	tests := map[string]struct {
-		user  people.AuthUser
-		valid bool
-	}{
-		"special characters": {people.AuthUser{Handle: "handle_"}, false},
-		"valid":              {people.AuthUser{Handle: gofakeit.LetterN(5)}, true},
-	}
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			err := tc.user.Validate()
-			if tc.valid {
-				assert.NoError(t, err)
-			} else {
-				assert.Error(t, err)
-			}
-		})
-	}
+	specialCharacters := people.AuthUser{Handle: "handle_"}
+	valid := people.AuthUser{Handle: gofakeit.LetterN(10)}
+	assert.Error(t, specialCharacters.Validate())
+	assert.NoError(t, valid.Validate())
 }

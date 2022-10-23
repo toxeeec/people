@@ -31,5 +31,8 @@ type User struct {
 // AuthUserBody defines model for AuthUserBody.
 type AuthUserBody = AuthUser
 
+// PostLoginJSONRequestBody defines body for PostLogin for application/json ContentType.
+type PostLoginJSONRequestBody = AuthUserBody
+
 // PostRegisterJSONRequestBody defines body for PostRegister for application/json ContentType.
 type PostRegisterJSONRequestBody = AuthUserBody

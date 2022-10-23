@@ -28,7 +28,7 @@ func (suite *HandlerSuite) SetupSuite() {
 	}
 	suite.db = db
 	suite.us = user.NewService(db)
-	suite.as = auth.NewService(db)
+	suite.as = auth.NewService(db, suite.us)
 	suite.e = echo.New()
 	swagger, err := people.GetSwagger()
 	if err != nil {

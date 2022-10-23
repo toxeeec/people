@@ -34,3 +34,22 @@ func (h *handler) PostRegister(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, tokens)
 }
+
+func (h *handler) PostLogin(c echo.Context) error {
+	var u people.AuthUser
+	if err := c.Bind(&u); err != nil {
+		return echo.ErrInternalServerError
+	}
+
+	id, err := h.as.VerifyCredentials(u)
+	if err != nil {
+		return people.ErrInvalidCredentials
+	}
+
+	tokens, err := h.as.NewTokens(id)
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+
+	return c.JSON(http.StatusOK, tokens)
+}

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
@@ -12,6 +13,7 @@ import (
 
 type UserSuite struct {
 	suite.Suite
+	db *sqlx.DB
 	us service
 }
 
@@ -20,7 +22,7 @@ func (suite *UserSuite) TestCreate() {
 	gofakeit.Struct(&user)
 	id, _ := suite.us.Create(user)
 
-	rows, _ := suite.us.db.Queryx("SELECT user_id, handle FROM user_profile")
+	rows, _ := suite.db.Queryx("SELECT user_id, handle FROM user_profile")
 	for rows.Next() {
 		var actual people.User
 		rows.StructScan(&actual)
@@ -49,25 +51,35 @@ func (suite *UserSuite) TestDelete() {
 	assert.False(suite.T(), suite.us.Exists(user1.Handle))
 }
 
+func (suite *UserSuite) TestGet() {
+	var expected people.AuthUser
+	gofakeit.Struct(&expected)
+	suite.us.Create(expected)
+
+	actual, err := suite.us.Get(expected.Handle)
+	assert.NoError(suite.T(), err)
+	assert.Equal(suite.T(), expected.Handle, actual.Handle)
+
+	_, err = suite.us.Get(gofakeit.LetterN(10))
+	assert.Error(suite.T(), err)
+}
+
 func (suite *UserSuite) SetupSuite() {
 	db, err := people.PostgresConnect()
 	if err != nil {
 		suite.T().Fatal(err)
 	}
 
-	if err != nil {
-		suite.T().Fatal(err)
-	}
-
+	suite.db = db
 	suite.us = service{db}
 }
 
 func (suite *UserSuite) TearDownSuite() {
-	suite.us.db.Close()
+	suite.db.Close()
 }
 
 func (suite *UserSuite) SetupTest() {
-	suite.us.db.MustExec("TRUNCATE user_profile CASCADE")
+	suite.db.MustExec("TRUNCATE user_profile CASCADE")
 }
 
 func TestUserSuite(t *testing.T) {

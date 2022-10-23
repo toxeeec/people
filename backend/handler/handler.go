@@ -14,7 +14,7 @@ type handler struct {
 
 func New(db *sqlx.DB) people.ServerInterface {
 	var h handler
-	h.as = auth.NewService(db)
 	h.us = user.NewService(db)
+	h.as = auth.NewService(db, h.us)
 	return &h
 }
