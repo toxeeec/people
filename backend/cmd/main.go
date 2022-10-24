@@ -5,10 +5,12 @@ import (
 	"net/http"
 
 	"github.com/deepmap/oapi-codegen/pkg/middleware"
+	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/labstack/echo/v4"
 	echomiddleware "github.com/labstack/echo/v4/middleware"
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/handler"
+	"github.com/toxeeec/people/backend/token"
 )
 
 func main() {
@@ -28,7 +30,13 @@ func main() {
 		return c.JSON(http.StatusOK, swagger)
 	})
 
-	g := e.Group("", middleware.OapiRequestValidator(swagger))
+	validator := middleware.OapiRequestValidatorWithOptions(swagger,
+		&middleware.Options{
+			Options: openapi3filter.Options{
+				AuthenticationFunc: token.NewAuthenticator(),
+			},
+		})
+	g := e.Group("", validator)
 	h := handler.New(db)
 	people.RegisterHandlers(g, h)
 	e.Logger.Fatal(e.Start(":8000"))

@@ -32,21 +32,21 @@ func (s *service) NewTokens(id uint) (people.Tokens, error) {
 	return people.Tokens{AccessToken: &at, RefreshToken: rt.Value}, nil
 }
 
-func (s *service) UpdateRefreshToken(userID uint, tokenID uuid.UUID) (token.RefreshToken, error) {
+func (s *service) UpdateRefreshToken(userID uint, tokenID uuid.UUID) (people.RefreshToken, error) {
 	rt, err := token.NewRefreshToken(userID, &tokenID)
 	if err != nil {
-		return token.RefreshToken{}, err
+		return people.RefreshToken{}, err
 	}
 
 	_, err = s.db.Exec(queryUpdate, rt.Value, tokenID, userID)
 	if err != nil {
-		return token.RefreshToken{}, err
+		return people.RefreshToken{}, err
 	}
 
 	return rt, nil
 }
 
-func (s *service) CheckRefreshToken(token token.RefreshToken) bool {
+func (s *service) CheckRefreshToken(token people.RefreshToken) bool {
 	var exists bool
 	s.db.Get(&exists, queryExists, token.Value)
 	if exists {

@@ -5,4 +5,5 @@ type UserService interface {
 	Create(AuthUser) (uint, error)
 	Delete(handle string) error
 	Get(handle string) (User, error)
+	Follow(id uint, handle string) error
 }

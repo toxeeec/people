@@ -2,10 +2,16 @@ openapi: 3.0.0
 info:
   version: 1.0.0
   title: People API
+tags:
+  - name: auth
+  - name: me
+  - name: following
 
 paths:
   /register:
     post:
+      tags:
+        - auth
       requestBody:
         $ref: '#/components/requestBodies/AuthUserBody'
       responses:
@@ -16,20 +22,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Tokens'
         400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        401:
-          description: Invalid Credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
 
   /login:
     post:
+      tags:
+        - auth
       requestBody:
         $ref: '#/components/requestBodies/AuthUserBody'
       responses:
@@ -40,14 +38,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Tokens'
         400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
 
   /refresh:
     post:
+      tags:
+        - auth
       requestBody:
         $ref: '#/components/requestBodies/TokensBody'
       responses:
@@ -58,19 +56,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/Tokens'
         400:
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
         403:
-          description: Forbidden
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/Forbidden'
+          
+  /me/following/{handle}:
+    put:
+      tags:
+        - me
+        - following
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/handleParam'
+      responses:
+        204: 
+          $ref: '#/components/responses/NoContent'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     Tokens:
       properties:
@@ -80,6 +95,25 @@ components:
           type: string
       required:
         - refreshToken
+
+    AuthUser:
+      properties:
+        handle:
+          type: string
+          minLength: 5
+          maxLength: 15
+          x-oapi-codegen-extra-tags:
+            fake: '{lettern:10}'
+        password:
+          type: string
+          format: password
+          minLength: 12
+          x-go-type: Password
+          x-oapi-codegen-extra-tags:
+            fake: '{password:true,true,true,true,false,12}'
+      required:
+        - handle
+        - password
 
     User:
       properties:
@@ -104,30 +138,25 @@ components:
           x-oapi-codegen-extra-tags:
             db: hash
             json: '-'
+        followers:
+          type: integer
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: followers
+            fake: skip
+        following:
+          type: integer
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: following
+            fake: skip
       required:
         - id
         - handle
         - password
         - hash
-    
-    AuthUser:
-      properties:
-        handle:
-          type: string
-          minLength: 5
-          maxLength: 15
-          x-oapi-codegen-extra-tags:
-            fake: '{lettern:10}'
-        password:
-          type: string
-          format: password
-          minLength: 12
-          x-go-type: Password
-          x-oapi-codegen-extra-tags:
-            fake: '{password:true,true,true,true,false,12}'
-      required:
-        - handle
-        - password
+        - followers
+        - following
 
     Error:
       properties:
@@ -143,9 +172,56 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AuthUser'
+              
     TokensBody:
       required: true
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Tokens'
+
+  parameters:
+    handleParam:
+      name: handle
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 5
+        maxLength: 15
+
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NoContent:
+      description: No Content
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+     
+    Unauthorized:
+      description: Access token is missing
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Forbidden:
+      description: Token is malformed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

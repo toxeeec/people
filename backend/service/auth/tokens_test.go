@@ -15,7 +15,7 @@ func (suite *AuthSuite) TestNewTokens() {
 	tokens, err := suite.as.NewTokens(id)
 	assert.NotEmpty(suite.T(), tokens)
 	assert.NoError(suite.T(), err)
-	var rt token.RefreshToken
+	var rt people.RefreshToken
 	suite.db.Get(&rt, "SELECT token_id, value, user_id FROM token WHERE user_id = $1", id)
 	assert.Equal(suite.T(), rt.Value, tokens.RefreshToken)
 	assert.Equal(suite.T(), rt.UserID, id)
@@ -33,7 +33,7 @@ func (suite *AuthSuite) TestUpdateRefreshToken() {
 	assert.NotEmpty(suite.T(), expected)
 	assert.NoError(suite.T(), err)
 
-	var actual token.RefreshToken
+	var actual people.RefreshToken
 	suite.db.Get(&actual, "SELECT token_id, value, user_id FROM token WHERE user_id = $1", id)
 	assert.Equal(suite.T(), expected, actual)
 }

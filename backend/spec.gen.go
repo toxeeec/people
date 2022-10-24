@@ -8,10 +8,12 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 	"fmt"
+	"net/http"
 	"net/url"
 	"path"
 	"strings"
 
+	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
 )
@@ -21,6 +23,9 @@ type ServerInterface interface {
 
 	// (POST /login)
 	PostLogin(ctx echo.Context) error
+
+	// (PUT /me/following/{handle})
+	PutMeFollowingHandle(ctx echo.Context, handle HandleParam) error
 
 	// (POST /refresh)
 	PostRefresh(ctx echo.Context) error
@@ -40,6 +45,24 @@ func (w *ServerInterfaceWrapper) PostLogin(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.PostLogin(ctx)
+	return err
+}
+
+// PutMeFollowingHandle converts echo context to params.
+func (w *ServerInterfaceWrapper) PutMeFollowingHandle(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "handle" -------------
+	var handle HandleParam
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "handle", runtime.ParamLocationPath, ctx.Param("handle"), &handle)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter handle: %s", err))
+	}
+
+	ctx.Set(BearerAuthScopes, []string{""})
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.PutMeFollowingHandle(ctx, handle)
 	return err
 }
 
@@ -90,6 +113,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	}
 
 	router.POST(baseURL+"/login", wrapper.PostLogin)
+	router.PUT(baseURL+"/me/following/:handle", wrapper.PutMeFollowingHandle)
 	router.POST(baseURL+"/refresh", wrapper.PostRefresh)
 	router.POST(baseURL+"/register", wrapper.PostRegister)
 
@@ -98,15 +122,20 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xUwW7bMAz9lYDbUanjdL341gwbEKzAimI7DTloFmNrtUVNVLoEgf59kOwscZYW29Cc",
-	"1oshU8/vkY+kt1BSa8mg8QzFFhx+XyH7GSmNKXC98vVnRjcjtYnvJRmPxsejtLbRpfSaTPaNycQYlzW2",
-	"Mp5eO1xCAa+yvUDW3XK2I4UQgkia2qGCwrsVBgGf6B4NP6tiR3lSL4ieY1BvPFtHFp3vnailUQ3GUyvX",
-	"N2gqX0ORXwlotdm9XgnwG4tQAHunTQUC1mOSVo9LUlihGePaOzn2skqcS3kfwdsGvUdninwSICZkJfMP",
-	"ciphyLXSQ7EPDiTz6SnNisZ98Hb/1R+lslNJ5oijx1I2jCKfhmMnv+zsOch9EQS8c45OeNkis6ySmcPc",
-	"j1l3wMWvsfidTJYlMqfbE4SRb+mQ68cAR4oD9CKVqc2S0ofaN8lSJNvg6Pp2DgIe0LGOowj5xeRiEgXJ",
-	"opFWQwGXKRQ98XXKNWuo0ikLS5xmOlaSJnquIjWxv0kQcbCLm8fGe7Cu2WBXU1lsyXDn0nQyOcs2KeTS",
-	"aes7Dz5+iMJvnlGrm6ATUjOpRndd/fE6CMj63j1t710P+geDD35M/5e9UfPy/JrvyX3VSqHZN7TS7Pu/",
-	"8RMd7VEvO/O3Tc3Przk3D7LRavTWoULjtWySCyGEnwEAAP//RKni+X0IAAA=",
+	"H4sIAAAAAAAC/+RXTW/jNhD9K8K0Rzmy83HRLSlqNG2aBmmCHgwfGGkksZE4LEk18Rr67wuSkmU5yifi",
+	"BRZ7CUJyOG/4Zt6MvIaEKkkChdEQr0EyxSo0qNyqYCIt8cru2SUXEINkpoAQBKsQ4tYCQlD4X80VphAb",
+	"VWMIOimwYvZWxR4vUOSmgHh2EkLFRbc8CcGspHWjjeIih6ZpvCfU5oxSji6K09oUtxrVGaUru05IGBTG",
+	"/sukLHnCDCcR/atJ2L0e+WeFGcTwU9S/MfKnOuqc9ph99E0IN3SPQn8qonc5iud2tCSh/YvPWHrtWfg0",
+	"9F+VovaxKepEcWmdQGyxgg6sCWFO6o6nKYr9IztCAq6DipUZqQpTG8Al/dKj7jeASwo6LAds5lSLdP+4",
+	"16ipVgkGgkyQOcwmhFvBalOQ4l/wG8RwmiSodWA2OeBaewl22h1oz/UGRRKVaVXZKv99Ag/hcUJM8klC",
+	"KeYoJvhoFJsYljufGbu3xusSjUEl4tm0cQFJpvUDKUeLrRRmXCNqNweQs8MxzJwm7eZVf+tNoXQovq3t",
+	"/MlYqTGcHTa7ql70jXET5rIJwafjCZcVas1yR+ZuQxx67QyXmxb11BlzmXWnIw6tv0yhLp4z2EEcWC9d",
+	"dWBSK25Wf9sq8ZB3yBQqWyv9at7l6fd/bqCtKYvjT2GTpcIY6enjIiMXEDelSxWSLDE4vTqHEP5HpX3l",
+	"zg6mB1P7EJIomOQQw5HbCt1scgFFJeXcvU6Sb6KWISeg89S6Jm0unMn2vFk9p6bBSIoG82i3dR9Op3uZ",
+	"GEP1/vWHBT72WOMRtzFFW7PEXZm9fmXQiSy4F8UC7LYvgqjCKKOypAcu8mjtq71xhNdjfNfmT5x39r/1",
+	"2ui/NhbjUfUm0fbXSLN8wvvx6w/rZ8vHqLCXjl6/1M9Qd+NNgbWzZ1tgjpNtaS2W9tldMirL4CYHbVpa",
+	"ub5c+det0Qdqf+u76Lur/PdlbrzsFeZcm3YevkBwa/VDdZcRxvqtdfeLwR014WZd4faqr+dm2XwNAAD/",
+	"/7za3fqdDAAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

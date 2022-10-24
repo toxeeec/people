@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/deepmap/oapi-codegen/pkg/middleware"
+	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
@@ -11,6 +12,7 @@ import (
 	"github.com/toxeeec/people/backend/handler"
 	"github.com/toxeeec/people/backend/service/auth"
 	"github.com/toxeeec/people/backend/service/user"
+	"github.com/toxeeec/people/backend/token"
 )
 
 type HandlerSuite struct {
@@ -34,7 +36,13 @@ func (suite *HandlerSuite) SetupSuite() {
 	if err != nil {
 		suite.T().Fatal(err)
 	}
-	suite.e.Use(middleware.OapiRequestValidator(swagger))
+	validator := middleware.OapiRequestValidatorWithOptions(swagger,
+		&middleware.Options{
+			Options: openapi3filter.Options{
+				AuthenticationFunc: token.NewAuthenticator(),
+			},
+		})
+	suite.e.Use(validator)
 	h := handler.New(db)
 	people.RegisterHandlers(suite.e, h)
 }
