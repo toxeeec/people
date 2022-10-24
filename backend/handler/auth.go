@@ -5,12 +5,13 @@ import (
 
 	"github.com/labstack/echo/v4"
 	people "github.com/toxeeec/people/backend"
+	"github.com/toxeeec/people/backend/token"
 )
 
 func (h *handler) PostRegister(c echo.Context) error {
 	var u people.AuthUser
 	if err := c.Bind(&u); err != nil {
-		return echo.ErrInternalServerError
+		return echo.ErrBadRequest
 	}
 
 	if err := u.Validate(); err != nil {
@@ -38,7 +39,7 @@ func (h *handler) PostRegister(c echo.Context) error {
 func (h *handler) PostLogin(c echo.Context) error {
 	var u people.AuthUser
 	if err := c.Bind(&u); err != nil {
-		return echo.ErrInternalServerError
+		return echo.ErrBadRequest
 	}
 
 	id, err := h.as.VerifyCredentials(u)
@@ -52,4 +53,33 @@ func (h *handler) PostLogin(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, tokens)
+}
+
+func (h *handler) PostRefresh(c echo.Context) error {
+	var t people.Tokens
+	if err := c.Bind(&t); err != nil {
+		return echo.ErrBadRequest
+	}
+
+	rt, err := token.ParseRefreshToken(t.RefreshToken)
+	if err != nil {
+		return echo.ErrForbidden
+	}
+
+	valid := h.as.CheckRefreshToken(rt)
+	if !valid {
+		return echo.ErrForbidden
+	}
+
+	at, err := token.NewAccessToken(rt.UserID)
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+
+	newRT, err := h.as.UpdateRefreshToken(rt.UserID, rt.ID)
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+
+	return c.JSON(http.StatusOK, people.Tokens{AccessToken: &at, RefreshToken: newRT.Value})
 }

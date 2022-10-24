@@ -16,8 +16,8 @@ type Error struct {
 
 // Tokens defines model for Tokens.
 type Tokens struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
+	AccessToken  *string `json:"accessToken,omitempty"`
+	RefreshToken string  `json:"refreshToken"`
 }
 
 // User defines model for User.
@@ -31,8 +31,14 @@ type User struct {
 // AuthUserBody defines model for AuthUserBody.
 type AuthUserBody = AuthUser
 
+// TokensBody defines model for TokensBody.
+type TokensBody = Tokens
+
 // PostLoginJSONRequestBody defines body for PostLogin for application/json ContentType.
 type PostLoginJSONRequestBody = AuthUserBody
+
+// PostRefreshJSONRequestBody defines body for PostRefresh for application/json ContentType.
+type PostRefreshJSONRequestBody = TokensBody
 
 // PostRegisterJSONRequestBody defines body for PostRegister for application/json ContentType.
 type PostRegisterJSONRequestBody = AuthUserBody

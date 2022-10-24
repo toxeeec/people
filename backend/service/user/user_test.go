@@ -57,8 +57,8 @@ func (suite *UserSuite) TestGet() {
 	suite.us.Create(expected)
 
 	actual, err := suite.us.Get(expected.Handle)
-	assert.NoError(suite.T(), err)
 	assert.Equal(suite.T(), expected.Handle, actual.Handle)
+	assert.NoError(suite.T(), err)
 
 	_, err = suite.us.Get(gofakeit.LetterN(10))
 	assert.Error(suite.T(), err)

@@ -46,6 +46,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /refresh:
+    post:
+      requestBody:
+        $ref: '#/components/requestBodies/TokensBody'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tokens'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     Tokens:
@@ -55,7 +79,6 @@ components:
         refreshToken:
           type: string
       required:
-        - accessToken
         - refreshToken
 
     User:
@@ -120,3 +143,9 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AuthUser'
+    TokensBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Tokens'
