@@ -26,8 +26,8 @@ func (suite *HandlerSuite) TestPutMeFollowingHandle() {
 	at, _ := token.NewAccessToken(id1)
 
 	tests := map[string]struct {
-		handle string
-		code   int
+		handle   string
+		expected int
 	}{
 		"unknown handle":   {unknownHandle, http.StatusNotFound},
 		"same user":        {user1.Handle, http.StatusNotFound},
@@ -37,8 +37,8 @@ func (suite *HandlerSuite) TestPutMeFollowingHandle() {
 	for name, tc := range tests {
 		suite.Run(name, func() {
 			result := testutil.NewRequest().WithJWSAuth(at).Put(fmt.Sprintf("/me/following/%s", tc.handle)).Go(suite.T(), suite.e)
-			assert.Equal(suite.T(), tc.code, result.Code())
-			if tc.code < http.StatusBadRequest {
+			assert.Equal(suite.T(), tc.expected, result.Code())
+			if tc.expected < http.StatusBadRequest {
 				user1, _ := suite.us.Get(user1.Handle)
 				followed, _ := suite.us.Get(tc.handle)
 				assert.Equal(suite.T(), uint(1), followed.Followers)
@@ -63,8 +63,8 @@ func (suite *HandlerSuite) TestDeleteMeFollowingHandle() {
 	at, _ := token.NewAccessToken(id1)
 
 	tests := map[string]struct {
-		handle string
-		code   int
+		handle   string
+		expected int
 	}{
 		"unknown handle": {unknownHandle, http.StatusConflict},
 		"same user":      {user1.Handle, http.StatusConflict},
@@ -74,13 +74,43 @@ func (suite *HandlerSuite) TestDeleteMeFollowingHandle() {
 	for name, tc := range tests {
 		suite.Run(name, func() {
 			result := testutil.NewRequest().WithJWSAuth(at).Delete(fmt.Sprintf("/me/following/%s", tc.handle)).Go(suite.T(), suite.e)
-			assert.Equal(suite.T(), tc.code, result.Code())
-			if tc.code < http.StatusBadRequest {
+			assert.Equal(suite.T(), tc.expected, result.Code())
+			if tc.expected < http.StatusBadRequest {
 				user1, _ := suite.us.Get(user1.Handle)
 				followed, _ := suite.us.Get(tc.handle)
 				assert.Equal(suite.T(), uint(0), followed.Followers)
 				assert.Equal(suite.T(), uint(0), user1.Following)
 			}
+		})
+	}
+}
+
+func (suite *HandlerSuite) TestHandleCurrentUserIsFollowing() {
+	var user1 people.AuthUser
+	var user2 people.AuthUser
+	var user3 people.AuthUser
+	gofakeit.Struct(&user1)
+	gofakeit.Struct(&user2)
+	gofakeit.Struct(&user3)
+	unknownHandle := gofakeit.LetterN(10)
+	id1, _ := suite.us.Create(user1)
+	suite.us.Create(user2)
+	suite.us.Create(user3)
+	suite.us.Follow(id1, user2.Handle)
+	at, _ := token.NewAccessToken(id1)
+
+	tests := map[string]struct {
+		handle   string
+		expected int
+	}{
+		"unknown handle": {unknownHandle, http.StatusNotFound},
+		"not followed":   {user3.Handle, http.StatusNotFound},
+		"valid":          {user2.Handle, http.StatusNoContent},
+	}
+	for name, tc := range tests {
+		suite.Run(name, func() {
+			result := testutil.NewRequest().WithJWSAuth(at).Get(fmt.Sprintf("/me/following/%s", tc.handle)).Go(suite.T(), suite.e)
+			assert.Equal(suite.T(), tc.expected, result.Code())
 		})
 	}
 }

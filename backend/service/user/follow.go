@@ -20,6 +20,7 @@ const (
 	queryIncrementFollowing = "UPDATE user_profile SET following = following + 1 WHERE user_id = $1"
 	queryDecrementFollowers = "UPDATE user_profile SET followers = followers -1 WHERE user_id = $1"
 	queryDecrementFollowing = "UPDATE user_profile SET following = following -1 WHERE user_id = $1"
+	queryIsFollowing        = "SELECT EXISTS(SELECT 1 FROM follower WHERE follower_id = $1 AND user_id = (SELECT user_id FROM user_profile WHERE handle = $2))"
 )
 
 func (s *service) Follow(id uint, handle string) error {
@@ -82,4 +83,9 @@ func (s *service) Unfollow(id uint, handle string) error {
 	}
 
 	return tx.Commit()
+}
+
+func (s *service) IsFollowing(id uint, handle string) (bool, error) {
+	var isFollowing bool
+	return isFollowing, s.db.Get(&isFollowing, queryIsFollowing, id, handle)
 }

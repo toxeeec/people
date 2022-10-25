@@ -59,7 +59,7 @@ paths:
           $ref: '#/components/responses/BadRequest'
         403:
           $ref: '#/components/responses/Forbidden'
-          
+
   /me/following/{handle}:
     put:
       tags:
@@ -106,6 +106,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - me
+        - following
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/handleParam'
+      responses:
+        204: 
+          $ref: '#/components/responses/NoContent'
+        404:
+          $ref: '#/components/responses/NotFound'
 
 components:
   securitySchemes:
@@ -200,7 +214,7 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AuthUser'
-              
+
     TokensBody:
       required: true
       content:
@@ -232,7 +246,7 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-     
+
     Unauthorized:
       description: Access token is missing
       content:

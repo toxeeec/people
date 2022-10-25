@@ -48,3 +48,21 @@ func (h *handler) DeleteMeFollowingHandle(c echo.Context, handle people.HandlePa
 
 	return c.NoContent(http.StatusNoContent)
 }
+
+func (h *handler) GetMeFollowingHandle(c echo.Context, handle people.HandleParam) error {
+	userID, ok := people.FromContext(c.Request().Context(), people.UserIDKey)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	following, err := h.us.IsFollowing(userID, handle)
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+
+	if !following {
+		return echo.ErrNotFound
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}

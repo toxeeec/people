@@ -34,8 +34,7 @@ func (s *service) Create(u people.AuthUser) (uint, error) {
 		return 0, err
 	}
 
-	err = s.db.Get(&id, queryCreate, u.Handle, hash)
-	return id, err
+	return id, s.db.Get(&id, queryCreate, u.Handle, hash)
 }
 
 func (s *service) Delete(handle string) error {
