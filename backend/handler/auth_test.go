@@ -18,18 +18,26 @@ func (suite *HandlerSuite) TestPostRegister() {
 	gofakeit.Struct(&takenHandle)
 	takenHandle.Handle = valid.Handle
 
-	result := testutil.NewRequest().Post("/register").WithJsonBody(valid).Go(suite.T(), suite.e)
-	assert.Equal(suite.T(), http.StatusOK, result.Code())
-	assert.True(suite.T(), suite.us.Exists(valid.Handle))
-	var tokens people.Tokens
-	result.UnmarshalJsonToObject(&tokens)
-	assert.NotEmpty(suite.T(), tokens)
-
-	result = testutil.NewRequest().Post("/register").WithJsonBody(takenHandle).Go(suite.T(), suite.e)
-	assert.Equal(suite.T(), http.StatusBadRequest, result.Code())
-	tokens = people.Tokens{}
-	result.UnmarshalJsonToObject(&tokens)
-	assert.Empty(suite.T(), tokens)
+	tests := map[string]struct {
+		user     people.AuthUser
+		expected int
+	}{
+		"taken handle": {takenHandle, http.StatusOK},
+		"valid":        {valid, http.StatusBadRequest},
+	}
+	for name, tc := range tests {
+		suite.Run(name, func() {
+			result := testutil.NewRequest().Post("/register").WithJsonBody(tc.user).Go(suite.T(), suite.e)
+			assert.Equal(suite.T(), tc.expected, result.Code())
+			var tokens people.Tokens
+			result.UnmarshalJsonToObject(&tokens)
+			if tc.expected < http.StatusBadRequest {
+				assert.NotEmpty(suite.T(), tokens)
+			} else {
+				assert.Empty(suite.T(), tokens)
+			}
+		})
+	}
 }
 
 func (suite *HandlerSuite) TestPostLogin() {
@@ -42,23 +50,27 @@ func (suite *HandlerSuite) TestPostLogin() {
 	invalidPassword.Handle = valid.Handle
 	suite.us.Create(valid)
 
-	result := testutil.NewRequest().Post("/login").WithJsonBody(valid).Go(suite.T(), suite.e)
-	assert.Equal(suite.T(), http.StatusOK, result.Code())
-	var tokens people.Tokens
-	result.UnmarshalJsonToObject(&tokens)
-	assert.NotEmpty(suite.T(), tokens)
-
-	result = testutil.NewRequest().Post("/login").WithJsonBody(invalidPassword).Go(suite.T(), suite.e)
-	assert.Equal(suite.T(), http.StatusUnauthorized, result.Code())
-	tokens = people.Tokens{}
-	result.UnmarshalJsonToObject(&tokens)
-	assert.Empty(suite.T(), tokens)
-
-	result = testutil.NewRequest().Post("/login").WithJsonBody(unknownHandle).Go(suite.T(), suite.e)
-	assert.Equal(suite.T(), http.StatusUnauthorized, result.Code())
-	tokens = people.Tokens{}
-	result.UnmarshalJsonToObject(&tokens)
-	assert.Empty(suite.T(), tokens)
+	tests := map[string]struct {
+		user     people.AuthUser
+		expected int
+	}{
+		"unknown handle":   {unknownHandle, http.StatusUnauthorized},
+		"invalid password": {invalidPassword, http.StatusUnauthorized},
+		"valid":            {valid, http.StatusOK},
+	}
+	for name, tc := range tests {
+		suite.Run(name, func() {
+			result := testutil.NewRequest().Post("/login").WithJsonBody(tc.user).Go(suite.T(), suite.e)
+			assert.Equal(suite.T(), tc.expected, result.Code())
+			var tokens people.Tokens
+			result.UnmarshalJsonToObject(&tokens)
+			if tc.expected < http.StatusBadRequest {
+				assert.NotEmpty(suite.T(), tokens)
+			} else {
+				assert.Empty(suite.T(), tokens)
+			}
+		})
+	}
 }
 
 func (suite *HandlerSuite) newRefreshRequest(rt string, expected int) string {

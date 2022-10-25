@@ -28,15 +28,23 @@ func (suite *AuthSuite) TestVerifyCredentials() {
 	invalidPassword.Handle = valid.Handle
 	id1, _ := suite.us.Create(valid)
 
-	id, err := suite.as.VerifyCredentials(valid)
-	assert.Equal(suite.T(), id1, id)
-	assert.NoError(suite.T(), err)
-
-	_, err = suite.as.VerifyCredentials(invalidPassword)
-	assert.Error(suite.T(), err)
-
-	_, err = suite.as.VerifyCredentials(unknownHandle)
-	assert.Error(suite.T(), err)
+	tests := map[string]struct {
+		user  people.AuthUser
+		valid bool
+	}{
+		"unknown handle":   {unknownHandle, false},
+		"invalid password": {invalidPassword, false},
+		"valid":            {valid, true},
+	}
+	for name, tc := range tests {
+		suite.Run(name, func() {
+			id, err := suite.as.VerifyCredentials(tc.user)
+			assert.Equal(suite.T(), tc.valid, err == nil)
+			if tc.valid {
+				assert.Equal(suite.T(), id1, id)
+			}
+		})
+	}
 }
 
 func (suite *AuthSuite) SetupSuite() {
