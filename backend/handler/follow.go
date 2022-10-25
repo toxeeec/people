@@ -30,3 +30,21 @@ func (h *handler) PutMeFollowingHandle(c echo.Context, handle people.HandleParam
 
 	return c.NoContent(http.StatusNoContent)
 }
+
+func (h *handler) DeleteMeFollowingHandle(c echo.Context, handle people.HandleParam) error {
+	userID, ok := people.FromContext(c.Request().Context(), people.UserIDKey)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	err := h.us.Unfollow(userID, handle)
+	if errors.Is(err, user.ErrNotFollowed) {
+		return echo.NewHTTPError(http.StatusConflict, err.Error())
+	}
+
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
