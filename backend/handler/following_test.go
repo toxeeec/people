@@ -85,7 +85,7 @@ func (suite *HandlerSuite) TestDeleteMeFollowingHandle() {
 	}
 }
 
-func (suite *HandlerSuite) TestHandleCurrentUserIsFollowing() {
+func (suite *HandlerSuite) TestGetMeFollowingHandle() {
 	var user1 people.AuthUser
 	var user2 people.AuthUser
 	var user3 people.AuthUser

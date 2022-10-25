@@ -1,0 +1,26 @@
+package handler
+
+import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+	people "github.com/toxeeec/people/backend"
+)
+
+func (h *handler) GetMeFollowersHandle(c echo.Context, handle people.HandleParam) error {
+	userID, ok := people.FromContext(c.Request().Context(), people.UserIDKey)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	following, err := h.us.IsFollowed(userID, handle)
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+
+	if !following {
+		return echo.ErrNotFound
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}

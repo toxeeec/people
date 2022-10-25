@@ -121,6 +121,21 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
+  /me/followers/{handle}:
+    get:
+      tags:
+        - me
+        - followers
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/handleParam'
+      responses:
+        204: 
+          $ref: '#/components/responses/NoContent'
+        404:
+          $ref: '#/components/responses/NotFound'
+
 components:
   securitySchemes:
     bearerAuth:

@@ -16,14 +16,14 @@ func (suite *HandlerSuite) TestPostRegister() {
 	var takenHandle people.AuthUser
 	gofakeit.Struct(&valid)
 	gofakeit.Struct(&takenHandle)
-	takenHandle.Handle = valid.Handle
+	suite.us.Create(takenHandle)
 
 	tests := map[string]struct {
 		user     people.AuthUser
 		expected int
 	}{
-		"taken handle": {takenHandle, http.StatusOK},
-		"valid":        {valid, http.StatusBadRequest},
+		"taken handle": {takenHandle, http.StatusBadRequest},
+		"valid":        {valid, http.StatusOK},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
@@ -84,7 +84,7 @@ func (suite *HandlerSuite) newRefreshRequest(rt string, expected int) string {
 	return tokens.RefreshToken
 }
 
-func (suite *HandlerSuite) TestHandleRefresh() {
+func (suite *HandlerSuite) TestPostRefresh() {
 	var user people.AuthUser
 	gofakeit.Struct(&user)
 	id, _ := suite.us.Create(user)

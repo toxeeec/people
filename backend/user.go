@@ -8,4 +8,5 @@ type UserService interface {
 	Follow(id uint, handle string) error
 	Unfollow(id uint, handle string) error
 	IsFollowing(id uint, handle string) (bool, error)
+	IsFollowed(id uint, handle string) (bool, error)
 }
