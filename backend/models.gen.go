@@ -78,6 +78,12 @@ type GetMeFollowingParams struct {
 	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
+// GetUsersHandleFollowingParams defines parameters for GetUsersHandleFollowing.
+type GetUsersHandleFollowingParams struct {
+	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`
+	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // PostLoginJSONRequestBody defines body for PostLogin for application/json ContentType.
 type PostLoginJSONRequestBody = AuthUserBody
 

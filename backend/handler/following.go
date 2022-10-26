@@ -81,3 +81,18 @@ func (h *handler) GetMeFollowing(c echo.Context, params people.GetMeFollowingPar
 
 	return c.JSON(http.StatusOK, following)
 }
+
+func (h *handler) GetUsersHandleFollowing(c echo.Context, handle string, params people.GetUsersHandleFollowingParams) error {
+	u, err := h.us.Get(handle)
+	if err != nil {
+		return echo.ErrNotFound
+	}
+
+	pagination := people.NewPagination((*uint)(params.Page), (*uint)(params.Limit))
+	following, err := h.us.Following(*u.ID, pagination)
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+
+	return c.JSON(http.StatusOK, following)
+}
