@@ -297,6 +297,24 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
+  /users/{handle}/posts:
+    get:
+      tags:
+        - users
+        - posts
+      parameters:
+        - $ref: '#/components/parameters/handleParam'
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Posts'
+
+
 components:
   securitySchemes:
     bearerAuth:
@@ -410,6 +428,11 @@ components:
         - id
         - content
         - createdAt
+
+    Posts:
+      type: array
+      items:
+        $ref: '#/components/schemas/Post'
 
     Error:
       properties:

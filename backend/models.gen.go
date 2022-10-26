@@ -32,6 +32,9 @@ type Post struct {
 	User      *User     `db:"user" json:"user,omitempty"`
 }
 
+// Posts defines model for Posts.
+type Posts = []Post
+
 // Tokens defines model for Tokens.
 type Tokens struct {
 	AccessToken  string `json:"accessToken"`
@@ -109,6 +112,12 @@ type GetUsersHandleFollowersParams struct {
 
 // GetUsersHandleFollowingParams defines parameters for GetUsersHandleFollowing.
 type GetUsersHandleFollowingParams struct {
+	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`
+	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
+// GetUsersHandlePostsParams defines parameters for GetUsersHandlePosts.
+type GetUsersHandlePostsParams struct {
 	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`
 	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 }

@@ -53,3 +53,13 @@ func (h *handler) DeletePostsPostID(c echo.Context, postID people.PostIDParam) e
 
 	return c.NoContent(http.StatusNoContent)
 }
+
+func (h *handler) GetUsersHandlePosts(c echo.Context, handle string, params people.GetUsersHandlePostsParams) error {
+	posts, err := h.ps.FromUser(handle, people.NewPagination((*uint)(params.Page), (*uint)(params.Limit)))
+	if err != nil {
+		println(err.Error())
+		return echo.ErrInternalServerError
+	}
+
+	return c.JSON(http.StatusOK, posts)
+}

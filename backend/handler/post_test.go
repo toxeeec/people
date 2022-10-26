@@ -106,3 +106,36 @@ func (suite *HandlerSuite) TestHandleDeletePost() {
 		})
 	}
 }
+
+func (suite *HandlerSuite) TestGetUsersHandlePosts() {
+	var user1 people.AuthUser
+	var user2 people.AuthUser
+	gofakeit.Struct(&user1)
+	gofakeit.Struct(&user2)
+	id1, _ := suite.us.Create(user1)
+	suite.us.Create(user2)
+	count := 5
+	for i := 0; i < count; i++ {
+		var p people.PostBody
+		gofakeit.Struct(&p)
+		suite.ps.Create(id1, p)
+	}
+
+	tests := map[string]struct {
+		handle   string
+		expected int
+	}{
+		"invalid handle": {gofakeit.Username(), 0},
+		"0 posts":        {user2.Handle, 0},
+		"valid":          {user1.Handle, count},
+	}
+	for name, tc := range tests {
+		suite.Run(name, func() {
+			page := uint(1)
+			limit := uint(20)
+			pagination := people.NewPagination(&page, &limit)
+			posts, _ := suite.ps.FromUser(tc.handle, pagination)
+			assert.Equal(suite.T(), tc.expected, len(posts))
+		})
+	}
+}
