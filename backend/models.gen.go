@@ -66,6 +66,12 @@ type AuthUserBody = AuthUser
 // TokensBody defines model for TokensBody.
 type TokensBody = Tokens
 
+// GetMeFollowersParams defines parameters for GetMeFollowers.
+type GetMeFollowersParams struct {
+	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`
+	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // GetMeFollowingParams defines parameters for GetMeFollowing.
 type GetMeFollowingParams struct {
 	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`

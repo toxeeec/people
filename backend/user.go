@@ -10,4 +10,5 @@ type UserService interface {
 	IsFollowing(id uint, handle string) (bool, error)
 	IsFollowed(id uint, handle string) (bool, error)
 	Following(id uint, p Pagination) (Users, error)
+	Followers(id uint, p Pagination) (Users, error)
 }

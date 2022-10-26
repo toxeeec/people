@@ -178,3 +178,38 @@ func (suite *UserSuite) TestFollowing() {
 		})
 	}
 }
+
+func (suite *UserSuite) TestFollowers() {
+	var user1 people.AuthUser
+	var user2 people.AuthUser
+	gofakeit.Struct(&user1)
+	gofakeit.Struct(&user2)
+	id1, _ := suite.us.Create(user1)
+	id2, _ := suite.us.Create(user2)
+
+	var limit uint = 2
+
+	for i := 0; i < 3; i++ {
+		var u people.AuthUser
+		gofakeit.Struct(&u)
+		id, _ := suite.us.Create(u)
+		suite.us.Follow(id, user1.Handle)
+	}
+
+	tests := map[string]struct {
+		id       uint
+		page     uint
+		expected int
+	}{
+		"0 followers":  {id2, 1, 0},
+		"first page":   {id1, 1, 2},
+		"last page":    {id1, 2, 1},
+		"page too far": {id1, 3, 0},
+	}
+	for name, tc := range tests {
+		suite.Run(name, func() {
+			followers, _ := suite.us.Followers(tc.id, people.NewPagination(&tc.page, &limit))
+			assert.Equal(suite.T(), tc.expected, len(followers))
+		})
+	}
+}

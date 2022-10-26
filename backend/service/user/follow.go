@@ -24,6 +24,7 @@ const (
 	queryIsFollowing        = "SELECT EXISTS(SELECT 1 FROM follower WHERE follower_id = $1 AND user_id = (SELECT user_id FROM user_profile WHERE handle = $2))"
 	queryIsFollowed         = "SELECT EXISTS(SELECT 1 FROM follower WHERE user_id = $1 AND follower_id = (SELECT user_id FROM user_profile WHERE handle = $2))"
 	queryFollowing          = "SELECT handle, followers, following FROM user_profile JOIN follower on user_profile.user_id = follower.user_id WHERE follower_id = $1 ORDER BY followed_at DESC OFFSET $2 LIMIT $3"
+	queryFollowers          = "SELECT handle, followers, following FROM user_profile JOIN follower on user_profile.user_id = follower.follower_id WHERE follower.user_id = $1 ORDER BY followed_at DESC OFFSET $2 LIMIT $3"
 )
 
 func (s *service) Follow(id uint, handle string) error {
@@ -99,6 +100,11 @@ func (s *service) IsFollowed(id uint, handle string) (bool, error) {
 }
 
 func (s *service) Following(id uint, p people.Pagination) (people.Users, error) {
-	var u people.Users
+	u := make(people.Users, 0, p.Limit)
 	return u, s.db.Select(&u, queryFollowing, id, p.Offset, p.Limit)
+}
+
+func (s *service) Followers(id uint, p people.Pagination) (people.Users, error) {
+	u := make(people.Users, 0, p.Limit)
+	return u, s.db.Select(&u, queryFollowers, id, p.Offset, p.Limit)
 }

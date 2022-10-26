@@ -166,6 +166,29 @@ paths:
         403:
           $ref: '#/components/responses/Forbidden'
 
+  /me/followers:
+    get:
+      tags:
+        - me
+        - following
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+
 components:
   securitySchemes:
     bearerAuth:
