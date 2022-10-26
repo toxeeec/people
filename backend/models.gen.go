@@ -58,6 +58,9 @@ type LimitParam uint
 // PageParam defines model for pageParam.
 type PageParam uint
 
+// PostIDParam defines model for postIDParam.
+type PostIDParam uint
+
 // BadRequest defines model for BadRequest.
 type BadRequest = Error
 

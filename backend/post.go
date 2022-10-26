@@ -8,4 +8,5 @@ func (p *PostBody) TrimContent() {
 
 type PostService interface {
 	Create(userID uint, p PostBody) (Post, error)
+	Delete(postID, userID uint) error
 }

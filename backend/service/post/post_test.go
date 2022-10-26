@@ -35,6 +35,31 @@ func (suite *PostSuite) TestCreate() {
 	}
 }
 
+func (suite *PostSuite) TestDelete() {
+	var post people.PostBody
+	var user people.AuthUser
+	gofakeit.Struct(&post)
+	gofakeit.Struct(&user)
+	userID, _ := suite.us.Create(user)
+	p, _ := suite.ps.Create(userID, post)
+
+	tests := map[string]struct {
+		id     uint
+		userID uint
+		valid  bool
+	}{
+		"not owned":  {p.ID, userID + 1, false},
+		"unknown id": {p.ID + 1, userID, false},
+		"valid":      {p.ID, userID, true},
+	}
+	for name, tc := range tests {
+		suite.Run(name, func() {
+			err := suite.ps.Delete(tc.id, tc.userID)
+			assert.Equal(suite.T(), tc.valid, err == nil)
+		})
+	}
+}
+
 func (suite *PostSuite) SetupSuite() {
 	db, err := people.PostgresConnect()
 	if err != nil {

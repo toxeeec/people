@@ -30,3 +30,17 @@ func (h *handler) PostPosts(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, res)
 }
+
+func (h *handler) DeletePostsPostID(c echo.Context, postID people.PostIDParam) error {
+	userID, ok := people.FromContext(c.Request().Context(), people.UserIDKey)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	err := h.ps.Delete(uint(postID), userID)
+	if err != nil {
+		return echo.ErrNotFound
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
