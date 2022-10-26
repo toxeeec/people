@@ -78,6 +78,12 @@ type GetMeFollowingParams struct {
 	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
+// GetUsersHandleFollowersParams defines parameters for GetUsersHandleFollowers.
+type GetUsersHandleFollowersParams struct {
+	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`
+	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+}
+
 // GetUsersHandleFollowingParams defines parameters for GetUsersHandleFollowing.
 type GetUsersHandleFollowingParams struct {
 	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`

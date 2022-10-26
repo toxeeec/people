@@ -207,6 +207,24 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
+  /users/{handle}/followers:
+    get:
+      tags:
+        - me
+        - following
+      parameters:
+        - $ref: '#/components/parameters/handleParam'
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+        404:
+          $ref: '#/components/responses/NotFound'
 
 components:
   securitySchemes:

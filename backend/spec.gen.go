@@ -48,6 +48,9 @@ type ServerInterface interface {
 	// (POST /register)
 	PostRegister(ctx echo.Context) error
 
+	// (GET /users/{handle}/followers)
+	GetUsersHandleFollowers(ctx echo.Context, handle HandleParam, params GetUsersHandleFollowersParams) error
+
 	// (GET /users/{handle}/following)
 	GetUsersHandleFollowing(ctx echo.Context, handle HandleParam, params GetUsersHandleFollowingParams) error
 }
@@ -210,6 +213,38 @@ func (w *ServerInterfaceWrapper) PostRegister(ctx echo.Context) error {
 	return err
 }
 
+// GetUsersHandleFollowers converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUsersHandleFollowers(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "handle" -------------
+	var handle HandleParam
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "handle", runtime.ParamLocationPath, ctx.Param("handle"), &handle)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter handle: %s", err))
+	}
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetUsersHandleFollowersParams
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetUsersHandleFollowers(ctx, handle, params)
+	return err
+}
+
 // GetUsersHandleFollowing converts echo context to params.
 func (w *ServerInterfaceWrapper) GetUsersHandleFollowing(ctx echo.Context) error {
 	var err error
@@ -279,6 +314,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.PUT(baseURL+"/me/following/:handle", wrapper.PutMeFollowingHandle)
 	router.POST(baseURL+"/refresh", wrapper.PostRefresh)
 	router.POST(baseURL+"/register", wrapper.PostRegister)
+	router.GET(baseURL+"/users/:handle/followers", wrapper.GetUsersHandleFollowers)
 	router.GET(baseURL+"/users/:handle/following", wrapper.GetUsersHandleFollowing)
 
 }
@@ -286,25 +322,25 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
