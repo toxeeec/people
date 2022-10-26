@@ -5,7 +5,6 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	people "github.com/toxeeec/people/backend"

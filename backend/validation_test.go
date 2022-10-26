@@ -16,3 +16,14 @@ func TestUserValidate(t *testing.T) {
 	assert.Error(t, specialCharacters.Validate())
 	assert.NoError(t, valid.Validate())
 }
+
+func TestPostBodyValidate(t *testing.T) {
+	t.Parallel()
+
+	empty := people.PostBody{Content: "\t\n \n\t"}
+	empty.TrimContent()
+	valid := people.PostBody{Content: gofakeit.Sentence(5)}
+	valid.TrimContent()
+	assert.Error(t, empty.Validate())
+	assert.NoError(t, valid.Validate())
+}

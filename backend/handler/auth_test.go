@@ -6,7 +6,6 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/deepmap/oapi-codegen/pkg/testutil"
-	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	people "github.com/toxeeec/people/backend"
 )

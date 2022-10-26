@@ -11,6 +11,7 @@ import (
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/handler"
 	"github.com/toxeeec/people/backend/service/auth"
+	"github.com/toxeeec/people/backend/service/post"
 	"github.com/toxeeec/people/backend/service/user"
 	"github.com/toxeeec/people/backend/token"
 )
@@ -21,6 +22,7 @@ type HandlerSuite struct {
 	e  *echo.Echo
 	us people.UserService
 	as people.AuthService
+	ps people.PostService
 }
 
 func (suite *HandlerSuite) SetupSuite() {
@@ -31,6 +33,7 @@ func (suite *HandlerSuite) SetupSuite() {
 	suite.db = db
 	suite.us = user.NewService(db)
 	suite.as = auth.NewService(db, suite.us)
+	suite.ps = post.NewService(db)
 	suite.e = echo.New()
 	swagger, err := people.GetSwagger()
 	if err != nil {

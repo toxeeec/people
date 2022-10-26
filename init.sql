@@ -18,3 +18,10 @@ CREATE TABLE follower (
 	follower_id integer REFERENCES user_profile(user_id) ON DELETE CASCADE CONSTRAINT different_user CHECK (follower_id != user_id) NOT NULL,
 	PRIMARY KEY (user_id, follower_id)
 );
+
+CREATE TABLE post (
+	post_id SERIAL PRIMARY KEY,
+	user_id integer REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
+	content VARCHAR(280) NOT NULL,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
