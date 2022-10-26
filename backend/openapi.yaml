@@ -261,9 +261,28 @@ paths:
           $ref: '#/components/responses/Forbidden'
 
   /posts/{postID}:
+    get:
+      tags:
+        - posts
+      parameters:
+        - $ref: '#/components/parameters/postIDParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+
     delete:
       tags:
         - posts
+      security:
+        - bearerAuth: []
       parameters:
         - $ref: '#/components/parameters/postIDParam'
       responses:
@@ -293,6 +312,7 @@ components:
         refreshToken:
           type: string
       required:
+        - accessToken
         - refreshToken
 
     AuthUser:
@@ -411,7 +431,13 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Tokens'
+            properties:
+              refreshToken:
+                type: string
+                x-oapi-codegen-extra-tags:
+                  db: refreshToken
+            required:
+              - refreshToken
 
     PostBody:
       required: true
@@ -426,7 +452,7 @@ components:
                 x-oapi-codegen-extra-tags:
                   fake: '{sentence}'
             required:
-            - content
+              - content
 
   parameters:
     handleParam:

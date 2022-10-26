@@ -31,6 +31,15 @@ func (h *handler) PostPosts(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
+func (h *handler) GetPostsPostID(c echo.Context, postID people.PostIDParam) error {
+	p, err := h.ps.Get(uint(postID))
+	if err != nil {
+		return echo.ErrNotFound
+	}
+
+	return c.JSON(http.StatusOK, p)
+}
+
 func (h *handler) DeletePostsPostID(c echo.Context, postID people.PostIDParam) error {
 	userID, ok := people.FromContext(c.Request().Context(), people.UserIDKey)
 	if !ok {

@@ -81,5 +81,5 @@ func (h *handler) PostRefresh(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, people.Tokens{AccessToken: &at, RefreshToken: newRT.Value})
+	return c.JSON(http.StatusOK, people.Tokens{AccessToken: at, RefreshToken: newRT.Value})
 }

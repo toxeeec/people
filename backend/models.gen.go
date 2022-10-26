@@ -34,8 +34,8 @@ type Post struct {
 
 // Tokens defines model for Tokens.
 type Tokens struct {
-	AccessToken  *string `json:"accessToken,omitempty"`
-	RefreshToken string  `json:"refreshToken"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 // User defines model for User.
@@ -85,7 +85,9 @@ type PostBody struct {
 }
 
 // TokensBody defines model for TokensBody.
-type TokensBody = Tokens
+type TokensBody struct {
+	RefreshToken string `db:"refreshToken" json:"refreshToken"`
+}
 
 // GetMeFollowersParams defines parameters for GetMeFollowers.
 type GetMeFollowersParams struct {
@@ -118,7 +120,7 @@ type PostLoginJSONRequestBody = AuthUserBody
 type PostPostsJSONRequestBody PostBody
 
 // PostRefreshJSONRequestBody defines body for PostRefresh for application/json ContentType.
-type PostRefreshJSONRequestBody = TokensBody
+type PostRefreshJSONRequestBody TokensBody
 
 // PostRegisterJSONRequestBody defines body for PostRegister for application/json ContentType.
 type PostRegisterJSONRequestBody = AuthUserBody

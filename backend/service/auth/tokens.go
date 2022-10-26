@@ -29,7 +29,7 @@ func (s *service) NewTokens(id uint) (people.Tokens, error) {
 		return people.Tokens{}, err
 	}
 
-	return people.Tokens{AccessToken: &at, RefreshToken: rt.Value}, nil
+	return people.Tokens{AccessToken: at, RefreshToken: rt.Value}, nil
 }
 
 func (s *service) UpdateRefreshToken(userID uint, tokenID uuid.UUID) (people.RefreshToken, error) {

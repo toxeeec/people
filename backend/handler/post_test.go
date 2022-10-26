@@ -1,6 +1,7 @@
 package handler_test
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -39,6 +40,68 @@ func (suite *HandlerSuite) TestPostPosts() {
 				valid.TrimContent()
 
 				assert.Equal(suite.T(), valid.Content, p.Content)
+			}
+		})
+	}
+}
+
+func (suite *HandlerSuite) TestGetPostsPostID() {
+	var expected people.PostBody
+	var user people.AuthUser
+	gofakeit.Struct(&expected)
+	gofakeit.Struct(&user)
+	userID, _ := suite.us.Create(user)
+	p, _ := suite.ps.Create(userID, expected)
+
+	tests := map[string]struct {
+		id       uint
+		expected int
+	}{
+		"unknown id": {p.ID + 1, http.StatusNotFound},
+		"valid":      {p.ID, http.StatusOK},
+	}
+	for name, tc := range tests {
+		suite.Run(name, func() {
+			result := testutil.NewRequest().Get(fmt.Sprintf("/posts/%d", tc.id)).Go(suite.T(), suite.e)
+			assert.Equal(suite.T(), tc.expected, result.Code())
+			if tc.expected < http.StatusBadRequest {
+				var p people.Post
+				result.UnmarshalJsonToObject(&p)
+				// trim content for assertion
+				expected.TrimContent()
+
+				assert.Equal(suite.T(), expected.Content, p.Content)
+				assert.Equal(suite.T(), user.Handle, p.User.Handle)
+			}
+		})
+	}
+}
+
+func (suite *HandlerSuite) TestHandleDeletePost() {
+	var expected people.PostBody
+	var user people.AuthUser
+	gofakeit.Struct(&expected)
+	gofakeit.Struct(&user)
+	userID, _ := suite.us.Create(user)
+	p, _ := suite.ps.Create(userID, expected)
+
+	tests := map[string]struct {
+		id       uint
+		userID   uint
+		expected int
+	}{
+		"not owned":  {p.ID, userID + 1, http.StatusNotFound},
+		"unknown id": {p.ID + 1, userID, http.StatusNotFound},
+		"valid":      {p.ID, userID, http.StatusNoContent},
+	}
+	for name, tc := range tests {
+		suite.Run(name, func() {
+			at, _ := token.NewAccessToken(tc.userID)
+			result := testutil.NewRequest().WithJWSAuth(at).Delete(fmt.Sprintf("/posts/%d", tc.id)).Go(suite.T(), suite.e)
+			assert.Equal(suite.T(), tc.expected, result.Code())
+			if tc.expected < http.StatusBadRequest {
+				_, err := suite.ps.Get(p.ID)
+				assert.Error(suite.T(), err)
 			}
 		})
 	}
