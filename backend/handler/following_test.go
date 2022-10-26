@@ -39,10 +39,12 @@ func (suite *HandlerSuite) TestPutMeFollowingHandle() {
 			result := testutil.NewRequest().WithJWSAuth(at).Put(fmt.Sprintf("/me/following/%s", tc.handle)).Go(suite.T(), suite.e)
 			assert.Equal(suite.T(), tc.expected, result.Code())
 			if tc.expected < http.StatusBadRequest {
-				user1, _ := suite.us.Get(user1.Handle)
-				followed, _ := suite.us.Get(tc.handle)
-				assert.Equal(suite.T(), uint(1), followed.Followers)
-				assert.Equal(suite.T(), uint(1), user1.Following)
+				var followers uint
+				var following uint
+				suite.db.Get(&followers, "SELECT followers FROM user_profile WHERE handle = $1", tc.handle)
+				suite.db.Get(&following, "SELECT following FROM user_profile WHERE handle = $1", user1.Handle)
+				assert.Equal(suite.T(), uint(1), followers)
+				assert.Equal(suite.T(), uint(1), following)
 			}
 		})
 	}
@@ -76,10 +78,12 @@ func (suite *HandlerSuite) TestDeleteMeFollowingHandle() {
 			result := testutil.NewRequest().WithJWSAuth(at).Delete(fmt.Sprintf("/me/following/%s", tc.handle)).Go(suite.T(), suite.e)
 			assert.Equal(suite.T(), tc.expected, result.Code())
 			if tc.expected < http.StatusBadRequest {
-				user1, _ := suite.us.Get(user1.Handle)
-				followed, _ := suite.us.Get(tc.handle)
-				assert.Equal(suite.T(), uint(0), followed.Followers)
-				assert.Equal(suite.T(), uint(0), user1.Following)
+				var followers uint
+				var following uint
+				suite.db.Get(&followers, "SELECT followers FROM user_profile WHERE handle = $1", tc.handle)
+				suite.db.Get(&following, "SELECT following FROM user_profile WHERE handle = $1", user1.Handle)
+				assert.Equal(suite.T(), uint(0), followers)
+				assert.Equal(suite.T(), uint(0), following)
 			}
 		})
 	}

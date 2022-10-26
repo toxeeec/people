@@ -8,9 +8,7 @@ import (
 
 type Password string
 
-var (
-	ErrInvalidPassword = errors.New("invalid password")
-)
+var ErrInvalidPassword = errors.New("invalid password")
 
 func (p Password) Hash() (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)

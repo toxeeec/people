@@ -13,7 +13,8 @@ CREATE TABLE token (
 );
 
 CREATE TABLE follower (
+	followed_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	user_id integer REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
 	follower_id integer REFERENCES user_profile(user_id) ON DELETE CASCADE CONSTRAINT different_user CHECK (follower_id != user_id) NOT NULL,
-	PRIMARY KEY (user_id, follower_id) 
+	PRIMARY KEY (user_id, follower_id)
 );

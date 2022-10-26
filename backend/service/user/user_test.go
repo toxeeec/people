@@ -24,9 +24,9 @@ func (suite *UserSuite) TestCreate() {
 
 	rows, _ := suite.db.Queryx("SELECT user_id, handle FROM user_profile")
 	for rows.Next() {
-		var actual people.User
+		var actual people.AuthUser
 		rows.StructScan(&actual)
-		assert.Equal(suite.T(), id, actual.ID)
+		assert.Equal(suite.T(), id, *actual.ID)
 		assert.Equal(suite.T(), user.Handle, actual.Handle)
 	}
 }

@@ -17,7 +17,7 @@ const (
 	queryExists = "SELECT EXISTS(SELECT 1 FROM user_profile WHERE handle = $1)"
 	queryCreate = "INSERT INTO user_profile(handle, hash) VALUES($1, $2) RETURNING user_id"
 	queryDelete = "DELETE FROM user_profile WHERE handle = $1"
-	queryGet    = "SELECT user_id, handle, hash, followers, following FROM user_profile WHERE handle = $1"
+	queryGet    = "SELECT user_id, handle, hash FROM user_profile WHERE handle = $1"
 )
 
 func (s *service) Exists(handle string) bool {
@@ -42,7 +42,7 @@ func (s *service) Delete(handle string) error {
 	return err
 }
 
-func (s *service) Get(handle string) (people.User, error) {
-	var u people.User
+func (s *service) Get(handle string) (people.AuthUser, error) {
+	var u people.AuthUser
 	return u, s.db.Get(&u, queryGet, handle)
 }

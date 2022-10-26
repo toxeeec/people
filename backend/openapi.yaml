@@ -118,6 +118,10 @@ paths:
       responses:
         204: 
           $ref: '#/components/responses/NoContent'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
 
@@ -133,8 +137,34 @@ paths:
       responses:
         204: 
           $ref: '#/components/responses/NoContent'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
         404:
           $ref: '#/components/responses/NotFound'
+
+  /me/following:
+    get:
+      tags:
+        - me
+        - following
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/pageParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Users'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
 
 components:
   securitySchemes:
@@ -155,11 +185,19 @@ components:
 
     AuthUser:
       properties:
+        id:
+          type: integer
+          x-go-name: ID
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: user_id
+            fake: skip
         handle:
           type: string
           minLength: 5
           maxLength: 15
           x-oapi-codegen-extra-tags:
+            db: handle
             fake: '{lettern:10}'
         password:
           type: string
@@ -168,33 +206,20 @@ components:
           x-go-type: Password
           x-oapi-codegen-extra-tags:
             fake: '{password:true,true,true,true,false,12}'
+        hash:
+          type: string
+          x-oapi-codegen-extra-tags:
+            db: hash
       required:
         - handle
         - password
 
     User:
       properties:
-        id:
-          type: integer
-          x-go-name: ID
-          x-go-type: uint
-          x-oapi-codegen-extra-tags:
-            db: user_id
-            fake: skip
-            json: '-'
         handle:
           type: string
           x-oapi-codegen-extra-tags:
             db: handle
-        password:
-          type: string
-          x-oapi-codegen-extra-tags:
-            json: '-'
-        hash:
-          type: string
-          x-oapi-codegen-extra-tags:
-            db: hash
-            json: '-'
         followers:
           type: integer
           x-go-type: uint
@@ -207,6 +232,9 @@ components:
           x-oapi-codegen-extra-tags:
             db: following
             fake: skip
+      x-go-json-ignore:
+        - password
+        - hash
       required:
         - id
         - handle
@@ -221,6 +249,11 @@ components:
           type: string
       required:
         - message
+
+    Users:
+      type: array
+      items:
+        $ref: '#/components/schemas/User'
 
   requestBodies:
     AuthUserBody:
@@ -246,6 +279,23 @@ components:
         type: string
         minLength: 5
         maxLength: 15
+
+    pageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        x-go-type: uint
+
+    limitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        x-go-type: uint
 
   responses:
     BadRequest:

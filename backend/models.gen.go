@@ -9,7 +9,9 @@ const (
 
 // AuthUser defines model for AuthUser.
 type AuthUser struct {
-	Handle   string   `fake:"{lettern:10}" json:"handle"`
+	Handle   string   `db:"handle" fake:"{lettern:10}" json:"handle"`
+	Hash     *string  `db:"hash" json:"hash,omitempty"`
+	ID       *uint    `db:"user_id" fake:"skip" json:"id,omitempty"`
 	Password Password `fake:"{password:true,true,true,true,false,12}" json:"password"`
 }
 
@@ -29,13 +31,19 @@ type User struct {
 	Followers uint   `db:"followers" fake:"skip" json:"followers"`
 	Following uint   `db:"following" fake:"skip" json:"following"`
 	Handle    string `db:"handle" json:"handle"`
-	Hash      string `db:"hash" json:"-"`
-	ID        uint   `db:"user_id" fake:"skip" json:"-"`
-	Password  string `json:"-"`
 }
+
+// Users defines model for Users.
+type Users = []User
 
 // HandleParam defines model for handleParam.
 type HandleParam = string
+
+// LimitParam defines model for limitParam.
+type LimitParam uint
+
+// PageParam defines model for pageParam.
+type PageParam uint
 
 // BadRequest defines model for BadRequest.
 type BadRequest = Error
@@ -57,6 +65,12 @@ type AuthUserBody = AuthUser
 
 // TokensBody defines model for TokensBody.
 type TokensBody = Tokens
+
+// GetMeFollowingParams defines parameters for GetMeFollowing.
+type GetMeFollowingParams struct {
+	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`
+	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+}
 
 // PostLoginJSONRequestBody defines body for PostLogin for application/json ContentType.
 type PostLoginJSONRequestBody = AuthUserBody

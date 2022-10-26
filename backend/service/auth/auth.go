@@ -21,9 +21,9 @@ func (s *service) VerifyCredentials(u people.AuthUser) (uint, error) {
 		return 0, err
 	}
 
-	if err := u.Password.Compare(expected.Hash); err != nil {
+	if err := u.Password.Compare(*expected.Hash); err != nil {
 		return 0, err
 	}
 
-	return expected.ID, nil
+	return *expected.ID, nil
 }

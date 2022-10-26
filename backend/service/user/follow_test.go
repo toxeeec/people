@@ -35,10 +35,12 @@ func (suite *UserSuite) TestFollow() {
 			err := suite.us.Follow(id1, tc.handle)
 			assert.Equal(suite.T(), tc.valid, err == nil)
 			if tc.valid {
-				user1, _ := suite.us.Get(user1.Handle)
-				followed, _ := suite.us.Get(tc.handle)
-				assert.Equal(suite.T(), uint(1), followed.Followers)
-				assert.Equal(suite.T(), uint(1), user1.Following)
+				var followers uint
+				var following uint
+				suite.db.Get(&followers, "SELECT followers FROM user_profile WHERE handle = $1", tc.handle)
+				suite.db.Get(&following, "SELECT following FROM user_profile WHERE handle = $1", user1.Handle)
+				assert.Equal(suite.T(), uint(1), followers)
+				assert.Equal(suite.T(), uint(1), following)
 			}
 		})
 	}
@@ -71,10 +73,12 @@ func (suite *UserSuite) TestUnfollow() {
 			err := suite.us.Unfollow(id1, tc.handle)
 			assert.Equal(suite.T(), tc.valid, err == nil)
 			if tc.valid {
-				user1, _ := suite.us.Get(user1.Handle)
-				followed, _ := suite.us.Get(tc.handle)
-				assert.Equal(suite.T(), uint(0), followed.Followers)
-				assert.Equal(suite.T(), uint(0), user1.Following)
+				var followers uint
+				var following uint
+				suite.db.Get(&followers, "SELECT followers FROM user_profile WHERE handle = $1", tc.handle)
+				suite.db.Get(&following, "SELECT following FROM user_profile WHERE handle = $1", user1.Handle)
+				assert.Equal(suite.T(), uint(0), followers)
+				assert.Equal(suite.T(), uint(0), following)
 			}
 		})
 	}
@@ -136,6 +140,41 @@ func (suite *UserSuite) TestIsFollowed() {
 			actual, err := suite.us.IsFollowed(id1, tc.handle)
 			assert.Equal(suite.T(), tc.valid, actual)
 			assert.NoError(suite.T(), err)
+		})
+	}
+}
+
+func (suite *UserSuite) TestFollowing() {
+	var user1 people.AuthUser
+	var user2 people.AuthUser
+	gofakeit.Struct(&user1)
+	gofakeit.Struct(&user2)
+	id1, _ := suite.us.Create(user1)
+	id2, _ := suite.us.Create(user2)
+
+	var limit uint = 2
+
+	for i := 0; i < 3; i++ {
+		var u people.AuthUser
+		gofakeit.Struct(&u)
+		suite.us.Create(u)
+		suite.us.Follow(id1, u.Handle)
+	}
+
+	tests := map[string]struct {
+		id       uint
+		page     uint
+		expected int
+	}{
+		"0 following":  {id2, 1, 0},
+		"first page":   {id1, 1, 2},
+		"last page":    {id1, 2, 1},
+		"page too far": {id1, 3, 0},
+	}
+	for name, tc := range tests {
+		suite.Run(name, func() {
+			following, _ := suite.us.Following(tc.id, people.NewPagination(&tc.page, &limit))
+			assert.Equal(suite.T(), tc.expected, len(following))
 		})
 	}
 }
