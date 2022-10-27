@@ -69,15 +69,17 @@ func (suite *PostSuite) TestDelete() {
 	gofakeit.Struct(&user)
 	userID, _ := suite.us.Create(user)
 	p, _ := suite.ps.Create(userID, post)
+	r, _ := suite.ps.CreateReply(p.ID, userID, post)
 
 	tests := map[string]struct {
 		id     uint
 		userID uint
 		valid  bool
 	}{
-		"not owned":  {p.ID, userID + 1, false},
-		"unknown id": {p.ID + 1, userID, false},
-		"valid":      {p.ID, userID, true},
+		"not owned":     {p.ID, userID + 1, false},
+		"unknown id":    {p.ID + 5, userID, false},
+		"valid (reply)": {r.ID, userID, true},
+		"valid":         {p.ID, userID, true},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
@@ -174,6 +176,28 @@ func (suite *PostSuite) TestFeed() {
 				assert.Equal(suite.T(), tc.oldest, res.Meta.OldestID)
 				assert.Equal(suite.T(), tc.newest, res.Meta.NewestID)
 			}
+		})
+	}
+}
+
+func (suite *PostSuite) TestExists() {
+	var post people.PostBody
+	var user people.AuthUser
+	gofakeit.Struct(&post)
+	gofakeit.Struct(&user)
+	userID, _ := suite.us.Create(user)
+	p, _ := suite.ps.Create(userID, post)
+
+	tests := map[string]struct {
+		id    uint
+		valid bool
+	}{
+		"invalid id": {p.ID + 1, false},
+		"valid":      {p.ID, true},
+	}
+	for name, tc := range tests {
+		suite.Run(name, func() {
+			assert.Equal(suite.T(), tc.valid, suite.ps.Exists(tc.id))
 		})
 	}
 }

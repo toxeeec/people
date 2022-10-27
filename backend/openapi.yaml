@@ -293,6 +293,33 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
+  /posts/{postID}/replies:
+    post:
+      tags:
+        - posts
+        - replies
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/postIDParam'
+      requestBody:
+        $ref: '#/components/requestBodies/PostBody'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
   /users/{handle}/posts:
     get:
       tags:
@@ -439,12 +466,25 @@ components:
           x-oapi-codegen-extra-tags:
             db: created_at
             fake: skip
+        repliesTo:
+          type: integer
+          x-go-type: sql.NullInt32
+          x-oapi-codegen-extra-tags:
+            db: replies_to
+            fake: skip
+        replies:
+          type: integer
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: replies
+            fake: skip
         user:
           $ref: '#/components/schemas/User'
       required:
         - id
         - content
         - createdAt
+        - replies 
 
     Posts:
       type: array
@@ -512,6 +552,12 @@ components:
                 maxLength: 280
                 x-oapi-codegen-extra-tags:
                   fake: '{sentence}'
+              # repliesTo:
+              #   type: integer
+              #   x-go-type: sql.NullInt32
+              #   x-oapi-codegen-extra-tags:
+              #     db: replies_to
+              #     fake: skip
             required:
               - content
 

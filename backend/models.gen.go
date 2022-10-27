@@ -4,6 +4,7 @@
 package people
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -32,10 +33,12 @@ type FeedResponse struct {
 
 // Post defines model for Post.
 type Post struct {
-	Content   string    `db:"content" fake:"{sentence}" json:"content"`
-	CreatedAt time.Time `db:"created_at" fake:"skip" json:"createdAt"`
-	ID        uint      `db:"post_id" fake:"skip" json:"id"`
-	User      *User     `db:"user" json:"user,omitempty"`
+	Content   string         `db:"content" fake:"{sentence}" json:"content"`
+	CreatedAt time.Time      `db:"created_at" fake:"skip" json:"createdAt"`
+	ID        uint           `db:"post_id" fake:"skip" json:"id"`
+	Replies   uint           `db:"replies" fake:"skip" json:"replies"`
+	RepliesTo *sql.NullInt32 `db:"replies_to" fake:"skip" json:"repliesTo,omitempty"`
+	User      *User          `db:"user" json:"user,omitempty"`
 }
 
 // Posts defines model for Posts.
@@ -152,6 +155,9 @@ type PostLoginJSONRequestBody = AuthUserBody
 
 // PostPostsJSONRequestBody defines body for PostPosts for application/json ContentType.
 type PostPostsJSONRequestBody PostBody
+
+// PostPostsPostIDRepliesJSONRequestBody defines body for PostPostsPostIDReplies for application/json ContentType.
+type PostPostsPostIDRepliesJSONRequestBody PostBody
 
 // PostRefreshJSONRequestBody defines body for PostRefresh for application/json ContentType.
 type PostRefreshJSONRequestBody TokensBody

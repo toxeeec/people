@@ -12,16 +12,18 @@ CREATE TABLE token (
 	user_id integer REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL
 );
 
-CREATE TABLE follower (
-	followed_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	user_id integer REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
-	follower_id integer REFERENCES user_profile(user_id) ON DELETE CASCADE CONSTRAINT different_user CHECK (follower_id != user_id) NOT NULL,
-	PRIMARY KEY (user_id, follower_id)
-);
-
 CREATE TABLE post (
 	post_id SERIAL PRIMARY KEY,
 	user_id integer REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
 	content VARCHAR(280) NOT NULL,
+	replies_to integer REFERENCES post(post_id) ON DELETE CASCADE,
+	replies integer NOT NULL DEFAULT 0,
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE follower (
+	user_id integer REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
+	follower_id integer REFERENCES user_profile(user_id) ON DELETE CASCADE CONSTRAINT different_user CHECK (follower_id != user_id) NOT NULL,
+	followed_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (user_id, follower_id)
 );
