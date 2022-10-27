@@ -104,12 +104,8 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         403:
           $ref: '#/components/responses/Forbidden'
-        409:
-          description: User is not followed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+        404:
+          $ref: '#/components/responses/NotFound'
 
     get:
       tags:
@@ -314,6 +310,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/Posts'
 
+  /me/feed:
+    get:
+      tags:
+        - posts
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/beforeParam'
+        - $ref: '#/components/parameters/afterParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedResponse'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
 
 components:
   securitySchemes:
@@ -433,6 +450,27 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Post'
+          
+    SeekPaginationMeta:
+      properties:
+        oldestID:
+          type: integer
+          x-go-type: uint
+        newestID:
+          type: integer
+          x-go-type: uint
+      required:
+        - oldestID
+        - newestID
+
+    FeedResponse:
+      properties:
+        data:
+          $ref: '#/components/schemas/Posts'
+        meta:
+          $ref: '#/components/schemas/SeekPaginationMeta'
+      required:
+        - data
 
     Error:
       properties:
@@ -510,7 +548,23 @@ components:
       required: true
       schema:
         type: integer
-        minimum: 1
+        minimum: 0
+        x-go-type: uint
+
+    beforeParam:
+      name: before
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        x-go-type: uint
+
+    afterParam:
+      name: after
+      in: query
+      schema:
+        type: integer
+        minimum: 0
         x-go-type: uint
 
   responses:

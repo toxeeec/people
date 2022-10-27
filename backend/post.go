@@ -11,4 +11,5 @@ type PostService interface {
 	Get(id uint) (Post, error)
 	Delete(postID, userID uint) error
 	FromUser(handle string, p Pagination) (Posts, error)
+	Feed(userID uint, p SeekPagination) (FeedResponse, error)
 }

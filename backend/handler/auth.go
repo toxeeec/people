@@ -19,7 +19,7 @@ func (h *handler) PostRegister(c echo.Context) error {
 	}
 
 	if exists := h.us.Exists(u.Handle); exists {
-		return people.ErrHandleTaken
+		return people.ErrTakenHandle
 	}
 
 	id, err := h.us.Create(u)

@@ -24,6 +24,12 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// FeedResponse defines model for FeedResponse.
+type FeedResponse struct {
+	Data Posts               `json:"data"`
+	Meta *SeekPaginationMeta `json:"meta,omitempty"`
+}
+
 // Post defines model for Post.
 type Post struct {
 	Content   string    `db:"content" fake:"{sentence}" json:"content"`
@@ -34,6 +40,12 @@ type Post struct {
 
 // Posts defines model for Posts.
 type Posts = []Post
+
+// SeekPaginationMeta defines model for SeekPaginationMeta.
+type SeekPaginationMeta struct {
+	NewestID uint `json:"newestID"`
+	OldestID uint `json:"oldestID"`
+}
 
 // Tokens defines model for Tokens.
 type Tokens struct {
@@ -51,6 +63,12 @@ type User struct {
 
 // Users defines model for Users.
 type Users = []User
+
+// AfterParam defines model for afterParam.
+type AfterParam uint
+
+// BeforeParam defines model for beforeParam.
+type BeforeParam uint
 
 // HandleParam defines model for handleParam.
 type HandleParam = string
@@ -90,6 +108,13 @@ type PostBody struct {
 // TokensBody defines model for TokensBody.
 type TokensBody struct {
 	RefreshToken string `db:"refreshToken" json:"refreshToken"`
+}
+
+// GetMeFeedParams defines parameters for GetMeFeed.
+type GetMeFeedParams struct {
+	Limit  *LimitParam  `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterParam  `form:"after,omitempty" json:"after,omitempty"`
 }
 
 // GetMeFollowersParams defines parameters for GetMeFollowers.

@@ -38,12 +38,8 @@ func (h *handler) DeleteMeFollowingHandle(c echo.Context, handle people.HandlePa
 	}
 
 	err := h.us.Unfollow(userID, handle)
-	if errors.Is(err, user.ErrNotFollowed) {
-		return echo.NewHTTPError(http.StatusConflict, err.Error())
-	}
-
 	if err != nil {
-		return echo.ErrInternalServerError
+		return echo.ErrNotFound
 	}
 
 	return c.NoContent(http.StatusNoContent)

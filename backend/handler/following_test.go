@@ -68,9 +68,9 @@ func (suite *HandlerSuite) TestDeleteMeFollowingHandle() {
 		handle   string
 		expected int
 	}{
-		"unknown handle": {unknownHandle, http.StatusConflict},
-		"same user":      {user1.Handle, http.StatusConflict},
-		"not followed":   {user3.Handle, http.StatusConflict},
+		"unknown handle": {unknownHandle, http.StatusNotFound},
+		"same user":      {user1.Handle, http.StatusNotFound},
+		"not followed":   {user3.Handle, http.StatusNotFound},
 		"valid":          {user2.Handle, http.StatusNoContent},
 	}
 	for name, tc := range tests {
