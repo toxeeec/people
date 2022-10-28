@@ -113,71 +113,39 @@ func (suite *PostSuite) TestFromUser() {
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
-			page := uint(1)
-			limit := uint(20)
-			pagination := people.NewPagination(&page, &limit)
+			pagination := people.NewSeekPagination(nil, nil, nil)
 			posts, _ := suite.ps.FromUser(tc.handle, pagination)
-			assert.Equal(suite.T(), tc.expected, len(posts))
+			assert.Equal(suite.T(), tc.expected, len(posts.Data))
 		})
 	}
 }
 
 func (suite *PostSuite) TestFeed() {
-	var user people.AuthUser
-	gofakeit.Struct(&user)
-	userID, _ := suite.us.Create(user)
-
-	var oldest uint
-	var before uint
-	var after uint
-	var newest uint
-
-	count := 7
-	// - after - - before - -
+	var user1 people.AuthUser
+	var user2 people.AuthUser
+	var user3 people.AuthUser
+	gofakeit.Struct(&user1)
+	gofakeit.Struct(&user2)
+	gofakeit.Struct(&user3)
+	id1, _ := suite.us.Create(user1)
+	id2, _ := suite.us.Create(user2)
+	id3, _ := suite.us.Create(user3)
+	suite.us.Follow(id1, user2.Handle)
+	count := 5
 	for i := 0; i < count; i++ {
-		var u people.AuthUser
-		gofakeit.Struct(&u)
-		id, _ := suite.us.Create(u)
-		suite.us.Follow(userID, u.Handle)
-		var post people.PostBody
-		gofakeit.Struct(&post)
-		p, _ := suite.ps.Create(id, post)
-		switch i {
-		case 0:
-			oldest = p.ID
-		case 1:
-			after = p.ID
-		case 4:
-			before = p.ID
-		case count - 1:
-			newest = p.ID
-		}
+		var p people.PostBody
+		gofakeit.Struct(&p)
+		suite.ps.Create(id2, p)
 	}
 
-	tests := map[string]struct {
-		pagination people.SeekPagination
-		oldest     uint
-		newest     uint
-		count      int
-	}{
-		"no pagination":             {people.NewSeekPagination(nil, nil, nil), oldest, newest, count},
-		"before":                    {people.NewSeekPagination(&before, nil, nil), oldest, before - 1, 4},
-		"after":                     {people.NewSeekPagination(nil, &after, nil), after + 1, newest, 5},
-		"after greater than before": {people.NewSeekPagination(&after, &before, nil), 0, 0, 0},
-		"before and after":          {people.NewSeekPagination(&before, &after, nil), after + 1, before - 1, 2},
-	}
-	for name, tc := range tests {
-		suite.Run(name, func() {
-			res, _ := suite.ps.Feed(userID, tc.pagination)
-			assert.Equal(suite.T(), tc.count, len(res.Data))
-			if len(res.Data) == 0 {
-				assert.Nil(suite.T(), res.Meta)
-			} else {
-				assert.Equal(suite.T(), tc.oldest, res.Meta.OldestID)
-				assert.Equal(suite.T(), tc.newest, res.Meta.NewestID)
-			}
-		})
-	}
+	// not followed by user1
+	var p people.PostBody
+	gofakeit.Struct(&p)
+	suite.ps.Create(id3, p)
+
+	pagination := people.NewSeekPagination(nil, nil, nil)
+	res, _ := suite.ps.Feed(id1, pagination)
+	assert.Equal(suite.T(), count, len(res.Data))
 }
 
 func (suite *PostSuite) TestExists() {

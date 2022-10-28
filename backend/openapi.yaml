@@ -327,8 +327,9 @@ paths:
         - posts
       parameters:
         - $ref: '#/components/parameters/handleParam'
-        - $ref: '#/components/parameters/pageParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/beforeParam'
+        - $ref: '#/components/parameters/afterParam'
       responses:
         200:
           description: OK
@@ -353,7 +354,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FeedResponse'
+                $ref: '#/components/schemas/Posts'
         401:
           $ref: '#/components/responses/Unauthorized'
         403:
@@ -486,11 +487,6 @@ components:
         - createdAt
         - replies 
 
-    Posts:
-      type: array
-      items:
-        $ref: '#/components/schemas/Post'
-          
     SeekPaginationMeta:
       properties:
         oldestID:
@@ -503,12 +499,15 @@ components:
         - oldestID
         - newestID
 
-    FeedResponse:
+    Posts:
       properties:
         data:
-          $ref: '#/components/schemas/Posts'
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
         meta:
           $ref: '#/components/schemas/SeekPaginationMeta'
+      x-go-type: = SeekPaginationResult[Post]
       required:
         - data
 
@@ -552,12 +551,6 @@ components:
                 maxLength: 280
                 x-oapi-codegen-extra-tags:
                   fake: '{sentence}'
-              # repliesTo:
-              #   type: integer
-              #   x-go-type: sql.NullInt32
-              #   x-oapi-codegen-extra-tags:
-              #     db: replies_to
-              #     fake: skip
             required:
               - content
 

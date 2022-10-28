@@ -25,12 +25,6 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-// FeedResponse defines model for FeedResponse.
-type FeedResponse struct {
-	Data Posts               `json:"data"`
-	Meta *SeekPaginationMeta `json:"meta,omitempty"`
-}
-
 // Post defines model for Post.
 type Post struct {
 	Content   string         `db:"content" fake:"{sentence}" json:"content"`
@@ -42,7 +36,7 @@ type Post struct {
 }
 
 // Posts defines model for Posts.
-type Posts = []Post
+type Posts = SeekPaginationResult[Post]
 
 // SeekPaginationMeta defines model for SeekPaginationMeta.
 type SeekPaginationMeta struct {
@@ -146,8 +140,9 @@ type GetUsersHandleFollowingParams struct {
 
 // GetUsersHandlePostsParams defines parameters for GetUsersHandlePosts.
 type GetUsersHandlePostsParams struct {
-	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`
-	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit  *LimitParam  `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterParam  `form:"after,omitempty" json:"after,omitempty"`
 }
 
 // PostLoginJSONRequestBody defines body for PostLogin for application/json ContentType.

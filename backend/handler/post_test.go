@@ -131,11 +131,9 @@ func (suite *HandlerSuite) TestGetUsersHandlePosts() {
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
-			page := uint(1)
-			limit := uint(20)
-			pagination := people.NewPagination(&page, &limit)
+			pagination := people.NewSeekPagination(nil, nil, nil)
 			posts, _ := suite.ps.FromUser(tc.handle, pagination)
-			assert.Equal(suite.T(), tc.expected, len(posts))
+			assert.Equal(suite.T(), tc.expected, len(posts.Data))
 		})
 	}
 }
