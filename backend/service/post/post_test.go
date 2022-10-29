@@ -77,7 +77,7 @@ func (suite *PostSuite) TestDelete() {
 		valid  bool
 	}{
 		"not owned":     {p.ID, userID + 1, false},
-		"unknown id":    {p.ID + 5, userID, false},
+		"unknown id":    {p.ID + 2, userID, false},
 		"valid (reply)": {r.ID, userID, true},
 		"valid":         {p.ID, userID, true},
 	}

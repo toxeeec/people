@@ -23,28 +23,27 @@ FROM post JOIN user_profile ON post.user_id = user_profile.user_id WHERE post_id
 	queryDecrementReplies = "UPDATE post SET replies = replies - 1 WHERE post_id = $1"
 	queryFromUser         = `SELECT post_id, content, created_at FROM post 
 WHERE user_id = (SELECT user_id FROM user_profile WHERE handle = $1) AND replies_to IS NULL ORDER BY post_id DESC OFFSET $2 LIMIT $3`
-	queryFromUserNone   = fromUserBase + fromUserEnd
-	queryFromUserBefore = fromUserBase + fromUserEnd
+	queryFromUserNone   = fromUserBase + end
+	queryFromUserBefore = fromUserBase + end
 )
 
 const (
 	feedBase = `SELECT post_id, content, created_at, 
 user_profile.handle AS "user.handle", user_profile.followers AS "user.followers", user_profile.following AS "user.following" 
 FROM post JOIN user_profile ON post.user_id = user_profile.user_id WHERE post.user_id IN (SELECT user_id FROM follower WHERE follower_id = $1) `
-	feedEnd = " ORDER BY post_id DESC LIMIT $2"
 
 	fromUserBase = `SELECT post_id, content, created_at FROM post 
 WHERE user_id = (SELECT user_id FROM user_profile WHERE handle = $1) AND replies_to IS NULL `
-	fromUserEnd = " ORDER BY post_id DESC LIMIT $2"
 )
 const (
+	end         = " ORDER BY post_id DESC LIMIT $2"
 	before      = "AND post_id < $3"
 	after       = "AND post_id > $3"
 	beforeAfter = "AND post_id < $3 AND post_id > $4"
 )
 
-var feedQueries = people.SeekPaginationQueries(feedBase, feedEnd, before, after, beforeAfter)
-var fromUserQueries = people.SeekPaginationQueries(fromUserBase, fromUserEnd, before, after, beforeAfter)
+var feedQueries = people.SeekPaginationQueries(feedBase, end, before, after, beforeAfter)
+var fromUserQueries = people.SeekPaginationQueries(fromUserBase, end, before, after, beforeAfter)
 
 func (s *service) Create(userID uint, post people.PostBody) (people.Post, error) {
 	var p people.Post

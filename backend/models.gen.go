@@ -126,6 +126,13 @@ type GetMeFollowingParams struct {
 	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
 }
 
+// GetPostsPostIDRepliesParams defines parameters for GetPostsPostIDReplies.
+type GetPostsPostIDRepliesParams struct {
+	Limit  *LimitParam  `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterParam  `form:"after,omitempty" json:"after,omitempty"`
+}
+
 // GetUsersHandleFollowersParams defines parameters for GetUsersHandleFollowers.
 type GetUsersHandleFollowersParams struct {
 	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`

@@ -320,6 +320,23 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
+    get:
+      tags:
+        - posts
+        - replies
+      parameters:
+        - $ref: '#/components/parameters/postIDParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/beforeParam'
+        - $ref: '#/components/parameters/afterParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Posts'
+
   /users/{handle}/posts:
     get:
       tags:

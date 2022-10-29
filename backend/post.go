@@ -18,4 +18,5 @@ type PostService interface {
 	Feed(userID uint, p SeekPagination) (Posts, error)
 	Exists(postID uint) bool
 	CreateReply(postID, userID uint, p PostBody) (Post, error)
+	Replies(postID uint, p SeekPagination) (Posts, error)
 }
