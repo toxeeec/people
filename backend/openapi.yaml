@@ -2,10 +2,6 @@ openapi: 3.0.0
 info:
   version: 1.0.0
   title: People API
-tags:
-  - name: auth
-  - name: me
-  - name: following
 
 paths:
   /register:
@@ -296,7 +292,6 @@ paths:
   /posts/{postID}/replies:
     post:
       tags:
-        - posts
         - replies
       security:
         - bearerAuth: []
@@ -322,7 +317,6 @@ paths:
 
     get:
       tags:
-        - posts
         - replies
       parameters:
         - $ref: '#/components/parameters/postIDParam'
@@ -340,7 +334,6 @@ paths:
   /users/{handle}/posts:
     get:
       tags:
-        - users
         - posts
       parameters:
         - $ref: '#/components/parameters/handleParam'
@@ -358,7 +351,7 @@ paths:
   /me/feed:
     get:
       tags:
-        - posts
+        - me
       security:
         - bearerAuth: []
       parameters:
