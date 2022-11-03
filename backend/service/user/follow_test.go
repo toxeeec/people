@@ -1,8 +1,6 @@
 package user
 
 import (
-	"fmt"
-
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
 	people "github.com/toxeeec/people/backend"
@@ -19,7 +17,7 @@ func (suite *UserSuite) TestFollow() {
 	id1, _ := suite.us.Create(user1)
 	id2, _ := suite.us.Create(user2)
 	suite.us.Create(user3)
-	suite.us.db.MustExec(fmt.Sprintf("INSERT INTO follower(user_id, follower_id) VALUES(%d, %d)", id2, id1))
+	suite.us.db.MustExec("INSERT INTO follower(user_id, follower_id) VALUES($1, $2)", id2, id1)
 
 	tests := map[string]struct {
 		handle string
@@ -95,7 +93,7 @@ func (suite *UserSuite) TestIsFollowing() {
 	id1, _ := suite.us.Create(user1)
 	id2, _ := suite.us.Create(user2)
 	suite.us.Create(user3)
-	suite.us.db.MustExec(fmt.Sprintf("INSERT INTO follower(user_id, follower_id) VALUES(%d, %d)", id2, id1))
+	suite.us.db.MustExec("INSERT INTO follower(user_id, follower_id) VALUES($1, $2)", id2, id1)
 
 	tests := map[string]struct {
 		handle string
@@ -125,7 +123,7 @@ func (suite *UserSuite) TestIsFollowed() {
 	id1, _ := suite.us.Create(user1)
 	id2, _ := suite.us.Create(user2)
 	suite.us.Create(user3)
-	suite.us.db.MustExec(fmt.Sprintf("INSERT INTO follower(user_id, follower_id) VALUES(%d, %d)", id1, id2))
+	suite.us.db.MustExec("INSERT INTO follower(user_id, follower_id) VALUES($1, $2)", id1, id2)
 
 	tests := map[string]struct {
 		handle string

@@ -370,6 +370,34 @@ paths:
         403:
           $ref: '#/components/responses/Forbidden'
 
+  /posts/{postID}/likes:
+    put:
+      tags:
+        - likes
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/postIDParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Likes'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        409:
+          description: Post is already liked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          $ref: '#/components/responses/NotFound'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -496,6 +524,16 @@ components:
         - content
         - createdAt
         - replies 
+    Likes:
+      properties:
+        likes:
+          type: integer
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: likes
+            fake: skip
+      required:
+        - likes
 
     SeekPaginationMeta:
       properties:
@@ -517,7 +555,7 @@ components:
             $ref: '#/components/schemas/Post'
         meta:
           $ref: '#/components/schemas/SeekPaginationMeta'
-      x-go-type: = SeekPaginationResult[Post]
+      x-go-type: SeekPaginationResult[Post]
       required:
         - data
 

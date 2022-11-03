@@ -28,7 +28,7 @@ func (suite *HandlerSuite) TestPostPostsPostIDReplies() {
 		body     people.PostBody
 		expected int
 	}{
-		"invalid id":    {p.ID + 1, valid, http.StatusNotFound},
+		"invalid id":    {p.ID + 2, valid, http.StatusNotFound},
 		"empty content": {p.ID, emptyContent, http.StatusBadRequest},
 		"valid":         {p.ID, valid, http.StatusOK},
 	}

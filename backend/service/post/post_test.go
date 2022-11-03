@@ -68,18 +68,19 @@ func (suite *PostSuite) TestDelete() {
 	gofakeit.Struct(&post)
 	gofakeit.Struct(&user)
 	userID, _ := suite.us.Create(user)
-	p, _ := suite.ps.Create(userID, post)
-	r, _ := suite.ps.CreateReply(p.ID, userID, post)
+	p1, _ := suite.ps.Create(userID, post)
+	p2, _ := suite.ps.Create(userID, post)
+	r, _ := suite.ps.CreateReply(p2.ID, userID, post)
 
 	tests := map[string]struct {
 		id     uint
 		userID uint
 		valid  bool
 	}{
-		"not owned":     {p.ID, userID + 1, false},
-		"unknown id":    {p.ID + 2, userID, false},
+		"not owned":     {p1.ID, userID + 1, false},
+		"unknown id":    {p1.ID + 3, userID, false},
 		"valid (reply)": {r.ID, userID, true},
-		"valid":         {p.ID, userID, true},
+		"valid":         {p1.ID, userID, true},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {

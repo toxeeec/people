@@ -22,7 +22,7 @@ func (suite *HandlerSuite) TestPutMeFollowingHandle() {
 	id1, _ := suite.us.Create(user1)
 	id2, _ := suite.us.Create(user2)
 	suite.us.Create(user3)
-	suite.db.MustExec(fmt.Sprintf("INSERT INTO follower(user_id, follower_id) VALUES(%d, %d)", id2, id1))
+	suite.db.MustExec("INSERT INTO follower(user_id, follower_id) VALUES($1, $2)", id2, id1)
 	at, _ := token.NewAccessToken(id1)
 
 	tests := map[string]struct {
