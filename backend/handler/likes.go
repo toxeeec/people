@@ -30,3 +30,17 @@ func (h *handler) PutPostsPostIDLikes(c echo.Context, postID uint) error {
 
 	return c.JSON(http.StatusOK, l)
 }
+
+func (h *handler) DeletePostsPostIDLikes(c echo.Context, postID uint) error {
+	userID, ok := people.FromContext(c.Request().Context(), people.UserIDKey)
+	if !ok {
+		return echo.ErrInternalServerError
+	}
+
+	l, err := h.ps.Unlike(postID, userID)
+	if err != nil {
+		return echo.ErrNotFound
+	}
+
+	return c.JSON(http.StatusOK, l)
+}

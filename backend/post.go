@@ -20,5 +20,5 @@ type PostService interface {
 	CreateReply(postID, userID uint, p PostBody) (Post, error)
 	Replies(postID uint, p SeekPagination) (Posts, error)
 	Like(postID, userID uint) (Likes, error)
-	// Unlike(postID, userID uint) (uint, error)
+	Unlike(postID, userID uint) (Likes, error)
 }
