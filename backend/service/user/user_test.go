@@ -12,54 +12,42 @@ import (
 
 type UserSuite struct {
 	suite.Suite
-	db *sqlx.DB
-	us service
+	db          *sqlx.DB
+	us          service
+	user1       people.AuthUser
+	user2       people.AuthUser
+	user3       people.AuthUser
+	unknownUser people.AuthUser
+	id1         uint
+	id2         uint
+	id3         uint
 }
 
 func (suite *UserSuite) TestCreate() {
-	var user people.AuthUser
-	gofakeit.Struct(&user)
-	id, _ := suite.us.Create(user)
-
-	rows, _ := suite.db.Queryx("SELECT user_id, handle FROM user_profile")
+	rows, _ := suite.db.Queryx("SELECT user_id, handle FROM user_profile WHERE handle = $1", suite.user1.Handle)
 	for rows.Next() {
 		var actual people.AuthUser
 		rows.StructScan(&actual)
-		assert.Equal(suite.T(), id, *actual.ID)
-		assert.Equal(suite.T(), user.Handle, actual.Handle)
+		assert.Equal(suite.T(), suite.id1, *actual.ID)
 	}
 }
 
 func (suite *UserSuite) TestExists() {
-	var user1 people.AuthUser
-	var user2 people.AuthUser
-	gofakeit.Struct(&user1)
-	gofakeit.Struct(&user2)
-	suite.us.Create(user1)
-
-	assert.True(suite.T(), suite.us.Exists(user1.Handle))
-	assert.False(suite.T(), suite.us.Exists(user2.Handle))
+	assert.True(suite.T(), suite.us.Exists(suite.user1.Handle))
+	assert.False(suite.T(), suite.us.Exists(suite.unknownUser.Handle))
 }
 
 func (suite *UserSuite) TestDelete() {
-	var user1 people.AuthUser
-	gofakeit.Struct(&user1)
-	suite.us.Create(user1)
-
-	suite.us.Delete(user1.Handle)
-	assert.False(suite.T(), suite.us.Exists(user1.Handle))
+	suite.us.Delete(suite.user1.Handle)
+	assert.False(suite.T(), suite.us.Exists(suite.user1.Handle))
 }
 
 func (suite *UserSuite) TestGet() {
-	var expected people.AuthUser
-	gofakeit.Struct(&expected)
-	suite.us.Create(expected)
-
-	actual, err := suite.us.Get(expected.Handle)
-	assert.Equal(suite.T(), expected.Handle, actual.Handle)
+	actual, err := suite.us.Get(suite.user1.Handle)
+	assert.Equal(suite.T(), suite.user1.Handle, actual.Handle)
 	assert.NoError(suite.T(), err)
 
-	_, err = suite.us.Get(gofakeit.LetterN(10))
+	_, err = suite.us.Get(suite.unknownUser.Handle)
 	assert.Error(suite.T(), err)
 }
 
@@ -79,6 +67,13 @@ func (suite *UserSuite) TearDownSuite() {
 
 func (suite *UserSuite) SetupTest() {
 	suite.db.MustExec("TRUNCATE user_profile CASCADE")
+	gofakeit.Struct(&suite.user1)
+	gofakeit.Struct(&suite.user2)
+	gofakeit.Struct(&suite.user3)
+	gofakeit.Struct(&suite.unknownUser)
+	suite.id1, _ = suite.us.Create(suite.user1)
+	suite.id2, _ = suite.us.Create(suite.user2)
+	suite.id3, _ = suite.us.Create(suite.user3)
 }
 
 func TestUserSuite(t *testing.T) {
