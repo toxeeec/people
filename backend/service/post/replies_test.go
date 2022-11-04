@@ -7,57 +7,36 @@ import (
 )
 
 func (suite *PostSuite) TestCreateReply() {
-	var user people.AuthUser
-	var post people.PostBody
-	gofakeit.Struct(&user)
-	gofakeit.Struct(&post)
-	userID, _ := suite.us.Create(user)
-	p, _ := suite.ps.Create(userID, post)
-	postID := p.ID
-
-	var expected people.PostBody
-	gofakeit.Struct(&expected)
-	p, _ = suite.ps.CreateReply(postID, userID, expected)
-
-	rows, err := suite.ps.db.Queryx(`SELECT post_id, content, replies_to, replies AS "user.user_id" FROM post WHERE replies_to = $1`, postID)
+	r, _ := suite.ps.CreateReply(suite.post1.ID, suite.user1ID, suite.replyBody)
+	rows, err := suite.ps.db.Queryx(`SELECT post_id, content, replies_to, replies AS "user.user_id" FROM post WHERE replies_to = $1`, suite.post1.ID)
 	assert.NoError(suite.T(), err)
 	for rows.Next() {
 		var actual people.Post
 		rows.StructScan(&actual)
-		assert.Equal(suite.T(), p.ID, actual.ID)
-		assert.Equal(suite.T(), expected.Content, actual.Content)
-		assert.Equal(suite.T(), postID, uint(actual.RepliesTo.Int32))
+		assert.Equal(suite.T(), r.ID, actual.ID)
+		assert.Equal(suite.T(), r.Content, actual.Content)
+		assert.Equal(suite.T(), suite.post1.ID, uint(actual.RepliesTo.Int32))
 
-		p, _ := suite.ps.Get(postID)
+		p, _ := suite.ps.Get(suite.post1.ID)
 		assert.Equal(suite.T(), uint(1), p.Replies)
 	}
 }
 
 func (suite *PostSuite) TestReplies() {
-	var user people.AuthUser
-	var post1 people.PostBody
-	var post2 people.PostBody
-	gofakeit.Struct(&user)
-	gofakeit.Struct(&post1)
-	gofakeit.Struct(&post2)
-	userID, _ := suite.us.Create(user)
-	p1, _ := suite.ps.Create(userID, post1)
-	p2, _ := suite.ps.Create(userID, post2)
-
 	count := 5
 	for i := 0; i < count; i++ {
 		var p people.PostBody
 		gofakeit.Struct(&p)
-		suite.ps.CreateReply(p1.ID, userID, p)
+		suite.ps.CreateReply(suite.post1.ID, suite.user1ID, p)
 	}
 
 	tests := map[string]struct {
 		id       uint
 		expected int
 	}{
-		"invalid id": {p1.ID + 2, 0},
-		"0 replies":  {p2.ID, 0},
-		"valid":      {p1.ID, count},
+		"invalid id": {suite.post1.ID + 5, 0},
+		"0 replies":  {suite.post2.ID, 0},
+		"valid":      {suite.post1.ID, count},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
