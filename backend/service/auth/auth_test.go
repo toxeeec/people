@@ -13,20 +13,19 @@ import (
 
 type AuthSuite struct {
 	suite.Suite
-	db *sqlx.DB
-	us people.UserService
-	as service
+	db      *sqlx.DB
+	us      people.UserService
+	as      service
+	user1   people.AuthUser
+	user1ID uint
 }
 
 func (suite *AuthSuite) TestVerifyCredentials() {
-	var valid people.AuthUser
 	var invalidPassword people.AuthUser
 	var unknownHandle people.AuthUser
-	gofakeit.Struct(&valid)
 	gofakeit.Struct(&invalidPassword)
 	gofakeit.Struct(&unknownHandle)
-	invalidPassword.Handle = valid.Handle
-	id1, _ := suite.us.Create(valid)
+	invalidPassword.Handle = suite.user1.Handle
 
 	tests := map[string]struct {
 		user  people.AuthUser
@@ -34,14 +33,14 @@ func (suite *AuthSuite) TestVerifyCredentials() {
 	}{
 		"unknown handle":   {unknownHandle, false},
 		"invalid password": {invalidPassword, false},
-		"valid":            {valid, true},
+		"valid":            {suite.user1, true},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
 			id, err := suite.as.VerifyCredentials(tc.user)
 			assert.Equal(suite.T(), tc.valid, err == nil)
 			if tc.valid {
-				assert.Equal(suite.T(), id1, id)
+				assert.Equal(suite.T(), suite.user1ID, id)
 			}
 		})
 	}
@@ -56,6 +55,8 @@ func (suite *AuthSuite) SetupSuite() {
 	us := user.NewService(db)
 	suite.us = us
 	suite.as = service{db, us}
+	gofakeit.Struct(&suite.user1)
+	suite.user1ID, _ = suite.us.Create(suite.user1)
 }
 
 func (suite *AuthSuite) TearDownSuite() {
@@ -63,7 +64,7 @@ func (suite *AuthSuite) TearDownSuite() {
 }
 
 func (suite *AuthSuite) SetupTest() {
-	suite.db.MustExec("TRUNCATE user_profile CASCADE")
+	suite.db.MustExec("TRUNCATE token CASCADE")
 }
 
 func TestAuthSuite(t *testing.T) {

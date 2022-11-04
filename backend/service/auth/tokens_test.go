@@ -1,31 +1,24 @@
 package auth
 
 import (
-	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/token"
 )
 
 func (suite *AuthSuite) TestNewTokens() {
-	var user people.AuthUser
-	gofakeit.Struct(&user)
-	id, _ := suite.us.Create(user)
-
-	tokens, err := suite.as.NewTokens(id)
+	tokens, err := suite.as.NewTokens(suite.user1ID)
 	assert.NotEmpty(suite.T(), tokens)
 	assert.NoError(suite.T(), err)
+
 	var rt people.RefreshToken
-	suite.db.Get(&rt, "SELECT token_id, value, user_id FROM token WHERE user_id = $1", id)
+	suite.db.Get(&rt, "SELECT token_id, value, user_id FROM token WHERE user_id = $1", suite.user1ID)
 	assert.Equal(suite.T(), rt.Value, tokens.RefreshToken)
-	assert.Equal(suite.T(), rt.UserID, id)
+	assert.Equal(suite.T(), rt.UserID, suite.user1ID)
 }
 
 func (suite *AuthSuite) TestUpdateRefreshToken() {
-	var user people.AuthUser
-	gofakeit.Struct(&user)
-	id, _ := suite.us.Create(user)
-	tokens, _ := suite.as.NewTokens(id)
+	tokens, _ := suite.as.NewTokens(suite.user1ID)
 	rt, _ := token.ParseRefreshToken(tokens.RefreshToken)
 
 	expected, err := suite.as.UpdateRefreshToken(rt.UserID, rt.ID)
@@ -33,15 +26,12 @@ func (suite *AuthSuite) TestUpdateRefreshToken() {
 	assert.NoError(suite.T(), err)
 
 	var actual people.RefreshToken
-	suite.db.Get(&actual, "SELECT token_id, value, user_id FROM token WHERE user_id = $1", id)
+	suite.db.Get(&actual, "SELECT token_id, value, user_id FROM token WHERE user_id = $1", suite.user1ID)
 	assert.Equal(suite.T(), expected, actual)
 }
 
 func (suite *AuthSuite) TestCheckRefreshToken() {
-	var user people.AuthUser
-	gofakeit.Struct(&user)
-	id, _ := suite.us.Create(user)
-	tokens, _ := suite.as.NewTokens(id)
+	tokens, _ := suite.as.NewTokens(suite.user1ID)
 	rt1, _ := token.ParseRefreshToken(tokens.RefreshToken)
 	rt2, _ := token.NewRefreshToken(1, nil)
 
