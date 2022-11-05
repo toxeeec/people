@@ -69,7 +69,7 @@ func (h *handler) GetMeFollowing(c echo.Context, params people.GetMeFollowingPar
 		return echo.ErrInternalServerError
 	}
 
-	pagination := people.NewPagination((*uint)(params.Page), (*uint)(params.Limit))
+	pagination := people.NewPagination(params.Before, params.After, params.Limit)
 	following, err := h.us.Following(userID, pagination)
 	if err != nil {
 		return echo.ErrInternalServerError
@@ -84,7 +84,7 @@ func (h *handler) GetUsersHandleFollowing(c echo.Context, handle string, params 
 		return echo.ErrNotFound
 	}
 
-	pagination := people.NewPagination((*uint)(params.Page), (*uint)(params.Limit))
+	pagination := people.NewPagination(params.Before, params.After, params.Limit)
 	following, err := h.us.Following(*u.ID, pagination)
 	if err != nil {
 		return echo.ErrInternalServerError
@@ -99,7 +99,7 @@ func (h *handler) GetUsersHandleFollowers(c echo.Context, handle string, params 
 		return echo.ErrNotFound
 	}
 
-	pagination := people.NewPagination((*uint)(params.Page), (*uint)(params.Limit))
+	pagination := people.NewPagination(params.Before, params.After, params.Limit)
 	following, err := h.us.Following(*u.ID, pagination)
 	if err != nil {
 		return echo.ErrInternalServerError

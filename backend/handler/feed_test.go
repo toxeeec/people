@@ -29,7 +29,7 @@ func (suite *HandlerSuite) TestGetMeFeed() {
 	result := testutil.NewRequest().WithJWSAuth(at).Get("/me/feed").Go(suite.T(), suite.e)
 	assert.Equal(suite.T(), http.StatusOK, result.Code())
 
-	var res people.SeekPaginationResult[people.Post]
+	var res people.PaginationResult[people.Post, uint]
 	result.UnmarshalJsonToObject(&res)
 	assert.Equal(suite.T(), count, len(res.Data))
 }

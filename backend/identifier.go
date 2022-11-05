@@ -1,5 +1,5 @@
 package people
 
-type Identifier interface {
-	Identify() uint
+type Identifier[T any] interface {
+	Identify() T
 }

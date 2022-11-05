@@ -31,7 +31,7 @@ func (h *handler) GetMeFollowers(c echo.Context, params people.GetMeFollowersPar
 		return echo.ErrInternalServerError
 	}
 
-	pagination := people.NewPagination((*uint)(params.Page), (*uint)(params.Limit))
+	pagination := people.NewPagination(params.Before, params.After, params.Limit)
 	following, err := h.us.Followers(userID, pagination)
 	if err != nil {
 		return echo.ErrInternalServerError

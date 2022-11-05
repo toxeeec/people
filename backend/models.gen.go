@@ -25,6 +25,12 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// HandlePaginationMeta defines model for HandlePaginationMeta.
+type HandlePaginationMeta = PaginationMeta[string]
+
+// IDPaginationMeta defines model for IDPaginationMeta.
+type IDPaginationMeta = PaginationMeta[uint]
+
 // Likes defines model for Likes.
 type Likes struct {
 	Likes uint `db:"likes" fake:"skip" json:"likes"`
@@ -42,13 +48,7 @@ type Post struct {
 }
 
 // Posts defines model for Posts.
-type Posts = SeekPaginationResult[Post]
-
-// SeekPaginationMeta defines model for SeekPaginationMeta.
-type SeekPaginationMeta struct {
-	NewestID uint `json:"newestID"`
-	OldestID uint `json:"oldestID"`
-}
+type Posts = PaginationResult[Post, uint]
 
 // Tokens defines model for Tokens.
 type Tokens struct {
@@ -65,10 +65,16 @@ type User struct {
 }
 
 // Users defines model for Users.
-type Users = []User
+type Users = PaginationResult[User, string]
+
+// AfterHandleParam defines model for afterHandleParam.
+type AfterHandleParam = string
 
 // AfterParam defines model for afterParam.
 type AfterParam = uint
+
+// BeforeHandleParam defines model for beforeHandleParam.
+type BeforeHandleParam = string
 
 // BeforeParam defines model for beforeParam.
 type BeforeParam = uint
@@ -78,9 +84,6 @@ type HandleParam = string
 
 // LimitParam defines model for limitParam.
 type LimitParam = uint
-
-// PageParam defines model for pageParam.
-type PageParam = uint
 
 // PostIDParam defines model for postIDParam.
 type PostIDParam = uint
@@ -122,14 +125,16 @@ type GetMeFeedParams struct {
 
 // GetMeFollowersParams defines parameters for GetMeFollowers.
 type GetMeFollowersParams struct {
-	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`
-	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit  *LimitParam        `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeHandleParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterHandleParam  `form:"after,omitempty" json:"after,omitempty"`
 }
 
 // GetMeFollowingParams defines parameters for GetMeFollowing.
 type GetMeFollowingParams struct {
-	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`
-	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit  *LimitParam        `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeHandleParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterHandleParam  `form:"after,omitempty" json:"after,omitempty"`
 }
 
 // PostPostsJSONBody defines parameters for PostPosts.
@@ -156,14 +161,16 @@ type PostRefreshJSONBody struct {
 
 // GetUsersHandleFollowersParams defines parameters for GetUsersHandleFollowers.
 type GetUsersHandleFollowersParams struct {
-	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`
-	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit  *LimitParam        `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeHandleParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterHandleParam  `form:"after,omitempty" json:"after,omitempty"`
 }
 
 // GetUsersHandleFollowingParams defines parameters for GetUsersHandleFollowing.
 type GetUsersHandleFollowingParams struct {
-	Page  *PageParam  `form:"page,omitempty" json:"page,omitempty"`
-	Limit *LimitParam `form:"limit,omitempty" json:"limit,omitempty"`
+	Limit  *LimitParam        `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeHandleParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterHandleParam  `form:"after,omitempty" json:"after,omitempty"`
 }
 
 // GetUsersHandlePostsParams defines parameters for GetUsersHandlePosts.

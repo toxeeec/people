@@ -103,8 +103,8 @@ func (suite *UserSuite) TestIsFollowed() {
 }
 
 func (suite *UserSuite) TestFollowing() {
-	var limit uint = 2
-	for i := 0; i < 3; i++ {
+	count := 5
+	for i := 0; i < 5; i++ {
 		var u people.AuthUser
 		gofakeit.Struct(&u)
 		suite.us.Create(u)
@@ -113,25 +113,23 @@ func (suite *UserSuite) TestFollowing() {
 
 	tests := map[string]struct {
 		id       uint
-		page     uint
 		expected int
 	}{
-		"0 following":  {suite.id2, 1, 0},
-		"first page":   {suite.id1, 1, 2},
-		"last page":    {suite.id1, 2, 1},
-		"page too far": {suite.id1, 3, 0},
+		"invalid id":  {suite.id1 + 10, 0},
+		"0 following": {suite.id2, 0},
+		"valid":       {suite.id1, count},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
-			following, _ := suite.us.Following(tc.id, people.NewPagination(&tc.page, &limit))
-			assert.Equal(suite.T(), tc.expected, len(following))
+			following, _ := suite.us.Following(tc.id, people.NewPagination[string](nil, nil, nil))
+			assert.Equal(suite.T(), tc.expected, len(following.Data))
 		})
 	}
 }
 
 func (suite *UserSuite) TestFollowers() {
-	var limit uint = 2
-	for i := 0; i < 3; i++ {
+	count := 5
+	for i := 0; i < count; i++ {
 		var u people.AuthUser
 		gofakeit.Struct(&u)
 		id, _ := suite.us.Create(u)
@@ -140,18 +138,16 @@ func (suite *UserSuite) TestFollowers() {
 
 	tests := map[string]struct {
 		id       uint
-		page     uint
 		expected int
 	}{
-		"0 followers":  {suite.id2, 1, 0},
-		"first page":   {suite.id1, 1, 2},
-		"last page":    {suite.id1, 2, 1},
-		"page too far": {suite.id1, 3, 0},
+		"invalid id":  {suite.id1 + 10, 0},
+		"0 followers": {suite.id2, 0},
+		"valid":       {suite.id1, count},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
-			followers, _ := suite.us.Followers(tc.id, people.NewPagination(&tc.page, &limit))
-			assert.Equal(suite.T(), tc.expected, len(followers))
+			followers, _ := suite.us.Followers(tc.id, people.NewPagination[string](nil, nil, nil))
+			assert.Equal(suite.T(), tc.expected, len(followers.Data))
 		})
 	}
 }

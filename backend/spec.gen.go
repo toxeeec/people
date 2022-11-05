@@ -138,18 +138,25 @@ func (w *ServerInterfaceWrapper) GetMeFollowers(ctx echo.Context) error {
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetMeFollowersParams
-	// ------------- Optional query parameter "page" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
-	}
-
 	// ------------- Optional query parameter "limit" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "before" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "before", ctx.QueryParams(), &params.Before)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter before: %s", err))
+	}
+
+	// ------------- Optional query parameter "after" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "after", ctx.QueryParams(), &params.After)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter after: %s", err))
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
@@ -183,18 +190,25 @@ func (w *ServerInterfaceWrapper) GetMeFollowing(ctx echo.Context) error {
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetMeFollowingParams
-	// ------------- Optional query parameter "page" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
-	}
-
 	// ------------- Optional query parameter "limit" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "before" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "before", ctx.QueryParams(), &params.Before)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter before: %s", err))
+	}
+
+	// ------------- Optional query parameter "after" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "after", ctx.QueryParams(), &params.After)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter after: %s", err))
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
@@ -425,18 +439,25 @@ func (w *ServerInterfaceWrapper) GetUsersHandleFollowers(ctx echo.Context) error
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetUsersHandleFollowersParams
-	// ------------- Optional query parameter "page" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
-	}
-
 	// ------------- Optional query parameter "limit" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "before" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "before", ctx.QueryParams(), &params.Before)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter before: %s", err))
+	}
+
+	// ------------- Optional query parameter "after" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "after", ctx.QueryParams(), &params.After)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter after: %s", err))
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
@@ -457,18 +478,25 @@ func (w *ServerInterfaceWrapper) GetUsersHandleFollowing(ctx echo.Context) error
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetUsersHandleFollowingParams
-	// ------------- Optional query parameter "page" -------------
-
-	err = runtime.BindQueryParameter("form", true, false, "page", ctx.QueryParams(), &params.Page)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter page: %s", err))
-	}
-
 	// ------------- Optional query parameter "limit" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "before" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "before", ctx.QueryParams(), &params.Before)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter before: %s", err))
+	}
+
+	// ------------- Optional query parameter "after" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "after", ctx.QueryParams(), &params.After)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter after: %s", err))
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
@@ -569,34 +597,35 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"oj/Psv8DAAD//5RXgW7fNAAA",
+	"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",
+	"AA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

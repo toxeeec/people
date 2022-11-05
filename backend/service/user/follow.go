@@ -14,17 +14,42 @@ var (
 )
 
 const (
+	selectUser       = "SELECT handle, followers, following FROM user_profile"
+	selectIDByHandle = "SELECT user_id FROM user_profile WHERE handle = "
+)
+
+const (
 	queryFollow             = "INSERT INTO follower(user_id, follower_id) SELECT user_id, $1 FROM user_profile WHERE handle = $2 RETURNING user_id"
-	queryUnfollow           = "DELETE FROM follower WHERE follower_id = $1 AND user_id = (SELECT user_id FROM user_profile WHERE handle = $2) RETURNING user_id"
+	queryUnfollow           = "DELETE FROM follower WHERE follower_id = $1 AND user_id = (" + selectIDByHandle + "$2) RETURNING user_id"
 	queryIncrementFollowers = "UPDATE user_profile SET followers = followers + 1 WHERE user_id = $1"
 	queryDecrementFollowers = "UPDATE user_profile SET followers = followers -1 WHERE user_id = $1"
 	queryIncrementFollowing = "UPDATE user_profile SET following = following + 1 WHERE user_id = $1"
 	queryDecrementFollowing = "UPDATE user_profile SET following = following -1 WHERE user_id = $1"
-	queryIsFollowing        = "SELECT EXISTS(SELECT 1 FROM follower WHERE follower_id = $1 AND user_id = (SELECT user_id FROM user_profile WHERE handle = $2))"
-	queryIsFollowed         = "SELECT EXISTS(SELECT 1 FROM follower WHERE user_id = $1 AND follower_id = (SELECT user_id FROM user_profile WHERE handle = $2))"
+	queryIsFollowing        = "SELECT EXISTS(SELECT 1 FROM follower WHERE follower_id = $1 AND user_id = (" + selectIDByHandle + "$2))"
+	queryIsFollowed         = "SELECT EXISTS(SELECT 1 FROM follower WHERE user_id = $1 AND follower_id = (" + selectIDByHandle + "$2))"
 	queryFollowing          = "SELECT handle, followers, following FROM user_profile JOIN follower on user_profile.user_id = follower.user_id WHERE follower_id = $1 ORDER BY followed_at DESC OFFSET $2 LIMIT $3"
 	queryFollowers          = "SELECT handle, followers, following FROM user_profile JOIN follower on user_profile.user_id = follower.follower_id WHERE follower.user_id = $1 ORDER BY followed_at DESC OFFSET $2 LIMIT $3"
 )
+
+const (
+	followingBase = selectUser + " JOIN follower on user_profile.user_id = follower.user_id WHERE follower_id = $1"
+	followersBase = selectUser + " JOIN follower on user_profile.user_id = follower_id WHERE follower.user_id = $1"
+)
+
+const (
+	end                  = " ORDER BY followed_at DESC LIMIT $2"
+	followingBefore      = " AND followed_at < (SELECT followed_at FROM follower WHERE user_id = (" + selectIDByHandle + "$3))"
+	followersBefore      = " AND followed_at < (SELECT followed_at FROM follower WHERE follower_id = (" + selectIDByHandle + "$3))"
+	followingAfter       = " AND followed_at > (SELECT followed_at FROM follower WHERE user_id = (" + selectIDByHandle + "$3))"
+	followersAfter       = " AND followed_at > (SELECT followed_at FROM follower WHERE follower_id = (" + selectIDByHandle + "$3))"
+	followingBeforeAfter = " AND followed_at < (SELECT followed_at FROM follower WHERE user_id = (" + selectIDByHandle + `$3)) 
+AND followed_at > (SELECT followed_at FROM follower WHERE user_id = (` + selectIDByHandle + "$4))"
+	followersBeforeAfter = " AND followed_at < (SELECT followed_at FROM follower WHERE follower_id = (" + selectIDByHandle + `$3)) 
+AND followed_at > (SELECT followed_at FROM follower WHERE follower_id = (` + selectIDByHandle + "$4))"
+)
+
+var followingQueries = people.PaginationQueries(followingBase, end, followingBefore, followingAfter, followingBeforeAfter)
+var followersQueries = people.PaginationQueries(followersBase, end, followersBefore, followersAfter, followersBeforeAfter)
 
 func (s *service) Follow(id uint, handle string) error {
 	tx, err := s.db.Beginx()
@@ -98,12 +123,10 @@ func (s *service) IsFollowed(id uint, handle string) (bool, error) {
 	return isFollowed, s.db.Get(&isFollowed, queryIsFollowed, id, handle)
 }
 
-func (s *service) Following(id uint, p people.Pagination) (people.Users, error) {
-	u := make(people.Users, 0, p.Limit)
-	return u, s.db.Select(&u, queryFollowing, id, p.Offset, p.Limit)
+func (s *service) Following(id uint, p people.HandlePagination) (people.Users, error) {
+	return people.PaginationSelect[people.User](s.db, &followingQueries, p, id)
 }
 
-func (s *service) Followers(id uint, p people.Pagination) (people.Users, error) {
-	u := make(people.Users, 0, p.Limit)
-	return u, s.db.Select(&u, queryFollowers, id, p.Offset, p.Limit)
+func (s *service) Followers(id uint, p people.HandlePagination) (people.Users, error) {
+	return people.PaginationSelect[people.User](s.db, &followersQueries, p, id)
 }

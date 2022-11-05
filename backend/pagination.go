@@ -2,11 +2,6 @@ package people
 
 import "github.com/jmoiron/sqlx"
 
-type Pagination struct {
-	Offset uint
-	Limit  uint
-}
-
 type PaginationMode int
 
 const (
@@ -16,12 +11,20 @@ const (
 	PaginationModeBeforeAfter
 )
 
-type SeekPagination struct {
+type PaginationMeta[T any] struct {
+	Oldest T
+	Newest T
+}
+
+type Pagination[T any] struct {
 	Mode   PaginationMode
-	Before uint
-	After  uint
+	Before T
+	After  T
 	Limit  uint
 }
+
+type IDPagination = Pagination[uint]
+type HandlePagination = Pagination[string]
 
 const (
 	offsetDefault = 0
@@ -29,19 +32,8 @@ const (
 	limitMax      = 100
 )
 
-func NewPagination(page, limit *uint) Pagination {
-	p := Pagination{offsetDefault, limitDefault}
-	if limit != nil && *limit <= limitMax {
-		p.Limit = *limit
-	}
-	if page != nil {
-		p.Offset = (*page - 1) * p.Limit
-	}
-	return p
-}
-
-func NewSeekPagination(before, after, limit *uint) SeekPagination {
-	p := SeekPagination{PaginationModeNone, 0, 0, limitDefault}
+func NewPagination[T any](before, after *T, limit *uint) Pagination[T] {
+	p := Pagination[T]{Mode: PaginationModeNone, Limit: limitDefault}
 	if limit != nil && *limit <= limitMax {
 		p.Limit = *limit
 	}
@@ -60,7 +52,7 @@ func NewSeekPagination(before, after, limit *uint) SeekPagination {
 	return p
 }
 
-func SeekPaginationQueries(base, end, before, after, beforeAfter string) [4]string {
+func PaginationQueries(base, end, before, after, beforeAfter string) [4]string {
 	return [4]string{
 		base + end,
 		base + before + end,
@@ -69,15 +61,16 @@ func SeekPaginationQueries(base, end, before, after, beforeAfter string) [4]stri
 	}
 }
 
-type SeekPaginationResult[T Identifier] struct {
-	Data []T
-	Meta *SeekPaginationMeta
+type PaginationResult[T Identifier[U], U any] struct {
+	Data []T                `json:"data"`
+	Meta *PaginationMeta[U] `json:"meta,omitempty"`
 }
 
-func SeekPaginationSelect[T Identifier](db *sqlx.DB, queries *[4]string, p SeekPagination, params ...any) (SeekPaginationResult[T], error) {
-	var res SeekPaginationResult[T]
+func PaginationSelect[T Identifier[U], U any](db *sqlx.DB, queries *[4]string, p Pagination[U], params ...any) (PaginationResult[T, U], error) {
+	var res PaginationResult[T, U]
 	res.Data = make([]T, 0, p.Limit)
 	query := queries[p.Mode]
+	println(query)
 	switch p.Mode {
 	case PaginationModeNone:
 		params = append(params, p.Limit)
@@ -90,13 +83,13 @@ func SeekPaginationSelect[T Identifier](db *sqlx.DB, queries *[4]string, p SeekP
 	}
 	err := db.Select(&res.Data, query, params...)
 	if err != nil {
-		return SeekPaginationResult[T]{}, err
+		return PaginationResult[T, U]{}, err
 	}
 
 	if len(res.Data) > 0 {
-		res.Meta = &SeekPaginationMeta{
-			NewestID: res.Data[0].Identify(),
-			OldestID: res.Data[len(res.Data)-1].Identify(),
+		res.Meta = &PaginationMeta[U]{
+			Newest: res.Data[0].Identify(),
+			Oldest: res.Data[len(res.Data)-1].Identify(),
 		}
 	}
 	return res, nil

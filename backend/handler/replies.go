@@ -36,7 +36,7 @@ func (h *handler) PostPostsPostIDReplies(c echo.Context, postID people.PostIDPar
 }
 
 func (h *handler) GetPostsPostIDReplies(c echo.Context, postID people.PostIDParam, params people.GetPostsPostIDRepliesParams) error {
-	pagination := people.NewSeekPagination((*uint)(params.Before), (*uint)(params.After), (*uint)(params.Limit))
+	pagination := people.NewPagination((*uint)(params.Before), (*uint)(params.After), (*uint)(params.Limit))
 	posts, err := h.ps.Replies(uint(postID), pagination)
 	if err != nil {
 		return echo.ErrInternalServerError

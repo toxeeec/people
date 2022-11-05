@@ -100,7 +100,7 @@ func (suite *PostSuite) TestFromUser() {
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
-			pagination := people.NewSeekPagination(nil, nil, nil)
+			pagination := people.NewPagination[uint](nil, nil, nil)
 			posts, _ := suite.ps.FromUser(tc.handle, pagination)
 			assert.Equal(suite.T(), tc.expected, len(posts.Data))
 		})
@@ -121,7 +121,7 @@ func (suite *PostSuite) TestFeed() {
 	gofakeit.Struct(&p)
 	suite.ps.Create(suite.user3ID, p)
 
-	pagination := people.NewSeekPagination(nil, nil, nil)
+	pagination := people.NewPagination[uint](nil, nil, nil)
 	res, _ := suite.ps.Feed(suite.user1ID, pagination)
 	assert.Equal(suite.T(), count, len(res.Data))
 }

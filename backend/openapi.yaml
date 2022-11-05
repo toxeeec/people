@@ -152,8 +152,9 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: '#/components/parameters/pageParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/beforeHandleParam'
+        - $ref: '#/components/parameters/afterHandleParam'
       responses:
         200:
           description: OK
@@ -174,8 +175,9 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - $ref: '#/components/parameters/pageParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/beforeHandleParam'
+        - $ref: '#/components/parameters/afterHandleParam'
       responses:
         200:
           description: OK
@@ -195,8 +197,9 @@ paths:
         - following
       parameters:
         - $ref: '#/components/parameters/handleParam'
-        - $ref: '#/components/parameters/pageParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/beforeHandleParam'
+        - $ref: '#/components/parameters/afterHandleParam'
       responses:
         200:
           description: OK
@@ -216,8 +219,9 @@ paths:
         - followers
       parameters:
         - $ref: '#/components/parameters/handleParam'
-        - $ref: '#/components/parameters/pageParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/beforeHandleParam'
+        - $ref: '#/components/parameters/afterHandleParam'
       responses:
         200:
           description: OK
@@ -501,9 +505,16 @@ components:
         - following
 
     Users:
-      type: array
-      items:
-        $ref: '#/components/schemas/User'
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        meta:
+          $ref: '#/components/schemas/HandlePaginationMeta'
+      x-go-type: PaginationResult[User, string]
+      required:
+        - data
 
     Post:
       allOf:
@@ -559,17 +570,29 @@ components:
       required:
         - likes
 
-    SeekPaginationMeta:
+    IDPaginationMeta:
       properties:
-        oldestID:
+        oldest:
           type: integer
           x-go-type: uint
-        newestID:
+        newest:
           type: integer
           x-go-type: uint
       required:
-        - oldestID
-        - newestID
+        - oldest
+        - newest
+      x-go-type: PaginationMeta[uint]
+
+    HandlePaginationMeta:
+      properties:
+        oldest:
+          type: string
+        newest:
+          type: string
+      required:
+        - oldest
+        - newest
+      x-go-type: PaginationMeta[string]
 
     Posts:
       properties:
@@ -578,8 +601,8 @@ components:
           items:
             $ref: '#/components/schemas/Post'
         meta:
-          $ref: '#/components/schemas/SeekPaginationMeta'
-      x-go-type: SeekPaginationResult[Post]
+          $ref: '#/components/schemas/IDPaginationMeta'
+      x-go-type: PaginationResult[Post, uint]
       required:
         - data
 
@@ -636,14 +659,6 @@ components:
         minLength: 5
         maxLength: 15
 
-    pageParam:
-      name: page
-      in: query
-      schema:
-        type: integer
-        minimum: 1
-        x-go-type: uint
-
     limitParam:
       name: limit
       in: query
@@ -677,6 +692,18 @@ components:
         type: integer
         minimum: 0
         x-go-type: uint
+
+    beforeHandleParam:
+      name: before
+      in: query
+      schema:
+        type: string
+
+    afterHandleParam:
+      name: after
+      in: query
+      schema:
+        type: string
 
   responses:
     BadRequest:

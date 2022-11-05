@@ -13,7 +13,7 @@ func (h *handler) GetMeFeed(c echo.Context, params people.GetMeFeedParams) error
 		return echo.ErrInternalServerError
 	}
 
-	pagination := people.NewSeekPagination((*uint)(params.Before), (*uint)(params.After), (*uint)(params.Limit))
+	pagination := people.NewPagination((*uint)(params.Before), (*uint)(params.After), (*uint)(params.Limit))
 	posts, err := h.ps.Feed(userID, pagination)
 	if err != nil {
 		return echo.ErrInternalServerError

@@ -10,8 +10,8 @@ import (
 	"github.com/toxeeec/people/backend/service/user"
 )
 
-// TestSeekPaginationSelect uses Feed but it can be replaced with any method that uses SeekPagination
-func TestSeekPaginationSelect(t *testing.T) {
+// TestPaginationSelect uses Feed but it can be replaced with any method that uses Pagination
+func TestPaginationSelect(t *testing.T) {
 	db, _ := people.PostgresConnect()
 	db.MustExec("TRUNCATE user_profile CASCADE")
 	db.MustExec("TRUNCATE post CASCADE")
@@ -49,16 +49,16 @@ func TestSeekPaginationSelect(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		pagination people.SeekPagination
+		pagination people.Pagination[uint]
 		oldest     uint
 		newest     uint
 		count      int
 	}{
-		"no pagination":             {people.NewSeekPagination(nil, nil, nil), oldest, newest, count},
-		"before":                    {people.NewSeekPagination(&before, nil, nil), oldest, before - 1, 4},
-		"after":                     {people.NewSeekPagination(nil, &after, nil), after + 1, newest, 5},
-		"after greater than before": {people.NewSeekPagination(&after, &before, nil), 0, 0, 0},
-		"before and after":          {people.NewSeekPagination(&before, &after, nil), after + 1, before - 1, 2},
+		"no pagination":             {people.NewPagination[uint](nil, nil, nil), oldest, newest, count},
+		"before":                    {people.NewPagination(&before, nil, nil), oldest, before - 1, 4},
+		"after":                     {people.NewPagination(nil, &after, nil), after + 1, newest, 5},
+		"after greater than before": {people.NewPagination(&after, &before, nil), 0, 0, 0},
+		"before and after":          {people.NewPagination(&before, &after, nil), after + 1, before - 1, 2},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -67,8 +67,8 @@ func TestSeekPaginationSelect(t *testing.T) {
 			if len(res.Data) == 0 {
 				assert.Nil(t, res.Meta)
 			} else {
-				assert.Equal(t, tc.oldest, res.Meta.OldestID)
-				assert.Equal(t, tc.newest, res.Meta.NewestID)
+				assert.Equal(t, tc.oldest, res.Meta.Oldest)
+				assert.Equal(t, tc.newest, res.Meta.Newest)
 			}
 		})
 	}
