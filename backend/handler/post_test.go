@@ -12,53 +12,39 @@ import (
 )
 
 func (suite *HandlerSuite) TestPostPosts() {
-	var valid people.PostBody
 	var emptyContent people.PostBody
-	var user people.AuthUser
-	gofakeit.Struct(&valid)
-	gofakeit.Struct(&user)
 	emptyContent.Content = "\t\n \n\t"
-	userID, _ := suite.us.Create(user)
-
-	at, _ := token.NewAccessToken(userID)
 
 	tests := map[string]struct {
 		body     people.PostBody
 		expected int
 	}{
 		"empty content": {emptyContent, http.StatusBadRequest},
-		"valid":         {valid, http.StatusOK},
+		"valid":         {suite.postBody1, http.StatusOK},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
-			result := testutil.NewRequest().WithJWSAuth(at).WithJsonBody(tc.body).Post("/posts").Go(suite.T(), suite.e)
+			result := testutil.NewRequest().WithJWSAuth(suite.at1).WithJsonBody(tc.body).Post("/posts").Go(suite.T(), suite.e)
 			assert.Equal(suite.T(), tc.expected, result.Code())
 			if tc.expected < http.StatusBadRequest {
 				var p people.Post
 				result.UnmarshalJsonToObject(&p)
 				// trim content for assertion
-				valid.TrimContent()
+				suite.postBody1.TrimContent()
 
-				assert.Equal(suite.T(), valid.Content, p.Content)
+				assert.Equal(suite.T(), suite.postBody1.Content, p.Content)
 			}
 		})
 	}
 }
 
 func (suite *HandlerSuite) TestGetPostsPostID() {
-	var expected people.PostBody
-	var user people.AuthUser
-	gofakeit.Struct(&expected)
-	gofakeit.Struct(&user)
-	userID, _ := suite.us.Create(user)
-	p, _ := suite.ps.Create(userID, expected)
-
 	tests := map[string]struct {
 		id       uint
 		expected int
 	}{
-		"unknown id": {p.ID + 1, http.StatusNotFound},
-		"valid":      {p.ID, http.StatusOK},
+		"unknown id": {suite.post1.ID + 5, http.StatusNotFound},
+		"valid":      {suite.post1.ID, http.StatusOK},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
@@ -68,31 +54,24 @@ func (suite *HandlerSuite) TestGetPostsPostID() {
 				var p people.Post
 				result.UnmarshalJsonToObject(&p)
 				// trim content for assertion
-				expected.TrimContent()
+				suite.postBody1.TrimContent()
 
-				assert.Equal(suite.T(), expected.Content, p.Content)
-				assert.Equal(suite.T(), user.Handle, p.User.Handle)
+				assert.Equal(suite.T(), suite.postBody1.Content, p.Content)
+				assert.Equal(suite.T(), suite.user1.Handle, p.User.Handle)
 			}
 		})
 	}
 }
 
 func (suite *HandlerSuite) TestHandleDeletePost() {
-	var expected people.PostBody
-	var user people.AuthUser
-	gofakeit.Struct(&expected)
-	gofakeit.Struct(&user)
-	userID, _ := suite.us.Create(user)
-	p, _ := suite.ps.Create(userID, expected)
-
 	tests := map[string]struct {
 		id       uint
 		userID   uint
 		expected int
 	}{
-		"not owned":  {p.ID, userID + 1, http.StatusNotFound},
-		"unknown id": {p.ID + 1, userID, http.StatusNotFound},
-		"valid":      {p.ID, userID, http.StatusNoContent},
+		"not owned":  {suite.post1.ID, suite.id1 + 5, http.StatusNotFound},
+		"unknown id": {suite.post1.ID + 5, suite.id1, http.StatusNotFound},
+		"valid":      {suite.post1.ID, suite.id1, http.StatusNoContent},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
@@ -100,7 +79,7 @@ func (suite *HandlerSuite) TestHandleDeletePost() {
 			result := testutil.NewRequest().WithJWSAuth(at).Delete(fmt.Sprintf("/posts/%d", tc.id)).Go(suite.T(), suite.e)
 			assert.Equal(suite.T(), tc.expected, result.Code())
 			if tc.expected < http.StatusBadRequest {
-				_, err := suite.ps.Get(p.ID)
+				_, err := suite.ps.Get(suite.post1.ID)
 				assert.Error(suite.T(), err)
 			}
 		})
@@ -108,17 +87,11 @@ func (suite *HandlerSuite) TestHandleDeletePost() {
 }
 
 func (suite *HandlerSuite) TestGetUsersHandlePosts() {
-	var user1 people.AuthUser
-	var user2 people.AuthUser
-	gofakeit.Struct(&user1)
-	gofakeit.Struct(&user2)
-	id1, _ := suite.us.Create(user1)
-	suite.us.Create(user2)
 	count := 5
 	for i := 0; i < count; i++ {
 		var p people.PostBody
 		gofakeit.Struct(&p)
-		suite.ps.Create(id1, p)
+		suite.ps.Create(suite.id2, p)
 	}
 
 	tests := map[string]struct {
@@ -126,8 +99,8 @@ func (suite *HandlerSuite) TestGetUsersHandlePosts() {
 		expected int
 	}{
 		"invalid handle": {gofakeit.Username(), 0},
-		"0 posts":        {user2.Handle, 0},
-		"valid":          {user1.Handle, count},
+		"0 posts":        {suite.user3.Handle, 0},
+		"valid":          {suite.user2.Handle, count},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {

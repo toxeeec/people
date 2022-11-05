@@ -12,16 +12,13 @@ import (
 
 func (suite *HandlerSuite) TestPostRegister() {
 	var valid people.AuthUser
-	var takenHandle people.AuthUser
 	gofakeit.Struct(&valid)
-	gofakeit.Struct(&takenHandle)
-	suite.us.Create(takenHandle)
 
 	tests := map[string]struct {
 		user     people.AuthUser
 		expected int
 	}{
-		"taken handle": {takenHandle, http.StatusBadRequest},
+		"taken handle": {suite.user1, http.StatusBadRequest},
 		"valid":        {valid, http.StatusOK},
 	}
 	for name, tc := range tests {
@@ -40,14 +37,11 @@ func (suite *HandlerSuite) TestPostRegister() {
 }
 
 func (suite *HandlerSuite) TestPostLogin() {
-	var valid people.AuthUser
 	var invalidPassword people.AuthUser
 	var unknownHandle people.AuthUser
-	gofakeit.Struct(&valid)
 	gofakeit.Struct(&invalidPassword)
 	gofakeit.Struct(&unknownHandle)
-	invalidPassword.Handle = valid.Handle
-	suite.us.Create(valid)
+	invalidPassword.Handle = suite.user1.Handle
 
 	tests := map[string]struct {
 		user     people.AuthUser
@@ -55,7 +49,7 @@ func (suite *HandlerSuite) TestPostLogin() {
 	}{
 		"unknown handle":   {unknownHandle, http.StatusUnauthorized},
 		"invalid password": {invalidPassword, http.StatusUnauthorized},
-		"valid":            {valid, http.StatusOK},
+		"valid":            {suite.user1, http.StatusOK},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
@@ -84,10 +78,7 @@ func (suite *HandlerSuite) newRefreshRequest(rt string, expected int) string {
 }
 
 func (suite *HandlerSuite) TestPostRefresh() {
-	var user people.AuthUser
-	gofakeit.Struct(&user)
-	id, _ := suite.us.Create(user)
-	tokens, _ := suite.as.NewTokens(id)
+	tokens, _ := suite.as.NewTokens(suite.id1)
 
 	rt := suite.newRefreshRequest(tokens.RefreshToken, http.StatusOK)
 
