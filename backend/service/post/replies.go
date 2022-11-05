@@ -10,9 +10,7 @@ const (
 )
 
 const (
-	repliesBase = `SELECT post_id, content, created_at, replies_to, replies, user_profile.handle AS "user.handle", 
-user_profile.followers AS "user.followers", user_profile.following AS "user.following"
-FROM post JOIN user_profile ON post.user_id = user_profile.user_id WHERE replies_to = $1`
+	repliesBase = selectPostAndUser + "WHERE replies_to = $1"
 )
 
 var repliesQueries = people.SeekPaginationQueries(repliesBase, end, before, after, beforeAfter)

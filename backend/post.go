@@ -16,9 +16,9 @@ type PostService interface {
 	Delete(postID, userID uint) error
 	FromUser(handle string, p SeekPagination) (Posts, error)
 	Feed(userID uint, p SeekPagination) (Posts, error)
+	Replies(postID uint, p SeekPagination) (Posts, error)
 	Exists(postID uint) bool
 	CreateReply(postID, userID uint, p PostBody) (Post, error)
-	Replies(postID uint, p SeekPagination) (Posts, error)
 	Like(postID, userID uint) (Likes, error)
 	Unlike(postID, userID uint) (Likes, error)
 }

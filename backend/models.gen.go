@@ -35,6 +35,7 @@ type Post struct {
 	Content   string         `db:"content" fake:"{sentence}" json:"content"`
 	CreatedAt time.Time      `db:"created_at" fake:"skip" json:"createdAt"`
 	ID        uint           `db:"post_id" fake:"skip" json:"id"`
+	Likes     uint           `db:"likes" fake:"skip" json:"likes"`
 	Replies   uint           `db:"replies" fake:"skip" json:"replies"`
 	RepliesTo *sql.NullInt32 `db:"replies_to" fake:"skip" json:"repliesTo,omitempty"`
 	User      *User          `db:"user" json:"user,omitempty"`

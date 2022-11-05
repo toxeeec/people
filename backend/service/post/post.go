@@ -14,27 +14,24 @@ func NewService(db *sqlx.DB) people.PostService {
 }
 
 const (
-	queryCreate = "INSERT INTO post(user_id, content) VALUES($1, $2) RETURNING post_id, content, created_at"
-	queryGet    = `SELECT post_id, content, created_at, replies_to, replies, user_profile.handle AS "user.handle", 
-user_profile.followers AS "user.followers", user_profile.following AS "user.following"
-FROM post JOIN user_profile ON post.user_id = user_profile.user_id WHERE post_id = $1`
-	queryExists           = "SELECT EXISTS(SELECT 1 FROM post WHERE post_id = $1)"
-	queryDelete           = `DELETE FROM post WHERE post_id = $1 AND user_id = $2 RETURNING replies_to`
-	queryDecrementReplies = "UPDATE post SET replies = replies - 1 WHERE post_id = $1"
-	queryFromUser         = `SELECT post_id, content, created_at FROM post 
-WHERE user_id = (SELECT user_id FROM user_profile WHERE handle = $1) AND replies_to IS NULL ORDER BY post_id DESC OFFSET $2 LIMIT $3`
-	queryFromUserNone   = fromUserBase + end
-	queryFromUserBefore = fromUserBase + end
+	selectPostAndUser = `SELECT post_id, content, created_at, replies_to, replies, likes, 
+user_profile.handle AS "user.handle", user_profile.followers AS "user.followers", user_profile.following AS "user.following" 
+FROM post JOIN user_profile ON post.user_id = user_profile.user_id `
 )
 
 const (
-	feedBase = `SELECT post_id, content, created_at, 
-user_profile.handle AS "user.handle", user_profile.followers AS "user.followers", user_profile.following AS "user.following" 
-FROM post JOIN user_profile ON post.user_id = user_profile.user_id WHERE post.user_id IN (SELECT user_id FROM follower WHERE follower_id = $1) `
-
-	fromUserBase = `SELECT post_id, content, created_at FROM post 
-WHERE user_id = (SELECT user_id FROM user_profile WHERE handle = $1) AND replies_to IS NULL `
+	queryCreate           = "INSERT INTO post(user_id, content) VALUES($1, $2) RETURNING post_id, content, created_at"
+	queryGet              = selectPostAndUser + "WHERE post_id = $1"
+	queryExists           = "SELECT EXISTS(SELECT 1 FROM post WHERE post_id = $1)"
+	queryDelete           = `DELETE FROM post WHERE post_id = $1 AND user_id = $2 RETURNING replies_to`
+	queryDecrementReplies = "UPDATE post SET replies = replies - 1 WHERE post_id = $1"
 )
+
+const (
+	feedBase     = selectPostAndUser + "WHERE post.user_id IN (SELECT user_id FROM follower WHERE follower_id = $1) "
+	fromUserBase = `SELECT post_id, content, created_at FROM post WHERE user_id = (SELECT user_id FROM user_profile WHERE handle = $1) AND replies_to IS NULL `
+)
+
 const (
 	end         = " ORDER BY post_id DESC LIMIT $2"
 	before      = "AND post_id < $3"
