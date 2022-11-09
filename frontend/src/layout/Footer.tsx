@@ -1,7 +1,7 @@
 import { Button, Divider, Group, Paper } from "@mantine/core";
 import { useState } from "react";
-import Login from "./Login";
-import Signup from "./Signup";
+import Login from "../components/Login";
+import Signup from "../components/Signup";
 
 export default function Footer() {
 	const [loginOpened, setLoginOpened] = useState(false);
