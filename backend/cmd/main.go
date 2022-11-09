@@ -26,6 +26,9 @@ func main() {
 	e := echo.New()
 	e.Use(echomiddleware.Logger())
 	e.Use(echomiddleware.Recover())
+	e.Use(echomiddleware.CORSWithConfig(echomiddleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:5173"},
+	}))
 	e.GET("openapi.json", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, swagger)
 	})

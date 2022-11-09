@@ -6,6 +6,8 @@ BACKEND_SERVICE=backend
 all: up
 
 up:
+	cp openapi.yaml backend/
+	cp openapi.yaml frontend/
 	docker compose -f $(DOCKER_COMPOSE_DEV) up
 
 down:
