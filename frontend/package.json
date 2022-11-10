@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "gen": "orval; eslint --fix src/**",
+    "gen": "orval; eslint --fix --ext ts src/models/* src/spec.gen.ts",
     "dev": "npm run gen; vite --host",
     "build": "tsc && vite build",
     "preview": "vite preview"

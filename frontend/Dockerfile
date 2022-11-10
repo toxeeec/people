@@ -1,6 +1,6 @@
 FROM node:alpine
 WORKDIR /app
-COPY openapi.yaml ./
+COPY openapi.json ./
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 COPY . .

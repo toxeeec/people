@@ -34,5 +34,23 @@ export default function useAuth() {
 		return { accessToken, refreshToken, isAuthenticated };
 	};
 
-	return { auth: ctx?.authValues || defaultAuthValues, setAuth, getAuth };
+	const clearAuth = () => {
+		if (!ctx) {
+			throw new Error("Context must be defined");
+		}
+		setAccessToken("");
+		setRefreshToken("");
+		ctx.setAuthValues({
+			accessToken,
+			refreshToken,
+			isAuthenticated: false,
+		});
+	};
+
+	return {
+		auth: ctx?.authValues || defaultAuthValues,
+		setAuth,
+		getAuth,
+		clearAuth,
+	};
 }

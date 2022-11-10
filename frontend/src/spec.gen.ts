@@ -22,6 +22,8 @@ import type {
 	UnauthorizedResponse,
 	ForbiddenResponse,
 	TokensBodyBody,
+	Posts,
+	GetMeFeedParams,
 	NoContentResponse,
 	NotFoundResponse,
 	Error,
@@ -32,10 +34,8 @@ import type {
 	GetUsersHandleFollowersParams,
 	Post,
 	PostBodyBody,
-	Posts,
-	GetPostsPostIDRepliesParams,
 	GetUsersHandlePostsParams,
-	GetMeFeedParams,
+	GetPostsPostIDRepliesParams,
 	Likes,
 } from "./models";
 
@@ -175,6 +175,124 @@ export const usePostRefresh = <
 	>(mutationFn, mutationOptions);
 };
 
+export const getMeFeed = (
+	params?: GetMeFeedParams,
+	options?: AxiosRequestConfig
+): Promise<AxiosResponse<Posts>> => {
+	return axios.get(`/me/feed`, {
+		...options,
+		params: { ...params, ...options?.params },
+	});
+};
+
+export const getGetMeFeedQueryKey = (params?: GetMeFeedParams) => [
+	`/me/feed`,
+	...(params ? [params] : []),
+];
+
+export type GetMeFeedQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getMeFeed>>
+>;
+export type GetMeFeedQueryError = AxiosError<
+	UnauthorizedResponse | ForbiddenResponse
+>;
+
+export const useGetMeFeed = <
+	TData = Awaited<ReturnType<typeof getMeFeed>>,
+	TError = AxiosError<UnauthorizedResponse | ForbiddenResponse>
+>(
+	params?: GetMeFeedParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getMeFeed>>,
+			TError,
+			TData
+		>;
+		axios?: AxiosRequestConfig;
+	}
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+	const { query: queryOptions, axios: axiosOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetMeFeedQueryKey(params);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeFeed>>> = ({
+		signal,
+	}) => getMeFeed(params, { signal, ...axiosOptions });
+
+	const query = useQuery<Awaited<ReturnType<typeof getMeFeed>>, TError, TData>(
+		queryKey,
+		queryFn,
+		queryOptions
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+	query.queryKey = queryKey;
+
+	return query;
+};
+
+export const getMeFollowingHandle = (
+	handle: string,
+	options?: AxiosRequestConfig
+): Promise<AxiosResponse<NoContentResponse>> => {
+	return axios.get(`/me/following/${handle}`, options);
+};
+
+export const getGetMeFollowingHandleQueryKey = (handle: string) => [
+	`/me/following/${handle}`,
+];
+
+export type GetMeFollowingHandleQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getMeFollowingHandle>>
+>;
+export type GetMeFollowingHandleQueryError = AxiosError<
+	| BadRequestResponse
+	| UnauthorizedResponse
+	| ForbiddenResponse
+	| NotFoundResponse
+>;
+
+export const useGetMeFollowingHandle = <
+	TData = Awaited<ReturnType<typeof getMeFollowingHandle>>,
+	TError = AxiosError<
+		| BadRequestResponse
+		| UnauthorizedResponse
+		| ForbiddenResponse
+		| NotFoundResponse
+	>
+>(
+	handle: string,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getMeFollowingHandle>>,
+			TError,
+			TData
+		>;
+		axios?: AxiosRequestConfig;
+	}
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+	const { query: queryOptions, axios: axiosOptions } = options ?? {};
+
+	const queryKey =
+		queryOptions?.queryKey ?? getGetMeFollowingHandleQueryKey(handle);
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getMeFollowingHandle>>
+	> = ({ signal }) => getMeFollowingHandle(handle, { signal, ...axiosOptions });
+
+	const query = useQuery<
+		Awaited<ReturnType<typeof getMeFollowingHandle>>,
+		TError,
+		TData
+	>(queryKey, queryFn, {
+		enabled: !!handle,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+	query.queryKey = queryKey;
+
+	return query;
+};
+
 export const putMeFollowingHandle = (
 	handle: string,
 	options?: AxiosRequestConfig
@@ -285,40 +403,36 @@ export const useDeleteMeFollowingHandle = <
 	>(mutationFn, mutationOptions);
 };
 
-export const getMeFollowingHandle = (
-	handle: string,
+export const getMeFollowing = (
+	params?: GetMeFollowingParams,
 	options?: AxiosRequestConfig
-): Promise<AxiosResponse<NoContentResponse>> => {
-	return axios.get(`/me/following/${handle}`, options);
+): Promise<AxiosResponse<Users>> => {
+	return axios.get(`/me/following`, {
+		...options,
+		params: { ...params, ...options?.params },
+	});
 };
 
-export const getGetMeFollowingHandleQueryKey = (handle: string) => [
-	`/me/following/${handle}`,
+export const getGetMeFollowingQueryKey = (params?: GetMeFollowingParams) => [
+	`/me/following`,
+	...(params ? [params] : []),
 ];
 
-export type GetMeFollowingHandleQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getMeFollowingHandle>>
+export type GetMeFollowingQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getMeFollowing>>
 >;
-export type GetMeFollowingHandleQueryError = AxiosError<
-	| BadRequestResponse
-	| UnauthorizedResponse
-	| ForbiddenResponse
-	| NotFoundResponse
+export type GetMeFollowingQueryError = AxiosError<
+	UnauthorizedResponse | ForbiddenResponse
 >;
 
-export const useGetMeFollowingHandle = <
-	TData = Awaited<ReturnType<typeof getMeFollowingHandle>>,
-	TError = AxiosError<
-		| BadRequestResponse
-		| UnauthorizedResponse
-		| ForbiddenResponse
-		| NotFoundResponse
-	>
+export const useGetMeFollowing = <
+	TData = Awaited<ReturnType<typeof getMeFollowing>>,
+	TError = AxiosError<UnauthorizedResponse | ForbiddenResponse>
 >(
-	handle: string,
+	params?: GetMeFollowingParams,
 	options?: {
 		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getMeFollowingHandle>>,
+			Awaited<ReturnType<typeof getMeFollowing>>,
 			TError,
 			TData
 		>;
@@ -327,21 +441,19 @@ export const useGetMeFollowingHandle = <
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
 	const { query: queryOptions, axios: axiosOptions } = options ?? {};
 
-	const queryKey =
-		queryOptions?.queryKey ?? getGetMeFollowingHandleQueryKey(handle);
+	const queryKey = queryOptions?.queryKey ?? getGetMeFollowingQueryKey(params);
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getMeFollowingHandle>>
-	> = ({ signal }) => getMeFollowingHandle(handle, { signal, ...axiosOptions });
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeFollowing>>> = ({
+		signal,
+	}) => getMeFollowing(params, { signal, ...axiosOptions });
 
 	const query = useQuery<
-		Awaited<ReturnType<typeof getMeFollowingHandle>>,
+		Awaited<ReturnType<typeof getMeFollowing>>,
 		TError,
 		TData
-	>(queryKey, queryFn, {
-		enabled: !!handle,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	>(queryKey, queryFn, queryOptions) as UseQueryResult<TData, TError> & {
+		queryKey: QueryKey;
+	};
 
 	query.queryKey = queryKey;
 
@@ -405,63 +517,6 @@ export const useGetMeFollowersHandle = <
 		enabled: !!handle,
 		...queryOptions,
 	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-	query.queryKey = queryKey;
-
-	return query;
-};
-
-export const getMeFollowing = (
-	params?: GetMeFollowingParams,
-	options?: AxiosRequestConfig
-): Promise<AxiosResponse<Users>> => {
-	return axios.get(`/me/following`, {
-		...options,
-		params: { ...params, ...options?.params },
-	});
-};
-
-export const getGetMeFollowingQueryKey = (params?: GetMeFollowingParams) => [
-	`/me/following`,
-	...(params ? [params] : []),
-];
-
-export type GetMeFollowingQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getMeFollowing>>
->;
-export type GetMeFollowingQueryError = AxiosError<
-	UnauthorizedResponse | ForbiddenResponse
->;
-
-export const useGetMeFollowing = <
-	TData = Awaited<ReturnType<typeof getMeFollowing>>,
-	TError = AxiosError<UnauthorizedResponse | ForbiddenResponse>
->(
-	params?: GetMeFollowingParams,
-	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getMeFollowing>>,
-			TError,
-			TData
-		>;
-		axios?: AxiosRequestConfig;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-	const { query: queryOptions, axios: axiosOptions } = options ?? {};
-
-	const queryKey = queryOptions?.queryKey ?? getGetMeFollowingQueryKey(params);
-
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeFollowing>>> = ({
-		signal,
-	}) => getMeFollowing(params, { signal, ...axiosOptions });
-
-	const query = useQuery<
-		Awaited<ReturnType<typeof getMeFollowing>>,
-		TError,
-		TData
-	>(queryKey, queryFn, queryOptions) as UseQueryResult<TData, TError> & {
-		queryKey: QueryKey;
-	};
 
 	query.queryKey = queryKey;
 
@@ -807,59 +862,64 @@ export const useDeletePostsPostID = <
 	>(mutationFn, mutationOptions);
 };
 
-export const postPostsPostIDReplies = (
-	postID: number,
-	postBodyBody: PostBodyBody,
+export const getUsersHandlePosts = (
+	handle: string,
+	params?: GetUsersHandlePostsParams,
 	options?: AxiosRequestConfig
-): Promise<AxiosResponse<Post>> => {
-	return axios.post(`/posts/${postID}/replies`, postBodyBody, options);
+): Promise<AxiosResponse<Posts>> => {
+	return axios.get(`/users/${handle}/posts`, {
+		...options,
+		params: { ...params, ...options?.params },
+	});
 };
 
-export type PostPostsPostIDRepliesMutationResult = NonNullable<
-	Awaited<ReturnType<typeof postPostsPostIDReplies>>
+export const getGetUsersHandlePostsQueryKey = (
+	handle: string,
+	params?: GetUsersHandlePostsParams
+) => [`/users/${handle}/posts`, ...(params ? [params] : [])];
+
+export type GetUsersHandlePostsQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getUsersHandlePosts>>
 >;
-export type PostPostsPostIDRepliesMutationBody = PostBodyBody;
-export type PostPostsPostIDRepliesMutationError = AxiosError<
-	| BadRequestResponse
-	| UnauthorizedResponse
-	| ForbiddenResponse
-	| NotFoundResponse
->;
+export type GetUsersHandlePostsQueryError = AxiosError<unknown>;
 
-export const usePostPostsPostIDReplies = <
-	TError = AxiosError<
-		| BadRequestResponse
-		| UnauthorizedResponse
-		| ForbiddenResponse
-		| NotFoundResponse
-	>,
-	TContext = unknown
->(options?: {
-	mutation?: UseMutationOptions<
-		Awaited<ReturnType<typeof postPostsPostIDReplies>>,
+export const useGetUsersHandlePosts = <
+	TData = Awaited<ReturnType<typeof getUsersHandlePosts>>,
+	TError = AxiosError<unknown>
+>(
+	handle: string,
+	params?: GetUsersHandlePostsParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getUsersHandlePosts>>,
+			TError,
+			TData
+		>;
+		axios?: AxiosRequestConfig;
+	}
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+	const { query: queryOptions, axios: axiosOptions } = options ?? {};
+
+	const queryKey =
+		queryOptions?.queryKey ?? getGetUsersHandlePostsQueryKey(handle, params);
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getUsersHandlePosts>>
+	> = ({ signal }) =>
+		getUsersHandlePosts(handle, params, { signal, ...axiosOptions });
+
+	const query = useQuery<
+		Awaited<ReturnType<typeof getUsersHandlePosts>>,
 		TError,
-		{ postID: number; data: PostBodyBody },
-		TContext
-	>;
-	axios?: AxiosRequestConfig;
-}) => {
-	const { mutation: mutationOptions, axios: axiosOptions } = options ?? {};
+		TData
+	>(queryKey, queryFn, {
+		enabled: !!handle,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
-	const mutationFn: MutationFunction<
-		Awaited<ReturnType<typeof postPostsPostIDReplies>>,
-		{ postID: number; data: PostBodyBody }
-	> = (props) => {
-		const { postID, data } = props ?? {};
+	query.queryKey = queryKey;
 
-		return postPostsPostIDReplies(postID, data, axiosOptions);
-	};
-
-	return useMutation<
-		Awaited<ReturnType<typeof postPostsPostIDReplies>>,
-		TError,
-		{ postID: number; data: PostBodyBody },
-		TContext
-	>(mutationFn, mutationOptions);
+	return query;
 };
 
 export const getPostsPostIDReplies = (
@@ -922,119 +982,59 @@ export const useGetPostsPostIDReplies = <
 	return query;
 };
 
-export const getUsersHandlePosts = (
-	handle: string,
-	params?: GetUsersHandlePostsParams,
+export const postPostsPostIDReplies = (
+	postID: number,
+	postBodyBody: PostBodyBody,
 	options?: AxiosRequestConfig
-): Promise<AxiosResponse<Posts>> => {
-	return axios.get(`/users/${handle}/posts`, {
-		...options,
-		params: { ...params, ...options?.params },
-	});
+): Promise<AxiosResponse<Post>> => {
+	return axios.post(`/posts/${postID}/replies`, postBodyBody, options);
 };
 
-export const getGetUsersHandlePostsQueryKey = (
-	handle: string,
-	params?: GetUsersHandlePostsParams
-) => [`/users/${handle}/posts`, ...(params ? [params] : [])];
-
-export type GetUsersHandlePostsQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getUsersHandlePosts>>
+export type PostPostsPostIDRepliesMutationResult = NonNullable<
+	Awaited<ReturnType<typeof postPostsPostIDReplies>>
 >;
-export type GetUsersHandlePostsQueryError = AxiosError<unknown>;
+export type PostPostsPostIDRepliesMutationBody = PostBodyBody;
+export type PostPostsPostIDRepliesMutationError = AxiosError<
+	| BadRequestResponse
+	| UnauthorizedResponse
+	| ForbiddenResponse
+	| NotFoundResponse
+>;
 
-export const useGetUsersHandlePosts = <
-	TData = Awaited<ReturnType<typeof getUsersHandlePosts>>,
-	TError = AxiosError<unknown>
->(
-	handle: string,
-	params?: GetUsersHandlePostsParams,
-	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getUsersHandlePosts>>,
-			TError,
-			TData
-		>;
-		axios?: AxiosRequestConfig;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-	const { query: queryOptions, axios: axiosOptions } = options ?? {};
-
-	const queryKey =
-		queryOptions?.queryKey ?? getGetUsersHandlePostsQueryKey(handle, params);
-
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getUsersHandlePosts>>
-	> = ({ signal }) =>
-		getUsersHandlePosts(handle, params, { signal, ...axiosOptions });
-
-	const query = useQuery<
-		Awaited<ReturnType<typeof getUsersHandlePosts>>,
+export const usePostPostsPostIDReplies = <
+	TError = AxiosError<
+		| BadRequestResponse
+		| UnauthorizedResponse
+		| ForbiddenResponse
+		| NotFoundResponse
+	>,
+	TContext = unknown
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof postPostsPostIDReplies>>,
 		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!handle,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+		{ postID: number; data: PostBodyBody },
+		TContext
+	>;
+	axios?: AxiosRequestConfig;
+}) => {
+	const { mutation: mutationOptions, axios: axiosOptions } = options ?? {};
 
-	query.queryKey = queryKey;
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof postPostsPostIDReplies>>,
+		{ postID: number; data: PostBodyBody }
+	> = (props) => {
+		const { postID, data } = props ?? {};
 
-	return query;
-};
+		return postPostsPostIDReplies(postID, data, axiosOptions);
+	};
 
-export const getMeFeed = (
-	params?: GetMeFeedParams,
-	options?: AxiosRequestConfig
-): Promise<AxiosResponse<Posts>> => {
-	return axios.get(`/me/feed`, {
-		...options,
-		params: { ...params, ...options?.params },
-	});
-};
-
-export const getGetMeFeedQueryKey = (params?: GetMeFeedParams) => [
-	`/me/feed`,
-	...(params ? [params] : []),
-];
-
-export type GetMeFeedQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getMeFeed>>
->;
-export type GetMeFeedQueryError = AxiosError<
-	UnauthorizedResponse | ForbiddenResponse
->;
-
-export const useGetMeFeed = <
-	TData = Awaited<ReturnType<typeof getMeFeed>>,
-	TError = AxiosError<UnauthorizedResponse | ForbiddenResponse>
->(
-	params?: GetMeFeedParams,
-	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getMeFeed>>,
-			TError,
-			TData
-		>;
-		axios?: AxiosRequestConfig;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-	const { query: queryOptions, axios: axiosOptions } = options ?? {};
-
-	const queryKey = queryOptions?.queryKey ?? getGetMeFeedQueryKey(params);
-
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeFeed>>> = ({
-		signal,
-	}) => getMeFeed(params, { signal, ...axiosOptions });
-
-	const query = useQuery<Awaited<ReturnType<typeof getMeFeed>>, TError, TData>(
-		queryKey,
-		queryFn,
-		queryOptions
-	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-	query.queryKey = queryKey;
-
-	return query;
+	return useMutation<
+		Awaited<ReturnType<typeof postPostsPostIDReplies>>,
+		TError,
+		{ postID: number; data: PostBodyBody },
+		TContext
+	>(mutationFn, mutationOptions);
 };
 
 export const putPostsPostIDLikes = (

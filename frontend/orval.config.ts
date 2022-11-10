@@ -8,7 +8,7 @@ export default defineConfig({
 			client: "react-query",
 		},
 		input: {
-			target: "./openapi.yaml",
+			target: "./openapi.json",
 		},
 	},
 });
