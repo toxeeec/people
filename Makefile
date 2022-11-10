@@ -5,9 +5,13 @@ BACKEND_SERVICE=backend
 
 all: up
 
-up:
-	cp openapi.yaml backend/
-	cp openapi.yaml frontend/
+gen:
+	which swagger-cli || npm i -g @apidevtools/swagger-cli
+	swagger-cli bundle spec/main.yaml -o openapi.json
+
+up: gen
+	cp openapi.json backend/
+	cp openapi.json frontend/
 	docker compose -f $(DOCKER_COMPOSE_DEV) up
 
 down:

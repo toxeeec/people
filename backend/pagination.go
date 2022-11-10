@@ -70,7 +70,6 @@ func PaginationSelect[T Identifier[U], U any](db *sqlx.DB, queries *[4]string, p
 	var res PaginationResult[T, U]
 	res.Data = make([]T, 0, p.Limit)
 	query := queries[p.Mode]
-	println(query)
 	switch p.Mode {
 	case PaginationModeNone:
 		params = append(params, p.Limit)

@@ -1,0 +1,39 @@
+components:
+  schemas:
+    $ref: ./schemas.yaml#/components/schemas
+
+  requestBodies:
+    AuthUserBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthUser'
+
+    TokensBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            properties:
+              refreshToken:
+                type: string
+                x-oapi-codegen-extra-tags:
+                  db: refreshToken
+            required:
+              - refreshToken
+
+    PostBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            properties:
+              content:
+                type: string
+                minLength: 1
+                maxLength: 280
+                x-oapi-codegen-extra-tags:
+                  fake: '{sentence}'
+            required:
+              - content

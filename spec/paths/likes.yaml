@@ -1,0 +1,52 @@
+components:
+  $ref: ../components/main.yaml#/components
+
+likes:
+  put:
+    tags:
+      - likes
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/postIDParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Likes'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        $ref: '#/components/responses/Forbidden'
+      409:
+        description: Post is already liked
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      404:
+        $ref: '#/components/responses/NotFound'
+
+  delete:
+    tags:
+      - likes
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/postIDParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Likes'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        $ref: '#/components/responses/Forbidden'
+      404:
+        $ref: '#/components/responses/NotFound'
+

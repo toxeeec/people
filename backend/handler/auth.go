@@ -83,3 +83,5 @@ func (h *handler) PostRefresh(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, people.Tokens{AccessToken: at, RefreshToken: newRT.Value})
 }
+
+//TODO: logout (remove refresh token from db)

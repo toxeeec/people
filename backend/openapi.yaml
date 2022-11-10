@@ -2,7 +2,6 @@ openapi: 3.0.0
 info:
   version: 1.0.0
   title: People API
-
 paths:
   /register:
     post:
@@ -11,15 +10,14 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/AuthUserBody'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tokens'
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-
   /login:
     post:
       tags:
@@ -27,17 +25,16 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/AuthUserBody'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tokens'
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-        401:
+        '401':
           $ref: '#/components/responses/Unauthorized'
-
   /refresh:
     post:
       tags:
@@ -45,18 +42,57 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/TokensBody'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tokens'
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-        403:
+        '403':
           $ref: '#/components/responses/Forbidden'
-
-  /me/following/{handle}:
+  /me/feed:
+    get:
+      tags:
+        - me
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/beforeParam'
+        - $ref: '#/components/parameters/afterParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Posts'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  '/me/following/{handle}':
+    get:
+      tags:
+        - me
+        - following
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/handleParam'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
     put:
       tags:
         - me
@@ -66,23 +102,22 @@ paths:
       parameters:
         - $ref: '#/components/parameters/handleParam'
       responses:
-        204: 
+        '204':
           $ref: '#/components/responses/NoContent'
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-        401:
+        '401':
           $ref: '#/components/responses/Unauthorized'
-        403:
+        '403':
           $ref: '#/components/responses/Forbidden'
-        404:
+        '404':
           $ref: '#/components/responses/NotFound'
-        409:
+        '409':
           description: User is already followed
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
     delete:
       tags:
         - me
@@ -92,58 +127,16 @@ paths:
       parameters:
         - $ref: '#/components/parameters/handleParam'
       responses:
-        204: 
+        '204':
           $ref: '#/components/responses/NoContent'
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-        401:
+        '401':
           $ref: '#/components/responses/Unauthorized'
-        403:
+        '403':
           $ref: '#/components/responses/Forbidden'
-        404:
+        '404':
           $ref: '#/components/responses/NotFound'
-
-    get:
-      tags:
-        - me
-        - following
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/handleParam'
-      responses:
-        204: 
-          $ref: '#/components/responses/NoContent'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-
-  /me/followers/{handle}:
-    get:
-      tags:
-        - me
-        - followers
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/handleParam'
-      responses:
-        204: 
-          $ref: '#/components/responses/NoContent'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        403:
-          $ref: '#/components/responses/Forbidden'
-        404:
-          $ref: '#/components/responses/NotFound'
-
   /me/following:
     get:
       tags:
@@ -156,17 +149,36 @@ paths:
         - $ref: '#/components/parameters/beforeHandleParam'
         - $ref: '#/components/parameters/afterHandleParam'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Users'
-        401:
+        '401':
           $ref: '#/components/responses/Unauthorized'
-        403:
+        '403':
           $ref: '#/components/responses/Forbidden'
-
+  '/me/followers/{handle}':
+    get:
+      tags:
+        - me
+        - followers
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/handleParam'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
   /me/followers:
     get:
       tags:
@@ -179,18 +191,17 @@ paths:
         - $ref: '#/components/parameters/beforeHandleParam'
         - $ref: '#/components/parameters/afterHandleParam'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Users'
-        401:
+        '401':
           $ref: '#/components/responses/Unauthorized'
-        403:
+        '403':
           $ref: '#/components/responses/Forbidden'
-
-  /users/{handle}/following:
+  '/users/{handle}/following':
     get:
       tags:
         - users
@@ -201,18 +212,17 @@ paths:
         - $ref: '#/components/parameters/beforeHandleParam'
         - $ref: '#/components/parameters/afterHandleParam'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Users'
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-        404:
+        '404':
           $ref: '#/components/responses/NotFound'
-
-  /users/{handle}/followers:
+  '/users/{handle}/followers':
     get:
       tags:
         - users
@@ -223,17 +233,16 @@ paths:
         - $ref: '#/components/parameters/beforeHandleParam'
         - $ref: '#/components/parameters/afterHandleParam'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Users'
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-        404:
+        '404':
           $ref: '#/components/responses/NotFound'
-
   /posts:
     post:
       tags:
@@ -243,37 +252,35 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/PostBody'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Post'
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-        401:
+        '401':
           $ref: '#/components/responses/Unauthorized'
-        403:
+        '403':
           $ref: '#/components/responses/Forbidden'
-
-  /posts/{postID}:
+  '/posts/{postID}':
     get:
       tags:
         - posts
       parameters:
         - $ref: '#/components/parameters/postIDParam'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Post'
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-        404:
+        '404':
           $ref: '#/components/responses/NotFound'
-
     delete:
       tags:
         - posts
@@ -282,18 +289,48 @@ paths:
       parameters:
         - $ref: '#/components/parameters/postIDParam'
       responses:
-        204:
+        '204':
           $ref: '#/components/responses/NoContent'
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-        401:
+        '401':
           $ref: '#/components/responses/Unauthorized'
-        403:
+        '403':
           $ref: '#/components/responses/Forbidden'
-        404:
+        '404':
           $ref: '#/components/responses/NotFound'
-
-  /posts/{postID}/replies:
+  '/users/{handle}/posts':
+    get:
+      tags:
+        - posts
+      parameters:
+        - $ref: '#/components/parameters/handleParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/beforeParam'
+        - $ref: '#/components/parameters/afterParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Posts'
+  '/posts/{postID}/replies':
+    get:
+      tags:
+        - replies
+      parameters:
+        - $ref: '#/components/parameters/postIDParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/beforeParam'
+        - $ref: '#/components/parameters/afterParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Posts'
     post:
       tags:
         - replies
@@ -304,77 +341,21 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/PostBody'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Post'
-        400:
+        '400':
           $ref: '#/components/responses/BadRequest'
-        401:
+        '401':
           $ref: '#/components/responses/Unauthorized'
-        403:
+        '403':
           $ref: '#/components/responses/Forbidden'
-        404:
+        '404':
           $ref: '#/components/responses/NotFound'
-
-    get:
-      tags:
-        - replies
-      parameters:
-        - $ref: '#/components/parameters/postIDParam'
-        - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/beforeParam'
-        - $ref: '#/components/parameters/afterParam'
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Posts'
-
-  /users/{handle}/posts:
-    get:
-      tags:
-        - posts
-      parameters:
-        - $ref: '#/components/parameters/handleParam'
-        - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/beforeParam'
-        - $ref: '#/components/parameters/afterParam'
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Posts'
-
-  /me/feed:
-    get:
-      tags:
-        - me
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/beforeParam'
-        - $ref: '#/components/parameters/afterParam'
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Posts'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        403:
-          $ref: '#/components/responses/Forbidden'
-
-  /posts/{postID}/likes:
+  '/posts/{postID}/likes':
     put:
       tags:
         - likes
@@ -383,25 +364,24 @@ paths:
       parameters:
         - $ref: '#/components/parameters/postIDParam'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Likes'
-        401:
+        '401':
           $ref: '#/components/responses/Unauthorized'
-        403:
+        '403':
           $ref: '#/components/responses/Forbidden'
-        409:
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
           description: Post is already liked
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        404:
-          $ref: '#/components/responses/NotFound'
-
     delete:
       tags:
         - likes
@@ -410,26 +390,24 @@ paths:
       parameters:
         - $ref: '#/components/parameters/postIDParam'
       responses:
-        200:
+        '200':
           description: OK
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Likes'
-        401:
+        '401':
           $ref: '#/components/responses/Unauthorized'
-        403:
+        '403':
           $ref: '#/components/responses/Forbidden'
-        404:
+        '404':
           $ref: '#/components/responses/NotFound'
-
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-
   schemas:
     Tokens:
       properties:
@@ -440,7 +418,6 @@ components:
       required:
         - accessToken
         - refreshToken
-
     AuthUser:
       properties:
         id:
@@ -471,7 +448,6 @@ components:
       required:
         - handle
         - password
-
     User:
       x-oapi-codegen-extra-tags:
         db: user
@@ -503,7 +479,6 @@ components:
         - handle
         - followers
         - following
-
     Users:
       properties:
         data:
@@ -512,10 +487,9 @@ components:
             $ref: '#/components/schemas/User'
         meta:
           $ref: '#/components/schemas/HandlePaginationMeta'
-      x-go-type: PaginationResult[User, string]
+      x-go-type: 'PaginationResult[User, string]'
       required:
         - data
-
     Post:
       allOf:
         - $ref: '#/components/schemas/Likes'
@@ -558,7 +532,7 @@ components:
             - id
             - content
             - createdAt
-            - replies 
+            - replies
     Likes:
       properties:
         likes:
@@ -569,7 +543,6 @@ components:
             fake: skip
       required:
         - likes
-
     IDPaginationMeta:
       properties:
         oldest:
@@ -581,8 +554,7 @@ components:
       required:
         - oldest
         - newest
-      x-go-type: PaginationMeta[uint]
-
+      x-go-type: 'PaginationMeta[uint]'
     HandlePaginationMeta:
       properties:
         oldest:
@@ -592,8 +564,7 @@ components:
       required:
         - oldest
         - newest
-      x-go-type: PaginationMeta[string]
-
+      x-go-type: 'PaginationMeta[string]'
     Posts:
       properties:
         data:
@@ -602,17 +573,15 @@ components:
             $ref: '#/components/schemas/Post'
         meta:
           $ref: '#/components/schemas/IDPaginationMeta'
-      x-go-type: PaginationResult[Post, uint]
+      x-go-type: 'PaginationResult[Post, uint]'
       required:
         - data
-
     Error:
       properties:
         message:
           type: string
       required:
         - message
-
   requestBodies:
     AuthUserBody:
       required: true
@@ -620,7 +589,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AuthUser'
-
     TokensBody:
       required: true
       content:
@@ -633,7 +601,6 @@ components:
                   db: refreshToken
             required:
               - refreshToken
-
     PostBody:
       required: true
       content:
@@ -648,7 +615,6 @@ components:
                   fake: '{sentence}'
             required:
               - content
-
   parameters:
     handleParam:
       name: handle
@@ -658,7 +624,6 @@ components:
         type: string
         minLength: 5
         maxLength: 15
-
     limitParam:
       name: limit
       in: query
@@ -667,7 +632,6 @@ components:
         minimum: 1
         maximum: 100
         x-go-type: uint
-          
     postIDParam:
       name: postID
       in: path
@@ -676,7 +640,6 @@ components:
         type: integer
         minimum: 0
         x-go-type: uint
-
     beforeParam:
       name: before
       in: query
@@ -684,7 +647,6 @@ components:
         type: integer
         minimum: 0
         x-go-type: uint
-
     afterParam:
       name: after
       in: query
@@ -692,19 +654,16 @@ components:
         type: integer
         minimum: 0
         x-go-type: uint
-
     beforeHandleParam:
       name: before
       in: query
       schema:
         type: string
-
     afterHandleParam:
       name: after
       in: query
       schema:
         type: string
-
   responses:
     BadRequest:
       description: Bad Request
@@ -712,28 +671,24 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-
     NoContent:
       description: No Content
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-
     Unauthorized:
       description: Access token is missing
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-
     Forbidden:
       description: Token is malformed
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Error'
-
     NotFound:
       description: Resource not found
       content:

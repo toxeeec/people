@@ -1,0 +1,47 @@
+components:
+  $ref: ../components/main.yaml#/components
+
+following:
+  get:
+    tags:
+      - users
+      - following
+    parameters:
+      - $ref: '#/components/parameters/handleParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/beforeHandleParam'
+      - $ref: '#/components/parameters/afterHandleParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Users'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      404:
+        $ref: '#/components/responses/NotFound'
+
+followers:
+  get:
+    tags:
+      - users
+      - followers
+    parameters:
+      - $ref: '#/components/parameters/handleParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/beforeHandleParam'
+      - $ref: '#/components/parameters/afterHandleParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Users'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      404:
+        $ref: '#/components/responses/NotFound'
+

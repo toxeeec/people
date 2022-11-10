@@ -1,0 +1,15 @@
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    $ref: './schemas.yaml#/components/schemas'
+  requestBodies:
+    $ref: './requestBodies.yaml#/components/requestBodies'
+  parameters:
+    $ref: './parameters.yaml#/components/parameters'
+  responses:
+    $ref: './responses.yaml#/components/responses'

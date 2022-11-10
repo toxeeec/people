@@ -1,0 +1,158 @@
+components:
+  $ref: ../components/main.yaml#/components
+
+feed:
+    get:
+      tags:
+        - me
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/beforeParam'
+        - $ref: '#/components/parameters/afterParam'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Posts'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+followingByHandle:
+  get:
+    tags:
+      - me
+      - following
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/handleParam'
+    responses:
+      204: 
+        $ref: '#/components/responses/NoContent'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        $ref: '#/components/responses/Forbidden'
+      404:
+        $ref: '#/components/responses/NotFound'
+
+  put:
+    tags:
+      - me
+      - following
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/handleParam'
+    responses:
+      204: 
+        $ref: '#/components/responses/NoContent'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        $ref: '#/components/responses/Forbidden'
+      404:
+        $ref: '#/components/responses/NotFound'
+      409:
+        description: User is already followed
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+  delete:
+    tags:
+      - me
+      - following
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/handleParam'
+    responses:
+      204: 
+        $ref: '#/components/responses/NoContent'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        $ref: '#/components/responses/Forbidden'
+      404:
+        $ref: '#/components/responses/NotFound'
+
+following:
+  get:
+    tags:
+      - me
+      - following
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/beforeHandleParam'
+      - $ref: '#/components/parameters/afterHandleParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Users'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        $ref: '#/components/responses/Forbidden'
+
+followersByHandle:
+  get:
+    tags:
+      - me
+      - followers
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/handleParam'
+    responses:
+      204: 
+        $ref: '#/components/responses/NoContent'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        $ref: '#/components/responses/Forbidden'
+      404:
+        $ref: '#/components/responses/NotFound'
+
+followers:
+  get:
+    tags:
+      - me
+      - followers
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/beforeHandleParam'
+      - $ref: '#/components/parameters/afterHandleParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Users'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        $ref: '#/components/responses/Forbidden'

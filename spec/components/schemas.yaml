@@ -1,0 +1,185 @@
+components:
+  schemas:
+    Tokens:
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+      required:
+        - accessToken
+        - refreshToken
+
+    AuthUser:
+      properties:
+        id:
+          type: integer
+          x-go-name: ID
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: user_id
+            fake: skip
+        handle:
+          type: string
+          minLength: 5
+          maxLength: 15
+          x-oapi-codegen-extra-tags:
+            db: handle
+            fake: '{lettern:10}'
+        password:
+          type: string
+          format: password
+          minLength: 12
+          x-go-type: Password
+          x-oapi-codegen-extra-tags:
+            fake: '{password:true,true,true,true,false,12}'
+        hash:
+          type: string
+          x-oapi-codegen-extra-tags:
+            db: hash
+      required:
+        - handle
+        - password
+
+    User:
+      x-oapi-codegen-extra-tags:
+        db: user
+      properties:
+        id:
+          type: integer
+          x-go-name: ID
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: user_id
+            fake: skip
+        handle:
+          type: string
+          x-oapi-codegen-extra-tags:
+            db: handle
+        followers:
+          type: integer
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: followers
+            fake: skip
+        following:
+          type: integer
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: following
+            fake: skip
+      required:
+        - handle
+        - followers
+        - following
+
+    Users:
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        meta:
+          $ref: '#/components/schemas/HandlePaginationMeta'
+      x-go-type: PaginationResult[User, string]
+      required:
+        - data
+
+    Post:
+      allOf:
+        - $ref: '#/components/schemas/Likes'
+        - type: object
+          properties:
+            id:
+              type: integer
+              x-go-name: ID
+              x-go-type: uint
+              x-oapi-codegen-extra-tags:
+                db: post_id
+                fake: skip
+            content:
+              type: string
+              x-oapi-codegen-extra-tags:
+                db: content
+                fake: '{sentence}'
+            createdAt:
+              type: string
+              format: date-time
+              x-go-type: time.Time
+              x-oapi-codegen-extra-tags:
+                db: created_at
+                fake: skip
+            repliesTo:
+              type: integer
+              x-go-type: sql.NullInt32
+              x-oapi-codegen-extra-tags:
+                db: replies_to
+                fake: skip
+            replies:
+              type: integer
+              x-go-type: uint
+              x-oapi-codegen-extra-tags:
+                db: replies
+                fake: skip
+            user:
+              $ref: '#/components/schemas/User'
+          required:
+            - id
+            - content
+            - createdAt
+            - replies 
+
+    Likes:
+      properties:
+        likes:
+          type: integer
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: likes
+            fake: skip
+      required:
+        - likes
+
+    IDPaginationMeta:
+      properties:
+        oldest:
+          type: integer
+          x-go-type: uint
+        newest:
+          type: integer
+          x-go-type: uint
+      required:
+        - oldest
+        - newest
+      x-go-type: PaginationMeta[uint]
+
+    HandlePaginationMeta:
+      properties:
+        oldest:
+          type: string
+        newest:
+          type: string
+      required:
+        - oldest
+        - newest
+      x-go-type: PaginationMeta[string]
+
+    Posts:
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
+        meta:
+          $ref: '#/components/schemas/IDPaginationMeta'
+      x-go-type: PaginationResult[Post, uint]
+      required:
+        - data
+
+    Error:
+      properties:
+        message:
+          type: string
+      required:
+        - message
+

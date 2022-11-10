@@ -1,0 +1,58 @@
+components:
+  parameters:
+    handleParam:
+      name: handle
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 5
+        maxLength: 15
+
+    limitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        x-go-type: uint
+          
+    postIDParam:
+      name: postID
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 0
+        x-go-type: uint
+
+    beforeParam:
+      name: before
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        x-go-type: uint
+
+    afterParam:
+      name: after
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        x-go-type: uint
+
+    beforeHandleParam:
+      name: before
+      in: query
+      schema:
+        type: string
+
+    afterHandleParam:
+      name: after
+      in: query
+      schema:
+        type: string
+
+

@@ -1,0 +1,53 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: People API
+
+paths:
+  /register:
+    $ref: './paths/auth.yaml#/register'
+
+  /login:
+    $ref: './paths/auth.yaml#/login'
+
+  /refresh:
+    $ref: './paths/auth.yaml#/refresh'
+
+  /me/feed:
+    $ref: './paths/me.yaml#/feed'
+
+  /me/following/{handle}:
+    $ref: './paths/me.yaml#/followingByHandle'
+
+  /me/following:
+    $ref: './paths/me.yaml#/following'
+
+  /me/followers/{handle}:
+    $ref: './paths/me.yaml#/followersByHandle'
+
+  /me/followers:
+    $ref: './paths/me.yaml#/followers'
+
+  /users/{handle}/following:
+    $ref: './paths/users.yaml#/following'
+
+  /users/{handle}/followers:
+    $ref: './paths/users.yaml#/followers'
+
+  /posts:
+    $ref: './paths/posts.yaml#/posts'
+
+  /posts/{postID}:
+    $ref: './paths/posts.yaml#/post'
+
+  /users/{handle}/posts:
+    $ref: './paths/posts.yaml#/userPosts'
+
+  /posts/{postID}/replies:
+    $ref: './paths/replies.yaml#/replies'
+
+  /posts/{postID}/likes:
+    $ref: './paths/likes.yaml#/likes'
+
+components: 
+  $ref: './components/main.yaml#/components'

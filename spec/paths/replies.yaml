@@ -1,0 +1,44 @@
+components:
+  $ref: ../components/main.yaml#/components
+
+replies:
+  get:
+    tags:
+      - replies
+    parameters:
+      - $ref: '#/components/parameters/postIDParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/beforeParam'
+      - $ref: '#/components/parameters/afterParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Posts'
+
+  post:
+    tags:
+      - replies
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/postIDParam'
+    requestBody:
+      $ref: '#/components/requestBodies/PostBody'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Post'
+      400:
+        $ref: '#/components/responses/BadRequest'
+      401:
+        $ref: '#/components/responses/Unauthorized'
+      403:
+        $ref: '#/components/responses/Forbidden'
+      404:
+        $ref: '#/components/responses/NotFound'
