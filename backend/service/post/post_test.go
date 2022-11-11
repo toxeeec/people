@@ -30,14 +30,13 @@ type PostSuite struct {
 }
 
 func (suite *PostSuite) TestCreate() {
-	rows, err := suite.ps.db.Queryx(`SELECT post_id, content, user_id AS "user.user_id" FROM post WHERE post_id = $1`, suite.post1.ID)
+	rows, err := suite.ps.db.Queryx(`SELECT post_id, content FROM post WHERE post_id = $1`, suite.post1.ID)
 	assert.NoError(suite.T(), err)
 	for rows.Next() {
 		var actual people.Post
 		rows.StructScan(&actual)
 		assert.Equal(suite.T(), suite.post1.ID, actual.ID)
 		assert.Equal(suite.T(), suite.postBody1.Content, actual.Content)
-		assert.Equal(suite.T(), suite.user1ID, *actual.User.ID)
 	}
 }
 

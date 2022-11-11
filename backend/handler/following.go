@@ -79,7 +79,7 @@ func (h *handler) GetMeFollowing(c echo.Context, params people.GetMeFollowingPar
 }
 
 func (h *handler) GetUsersHandleFollowing(c echo.Context, handle string, params people.GetUsersHandleFollowingParams) error {
-	u, err := h.us.Get(handle)
+	u, err := h.us.GetAuth(handle)
 	if err != nil {
 		return echo.ErrNotFound
 	}
@@ -94,7 +94,7 @@ func (h *handler) GetUsersHandleFollowing(c echo.Context, handle string, params 
 }
 
 func (h *handler) GetUsersHandleFollowers(c echo.Context, handle string, params people.GetUsersHandleFollowersParams) error {
-	u, err := h.us.Get(handle)
+	u, err := h.us.GetAuth(handle)
 	if err != nil {
 		return echo.ErrNotFound
 	}

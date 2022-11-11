@@ -8,7 +8,7 @@ import (
 
 func (suite *PostSuite) TestCreateReply() {
 	r, _ := suite.ps.CreateReply(suite.post1.ID, suite.user1ID, suite.replyBody)
-	rows, err := suite.ps.db.Queryx(`SELECT post_id, content, replies_to, replies AS "user.user_id" FROM post WHERE replies_to = $1`, suite.post1.ID)
+	rows, err := suite.ps.db.Queryx(`SELECT post_id, content, replies_to, replies FROM post WHERE replies_to = $1`, suite.post1.ID)
 	assert.NoError(suite.T(), err)
 	for rows.Next() {
 		var actual people.Post

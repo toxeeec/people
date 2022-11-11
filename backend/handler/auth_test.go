@@ -25,12 +25,13 @@ func (suite *HandlerSuite) TestPostRegister() {
 		suite.Run(name, func() {
 			result := testutil.NewRequest().Post("/register").WithJsonBody(tc.user).Go(suite.T(), suite.e)
 			assert.Equal(suite.T(), tc.expected, result.Code())
-			var tokens people.Tokens
-			result.UnmarshalJsonToObject(&tokens)
+			var res people.AuthResponse
+			result.UnmarshalJsonToObject(&res)
 			if tc.expected < http.StatusBadRequest {
-				assert.NotEmpty(suite.T(), tokens)
+				assert.NotEmpty(suite.T(), res)
+				assert.Equal(suite.T(), tc.user.Handle, res.User.Handle)
 			} else {
-				assert.Empty(suite.T(), tokens)
+				assert.Empty(suite.T(), res)
 			}
 		})
 	}
@@ -55,12 +56,13 @@ func (suite *HandlerSuite) TestPostLogin() {
 		suite.Run(name, func() {
 			result := testutil.NewRequest().Post("/login").WithJsonBody(tc.user).Go(suite.T(), suite.e)
 			assert.Equal(suite.T(), tc.expected, result.Code())
-			var tokens people.Tokens
-			result.UnmarshalJsonToObject(&tokens)
+			var res people.AuthResponse
+			result.UnmarshalJsonToObject(&res)
 			if tc.expected < http.StatusBadRequest {
-				assert.NotEmpty(suite.T(), tokens)
+				assert.NotEmpty(suite.T(), res)
+				assert.Equal(suite.T(), tc.user.Handle, res.User.Handle)
 			} else {
-				assert.Empty(suite.T(), tokens)
+				assert.Empty(suite.T(), res)
 			}
 		})
 	}

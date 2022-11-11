@@ -14,7 +14,6 @@ var (
 )
 
 const (
-	selectUser       = "SELECT handle, followers, following FROM user_profile"
 	selectIDByHandle = "SELECT user_id FROM user_profile WHERE handle = "
 )
 

@@ -33,7 +33,13 @@ func (h *handler) PostRegister(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, tokens)
+	user, err := h.us.Get(u.Handle)
+	if err != nil {
+		go h.us.Delete(u.Handle)
+		return echo.ErrInternalServerError
+	}
+
+	return c.JSON(http.StatusOK, people.AuthResponse{User: user, Tokens: tokens})
 }
 
 func (h *handler) PostLogin(c echo.Context) error {
@@ -52,7 +58,12 @@ func (h *handler) PostLogin(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	return c.JSON(http.StatusOK, tokens)
+	user, err := h.us.Get(u.Handle)
+	if err != nil {
+		return echo.ErrInternalServerError
+	}
+
+	return c.JSON(http.StatusOK, people.AuthResponse{User: user, Tokens: tokens})
 }
 
 func (h *handler) PostRefresh(c echo.Context) error {

@@ -20,8 +20,10 @@ var (
 const (
 	day = 24 * time.Hour
 
-	accessTokenDuration  = 15 * time.Minute
+	// accessTokenDuration  = 15 * time.Minute
 	refreshTokenDuration = 30 * day
+
+	accessTokenDuration = 1 * time.Minute
 )
 
 var (
@@ -48,7 +50,7 @@ func NewRefreshToken(id uint, u *uuid.UUID) (people.RefreshToken, error) {
 	}
 	claims := jwt.RegisteredClaims{
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(accessTokenDuration)),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(refreshTokenDuration)),
 		Subject:   fmt.Sprint(id),
 		ID:        u.String(),
 	}

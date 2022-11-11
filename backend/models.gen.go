@@ -12,6 +12,12 @@ const (
 	BearerAuthScopes = "bearerAuth.Scopes"
 )
 
+// AuthResponse defines model for AuthResponse.
+type AuthResponse struct {
+	Tokens Tokens `json:"tokens"`
+	User   User   `db:"user" json:"user"`
+}
+
 // AuthUser defines model for AuthUser.
 type AuthUser struct {
 	Handle   string   `db:"handle" fake:"{lettern:10}" json:"handle"`
@@ -61,7 +67,6 @@ type User struct {
 	Followers uint   `db:"followers" fake:"skip" json:"followers"`
 	Following uint   `db:"following" fake:"skip" json:"following"`
 	Handle    string `db:"handle" json:"handle"`
-	ID        *uint  `db:"user_id" fake:"skip" json:"id,omitempty"`
 }
 
 // Users defines model for Users.

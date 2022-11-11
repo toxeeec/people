@@ -12,8 +12,8 @@ const (
 )
 
 type PaginationMeta[T any] struct {
-	Oldest T
-	Newest T
+	Oldest T `json:"oldest"`
+	Newest T `json:"newest"`
 }
 
 type Pagination[T any] struct {
