@@ -23,6 +23,8 @@ func (suite *PostSuite) TestLike() {
 			assert.Equal(suite.T(), tc.valid, err == nil)
 			if tc.valid {
 				assert.Equal(suite.T(), uint(1), likes.Likes)
+				post, _ := suite.ps.Get(tc.postID)
+				assert.True(suite.T(), post.IsLiked)
 			}
 		})
 	}
@@ -47,6 +49,8 @@ func (suite *PostSuite) TestUnlike() {
 			assert.Equal(suite.T(), tc.valid, err == nil)
 			if tc.valid {
 				assert.Equal(suite.T(), uint(0), likes.Likes)
+				post, _ := suite.ps.Get(tc.postID)
+				assert.False(suite.T(), post.IsLiked)
 			}
 		})
 	}

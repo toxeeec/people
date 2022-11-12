@@ -140,8 +140,13 @@ components:
           x-oapi-codegen-extra-tags:
             db: likes
             fake: skip
+        isLiked:
+          type: boolean
+          x-oapi-codegen-extra-tags:
+            db: is_liked
       required:
         - likes
+        - isLiked
 
     IDPaginationMeta:
       properties:

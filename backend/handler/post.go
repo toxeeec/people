@@ -34,6 +34,7 @@ func (h *handler) PostPosts(c echo.Context) error {
 func (h *handler) GetPostsPostID(c echo.Context, postID people.PostIDParam) error {
 	p, err := h.ps.Get(uint(postID))
 	if err != nil {
+		println(err.Error())
 		return echo.ErrNotFound
 	}
 

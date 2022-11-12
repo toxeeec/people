@@ -39,7 +39,8 @@ type IDPaginationMeta = PaginationMeta[uint]
 
 // Likes defines model for Likes.
 type Likes struct {
-	Likes uint `db:"likes" fake:"skip" json:"likes"`
+	IsLiked bool `db:"is_liked" json:"isLiked"`
+	Likes   uint `db:"likes" fake:"skip" json:"likes"`
 }
 
 // Post defines model for Post.
@@ -47,6 +48,7 @@ type Post struct {
 	Content   string         `db:"content" fake:"{sentence}" json:"content"`
 	CreatedAt time.Time      `db:"created_at" fake:"skip" json:"createdAt"`
 	ID        uint           `db:"post_id" fake:"skip" json:"id"`
+	IsLiked   bool           `db:"is_liked" json:"isLiked"`
 	Likes     uint           `db:"likes" fake:"skip" json:"likes"`
 	Replies   uint           `db:"replies" fake:"skip" json:"replies"`
 	RepliesTo *sql.NullInt32 `db:"replies_to" fake:"skip" json:"repliesTo,omitempty"`
