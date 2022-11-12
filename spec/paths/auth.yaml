@@ -13,7 +13,7 @@ register:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Tokens'
+                  $ref: '#/components/schemas/AuthResponse'
           400:
             $ref: '#/components/responses/BadRequest'
 
@@ -29,7 +29,7 @@ login:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/Tokens'
+                  $ref: '#/components/schemas/AuthResponse'
           400:
             $ref: '#/components/responses/BadRequest'
           401:

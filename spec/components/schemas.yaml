@@ -41,17 +41,20 @@ components:
         - handle
         - password
 
+    AuthResponse:
+      properties:
+        tokens:
+          $ref: '#/components/schemas/Tokens'
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+        - tokens
+        - user
+
     User:
       x-oapi-codegen-extra-tags:
         db: user
       properties:
-        id:
-          type: integer
-          x-go-name: ID
-          x-go-type: uint
-          x-oapi-codegen-extra-tags:
-            db: user_id
-            fake: skip
         handle:
           type: string
           x-oapi-codegen-extra-tags:

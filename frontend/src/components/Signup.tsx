@@ -8,8 +8,8 @@ import {
 	Text,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Dispatch, SetStateAction } from "react";
-import useAuth from "../hooks/useAuth";
+import { Dispatch, SetStateAction, useContext } from "react";
+import AuthContext from "../context/AuthContext";
 import { AuthUser } from "../models";
 import { usePostRegister } from "../spec.gen";
 
@@ -31,18 +31,18 @@ export default function Signup({
 			password: (value) => (value.length < 12 ? "Invalid Password" : null),
 		},
 	});
-	const { setAuth } = useAuth();
+	const { setAuth } = useContext(AuthContext)!;
 
 	const { mutate, isLoading } = usePostRegister();
 	function handleSubmit(values: AuthUser) {
 		const data = { data: values };
 		mutate(data, {
 			onSuccess(data) {
-				setAuth(data.data);
+				setAuth(data);
 				setSignupOpened(false);
 			},
 			onError(error) {
-				const err = error.response?.data.message;
+				const err = error.message;
 				if (err?.startsWith("Handle")) {
 					form.setFieldError("handle", err);
 				} else {

@@ -1,10 +1,11 @@
+import { useContext } from "react";
 import { Outlet } from "react-router";
-import useAuth from "../hooks/useAuth";
+import AuthContext from "../context/AuthContext";
 import Footer from "./Footer";
 import LayoutHeader from "./LayoutHeader";
 
 export default function Layout() {
-	const { auth } = useAuth();
+	const { auth } = useContext(AuthContext)!;
 	return (
 		<>
 			{auth.isAuthenticated ? <LayoutHeader /> : null}

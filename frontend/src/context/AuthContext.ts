@@ -1,20 +1,22 @@
-import { createContext, Dispatch, SetStateAction } from "react";
+import { createContext } from "react";
+import { Tokens, User } from "../models";
 
 export interface AuthValues {
+	user?: User;
 	isAuthenticated: boolean;
 	accessToken: string;
 	refreshToken: string;
 }
 
-interface AuthContextType {
-	authValues: AuthValues;
-	setAuthValues: Dispatch<SetStateAction<AuthValues>>;
+export interface SetAuthProps {
+	tokens?: Tokens;
+	user?: User;
 }
 
-export const defaultAuthValues: AuthValues = {
-	isAuthenticated: false,
-	accessToken: "",
-	refreshToken: "",
-};
+interface AuthContextType {
+	auth: AuthValues;
+	setAuth: (_props: SetAuthProps) => void;
+	clearAuth: () => void;
+}
 
 export default createContext<AuthContextType | null>(null);

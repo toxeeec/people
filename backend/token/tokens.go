@@ -20,10 +20,8 @@ var (
 const (
 	day = 24 * time.Hour
 
-	// accessTokenDuration  = 15 * time.Minute
+	accessTokenDuration  = 15 * time.Minute
 	refreshTokenDuration = 30 * day
-
-	accessTokenDuration = 1 * time.Minute
 )
 
 var (

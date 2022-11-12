@@ -6,7 +6,6 @@
  */
 
 export interface User {
-	id?: number;
 	handle: string;
 	followers: number;
 	following: number;

@@ -1,56 +1,50 @@
 import { useLocalStorage } from "@mantine/hooks";
-import { useContext } from "react";
-import AuthContext, {
-	AuthValues,
-	defaultAuthValues,
-} from "../context/AuthContext";
-import { Tokens } from "../models";
+import { useMemo } from "react";
+import { AuthValues } from "../context/AuthContext";
+import { Tokens, User } from "../models";
 
 export default function useAuth() {
-	const ctx = useContext(AuthContext);
 	const [accessToken, setAccessToken] = useLocalStorage({
 		key: "accessToken",
+		defaultValue: "",
 		getInitialValueInEffect: false,
 	});
 	const [refreshToken, setRefreshToken] = useLocalStorage({
 		key: "refreshToken",
+		defaultValue: "",
+		getInitialValueInEffect: false,
+	});
+	const [userString, setUserString] = useLocalStorage({
+		key: "user",
+		defaultValue: "",
 		getInitialValueInEffect: false,
 	});
 
-	const setAuth = (tokens: Tokens) => {
-		if (!ctx) {
-			throw new Error("Context must be defined");
-		}
-		setAccessToken(tokens.accessToken);
-		setRefreshToken(tokens.refreshToken);
-		ctx.setAuthValues({
-			...tokens,
-			isAuthenticated: true,
-		});
-	};
-
-	const getAuth = (): AuthValues => {
+	const auth: AuthValues = useMemo(() => {
 		const isAuthenticated = !!(accessToken && refreshToken);
-		return { accessToken, refreshToken, isAuthenticated };
+		const user = userString ? JSON.parse(userString) : undefined;
+		return { accessToken, refreshToken, isAuthenticated, user };
+	}, [accessToken, refreshToken, userString]);
+
+	const setAuth = ({ tokens, user }: { tokens?: Tokens; user?: User }) => {
+		if (tokens) {
+			setAccessToken(tokens.accessToken);
+			setRefreshToken(tokens.refreshToken);
+		}
+		if (user) {
+			setUserString(JSON.stringify(user));
+		}
 	};
 
 	const clearAuth = () => {
-		if (!ctx) {
-			throw new Error("Context must be defined");
-		}
 		setAccessToken("");
 		setRefreshToken("");
-		ctx.setAuthValues({
-			accessToken,
-			refreshToken,
-			isAuthenticated: false,
-		});
+		setUserString("");
 	};
 
 	return {
-		auth: ctx?.authValues || defaultAuthValues,
+		auth,
 		setAuth,
-		getAuth,
 		clearAuth,
 	};
 }

@@ -8,10 +8,10 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Text } from "@mantine/core";
-import { Dispatch, SetStateAction } from "react";
-import useAuth from "../hooks/useAuth";
+import { Dispatch, SetStateAction, useContext } from "react";
 import { AuthUser } from "../models";
 import { usePostLogin } from "../spec.gen";
+import AuthContext from "../context/AuthContext";
 
 interface LoginProps {
 	loginOpened: boolean;
@@ -31,18 +31,18 @@ export default function Login({
 			password: (value) => (value.length < 12 ? "Invalid Password" : null),
 		},
 	});
-	const { setAuth } = useAuth();
+	const { setAuth } = useContext(AuthContext)!;
 
 	const { mutate, isLoading } = usePostLogin();
 	const handleSubmit = (values: AuthUser) => {
 		const data = { data: values };
 		mutate(data, {
 			onSuccess(data) {
-				setAuth(data.data);
+				setAuth(data);
 				setLoginOpened(false);
 			},
 			onError(error) {
-				const err = error.response?.data.message;
+				const err = error.message;
 				if (err?.startsWith("Handle")) {
 					form.setFieldError("handle", err);
 				} else {
