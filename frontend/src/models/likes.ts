@@ -7,4 +7,5 @@
 
 export interface Likes {
 	likes: number;
+	isLiked: boolean;
 }

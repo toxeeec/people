@@ -42,7 +42,7 @@ export default function Signup({
 				setSignupOpened(false);
 			},
 			onError(error) {
-				const err = error.message;
+				const err = error.response?.data.message;
 				if (err?.startsWith("Handle")) {
 					form.setFieldError("handle", err);
 				} else {
