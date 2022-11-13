@@ -32,9 +32,9 @@ func (h *handler) PostPosts(c echo.Context) error {
 }
 
 func (h *handler) GetPostsPostID(c echo.Context, postID people.PostIDParam) error {
-	p, err := h.ps.Get(uint(postID))
+	userID, _ := people.FromContext(c.Request().Context(), people.UserIDKey)
+	p, err := h.ps.Get(uint(postID), &userID)
 	if err != nil {
-		println(err.Error())
 		return echo.ErrNotFound
 	}
 
@@ -56,8 +56,9 @@ func (h *handler) DeletePostsPostID(c echo.Context, postID people.PostIDParam) e
 }
 
 func (h *handler) GetUsersHandlePosts(c echo.Context, handle string, params people.GetUsersHandlePostsParams) error {
+	userID, _ := people.FromContext(c.Request().Context(), people.UserIDKey)
 	pagination := people.NewPagination((*uint)(params.Before), (*uint)(params.After), (*uint)(params.Limit))
-	posts, err := h.ps.FromUser(handle, pagination)
+	posts, err := h.ps.FromUser(handle, &userID, pagination)
 	if err != nil {
 		return echo.ErrInternalServerError
 	}

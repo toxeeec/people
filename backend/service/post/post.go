@@ -14,30 +14,31 @@ func NewService(db *sqlx.DB) people.PostService {
 }
 
 const (
-	selectPostAndUser = `SELECT post_id, content, created_at, replies_to, replies, likes, 
-user_profile.handle AS "user.handle", user_profile.followers AS "user.followers", user_profile.following AS "user.following", 
-EXISTS(SELECT 1 FROM post_like WHERE post_like.post_id = post_id AND post_like.user_id = user_profile.user_id) as is_liked 
-FROM post JOIN user_profile ON post.user_id = user_profile.user_id`
+	isLiked             = " EXISTS(SELECT 1 FROM post_like WHERE post_id = post_id AND user_id = $1) as is_liked"
+	selectPostAndAuthor = `SELECT post_id, content, created_at, replies_to, replies, likes, 
+user_profile.handle AS "user.handle", user_profile.followers AS "user.followers", 
+user_profile.following AS "user.following",` + isLiked + ` FROM post JOIN user_profile ON post.user_id = user_profile.user_id`
 )
 
 const (
 	queryCreate           = "INSERT INTO post(user_id, content) VALUES($1, $2) RETURNING post_id, content, created_at"
-	queryGet              = selectPostAndUser + " WHERE post_id = $1"
+	queryGet              = selectPostAndAuthor + " WHERE post_id = $2"
 	queryExists           = "SELECT EXISTS(SELECT 1 FROM post WHERE post_id = $1)"
 	queryDelete           = `DELETE FROM post WHERE post_id = $1 AND user_id = $2 RETURNING replies_to`
 	queryDecrementReplies = "UPDATE post SET replies = replies - 1 WHERE post_id = $1"
 )
 
 const (
-	feedBase     = selectPostAndUser + " WHERE post.user_id IN (SELECT user_id FROM follower WHERE follower_id = $1) "
-	fromUserBase = `SELECT post_id, content, created_at FROM post WHERE user_id = (SELECT user_id FROM user_profile WHERE handle = $1) AND replies_to IS NULL `
+	feedBase     = selectPostAndAuthor + " WHERE post.user_id IN (SELECT user_id FROM follower WHERE follower_id = $2) "
+	fromUserBase = `SELECT post_id, content, created_at,` + isLiked + ` FROM post 
+WHERE user_id = (SELECT user_id FROM user_profile WHERE handle = $2) AND replies_to IS NULL `
 )
 
 const (
-	end         = " ORDER BY post_id DESC LIMIT $2"
-	before      = " AND post_id < $3"
-	after       = " AND post_id > $3"
-	beforeAfter = " AND post_id < $3 AND post_id > $4"
+	end         = " ORDER BY post_id DESC LIMIT $3"
+	before      = " AND post_id < $4"
+	after       = " AND post_id > $4"
+	beforeAfter = " AND post_id < $4 AND post_id > $5"
 )
 
 var feedQueries = people.PaginationQueries(feedBase, end, before, after, beforeAfter)
@@ -48,9 +49,12 @@ func (s *service) Create(userID uint, post people.PostBody) (people.Post, error)
 	return p, s.db.Get(&p, queryCreate, userID, post.Content)
 }
 
-func (s *service) Get(id uint) (people.Post, error) {
+func (s *service) Get(postID uint, userID *uint) (people.Post, error) {
+	if userID == nil {
+		userID = new(uint)
+	}
 	var p people.Post
-	return p, s.db.Get(&p, queryGet, id)
+	return p, s.db.Get(&p, queryGet, userID, postID)
 }
 
 func (s *service) Delete(postID, userID uint) error {
@@ -76,12 +80,15 @@ func (s *service) Delete(postID, userID uint) error {
 	return tx.Commit()
 }
 
-func (s *service) FromUser(handle string, p people.IDPagination) (people.Posts, error) {
-	return people.PaginationSelect[people.Post](s.db, &fromUserQueries, p, handle)
+func (s *service) FromUser(handle string, userID *uint, p people.IDPagination) (people.Posts, error) {
+	if userID == nil {
+		userID = new(uint)
+	}
+	return people.PaginationSelect[people.Post](s.db, &fromUserQueries, p, userID, handle)
 }
 
 func (s *service) Feed(userID uint, p people.IDPagination) (people.Posts, error) {
-	return people.PaginationSelect[people.Post](s.db, &feedQueries, p, userID)
+	return people.PaginationSelect[people.Post](s.db, &feedQueries, p, userID, userID)
 }
 
 func (s *service) Exists(postID uint) bool {

@@ -17,7 +17,7 @@ func (suite *PostSuite) TestCreateReply() {
 		assert.Equal(suite.T(), r.Content, actual.Content)
 		assert.Equal(suite.T(), suite.post1.ID, uint(actual.RepliesTo.Int32))
 
-		p, _ := suite.ps.Get(suite.post1.ID)
+		p, _ := suite.ps.Get(suite.post1.ID, nil)
 		assert.Equal(suite.T(), uint(1), p.Replies)
 	}
 }
@@ -41,7 +41,7 @@ func (suite *PostSuite) TestReplies() {
 	for name, tc := range tests {
 		suite.Run(name, func() {
 			pagination := people.NewPagination[uint](nil, nil, nil)
-			posts, _ := suite.ps.Replies(tc.id, pagination)
+			posts, _ := suite.ps.Replies(tc.id, nil, pagination)
 			assert.Equal(suite.T(), tc.expected, len(posts.Data))
 		})
 	}

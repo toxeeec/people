@@ -29,6 +29,7 @@ func (suite *HandlerSuite) TestPutPostsPostIDLikes() {
 				var l people.Likes
 				result.UnmarshalJsonToObject(&l)
 				assert.Equal(suite.T(), uint(1), l.Likes)
+				assert.True(suite.T(), l.IsLiked)
 			}
 		})
 	}
@@ -55,6 +56,7 @@ func (suite *HandlerSuite) TestDeletePostsPostIDLikes() {
 				var l people.Likes
 				result.UnmarshalJsonToObject(&l)
 				assert.Equal(suite.T(), uint(0), l.Likes)
+				assert.False(suite.T(), l.IsLiked)
 			}
 		})
 	}

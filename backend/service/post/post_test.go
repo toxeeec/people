@@ -30,14 +30,11 @@ type PostSuite struct {
 }
 
 func (suite *PostSuite) TestCreate() {
-	rows, err := suite.ps.db.Queryx(`SELECT post_id, content FROM post WHERE post_id = $1`, suite.post1.ID)
-	assert.NoError(suite.T(), err)
-	for rows.Next() {
-		var actual people.Post
-		rows.StructScan(&actual)
-		assert.Equal(suite.T(), suite.post1.ID, actual.ID)
-		assert.Equal(suite.T(), suite.postBody1.Content, actual.Content)
-	}
+	row := suite.ps.db.QueryRowx(`SELECT post_id, content FROM post WHERE post_id = $1`, suite.post1.ID)
+	var actual people.Post
+	row.StructScan(&actual)
+	assert.Equal(suite.T(), suite.post1.ID, actual.ID)
+	assert.Equal(suite.T(), suite.postBody1.Content, actual.Content)
 }
 
 func (suite *PostSuite) TestGet() {
@@ -50,7 +47,7 @@ func (suite *PostSuite) TestGet() {
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
-			p, err := suite.ps.Get(tc.id)
+			p, err := suite.ps.Get(tc.id, nil)
 			assert.Equal(suite.T(), tc.valid, err == nil)
 			if tc.valid {
 				assert.Equal(suite.T(), suite.post1.Content, p.Content)
@@ -100,7 +97,7 @@ func (suite *PostSuite) TestFromUser() {
 	for name, tc := range tests {
 		suite.Run(name, func() {
 			pagination := people.NewPagination[uint](nil, nil, nil)
-			posts, _ := suite.ps.FromUser(tc.handle, pagination)
+			posts, _ := suite.ps.FromUser(tc.handle, nil, pagination)
 			assert.Equal(suite.T(), tc.expected, len(posts.Data))
 		})
 	}

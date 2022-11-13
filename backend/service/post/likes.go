@@ -45,6 +45,7 @@ func (s *service) Like(postID, userID uint) (people.Likes, error) {
 	if err != nil {
 		return people.Likes{}, err
 	}
+	l.IsLiked = true
 
 	return l, tx.Commit()
 }
@@ -72,6 +73,7 @@ func (s *service) Unlike(postID, userID uint) (people.Likes, error) {
 	if err != nil {
 		return people.Likes{}, err
 	}
+	l.IsLiked = false
 
 	return l, tx.Commit()
 }

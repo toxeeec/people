@@ -79,7 +79,7 @@ func (suite *HandlerSuite) TestHandleDeletePost() {
 			result := testutil.NewRequest().WithJWSAuth(at).Delete(fmt.Sprintf("/posts/%d", tc.id)).Go(suite.T(), suite.e)
 			assert.Equal(suite.T(), tc.expected, result.Code())
 			if tc.expected < http.StatusBadRequest {
-				_, err := suite.ps.Get(suite.post1.ID)
+				_, err := suite.ps.Get(suite.post1.ID, nil)
 				assert.Error(suite.T(), err)
 			}
 		})
@@ -105,7 +105,10 @@ func (suite *HandlerSuite) TestGetUsersHandlePosts() {
 	for name, tc := range tests {
 		suite.Run(name, func() {
 			pagination := people.NewPagination[uint](nil, nil, nil)
-			posts, _ := suite.ps.FromUser(tc.handle, pagination)
+			posts, err := suite.ps.FromUser(tc.handle, nil, pagination)
+			if err != nil {
+				println(err.Error())
+			}
 			assert.Equal(suite.T(), tc.expected, len(posts.Data))
 		})
 	}

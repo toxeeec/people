@@ -10,7 +10,7 @@ const (
 )
 
 const (
-	repliesBase = selectPostAndUser + " WHERE replies_to = $1"
+	repliesBase = selectPostAndAuthor + " WHERE replies_to = $2"
 )
 
 var repliesQueries = people.PaginationQueries(repliesBase, end, before, after, beforeAfter)
@@ -36,6 +36,9 @@ func (s *service) CreateReply(postID, userID uint, post people.PostBody) (people
 	return p, tx.Commit()
 }
 
-func (s *service) Replies(postID uint, p people.IDPagination) (people.Posts, error) {
-	return people.PaginationSelect[people.Post](s.db, &repliesQueries, p, postID)
+func (s *service) Replies(postID uint, userID *uint, p people.IDPagination) (people.Posts, error) {
+	if userID == nil {
+		userID = new(uint)
+	}
+	return people.PaginationSelect[people.Post](s.db, &repliesQueries, p, userID, postID)
 }
