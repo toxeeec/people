@@ -14,7 +14,7 @@ func NewService(db *sqlx.DB) people.PostService {
 }
 
 const (
-	isLiked             = " EXISTS(SELECT 1 FROM post_like WHERE post_id = post_id AND user_id = $1) as is_liked"
+	isLiked             = " EXISTS(SELECT 1 FROM post_like WHERE post_id = post.post_id AND user_id = $1) as is_liked"
 	selectPostAndAuthor = `SELECT post_id, content, created_at, replies_to, replies, likes, 
 user_profile.handle AS "user.handle", user_profile.followers AS "user.followers", 
 user_profile.following AS "user.following",` + isLiked + ` FROM post JOIN user_profile ON post.user_id = user_profile.user_id`

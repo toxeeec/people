@@ -7,7 +7,6 @@ import (
 	"github.com/deepmap/oapi-codegen/pkg/testutil"
 	"github.com/stretchr/testify/assert"
 	people "github.com/toxeeec/people/backend"
-	"github.com/toxeeec/people/backend/token"
 )
 
 func (suite *HandlerSuite) TestPutPostsPostIDLikes() {
@@ -30,6 +29,9 @@ func (suite *HandlerSuite) TestPutPostsPostIDLikes() {
 				result.UnmarshalJsonToObject(&l)
 				assert.Equal(suite.T(), uint(1), l.Likes)
 				assert.True(suite.T(), l.IsLiked)
+
+				p, _ := suite.ps.Get(tc.id, &suite.id1)
+				assert.True(suite.T(), p.IsLiked)
 			}
 		})
 	}
@@ -37,8 +39,6 @@ func (suite *HandlerSuite) TestPutPostsPostIDLikes() {
 
 func (suite *HandlerSuite) TestDeletePostsPostIDLikes() {
 	suite.ps.Like(suite.post1.ID, suite.id1)
-
-	at, _ := token.NewAccessToken(suite.id1)
 
 	tests := map[string]struct {
 		id       uint
@@ -50,13 +50,16 @@ func (suite *HandlerSuite) TestDeletePostsPostIDLikes() {
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
-			result := testutil.NewRequest().WithJWSAuth(at).Delete(fmt.Sprintf("/posts/%d/likes", tc.id)).Go(suite.T(), suite.e)
+			result := testutil.NewRequest().WithJWSAuth(suite.at1).Delete(fmt.Sprintf("/posts/%d/likes", tc.id)).Go(suite.T(), suite.e)
 			assert.Equal(suite.T(), tc.expected, result.Code())
 			if tc.expected < http.StatusBadRequest {
 				var l people.Likes
 				result.UnmarshalJsonToObject(&l)
 				assert.Equal(suite.T(), uint(0), l.Likes)
 				assert.False(suite.T(), l.IsLiked)
+
+				p, _ := suite.ps.Get(tc.id, &suite.id1)
+				assert.False(suite.T(), p.IsLiked)
 			}
 		})
 	}
