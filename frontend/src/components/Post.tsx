@@ -1,25 +1,25 @@
 import { Avatar, Text, Group, Paper } from "@mantine/core";
 import { forwardRef } from "react";
-import { User } from "../models";
+import { Post as PostData } from "../models";
+import PostActions from "./PostActions";
 
 interface PostProps {
-	author: User;
-	content: string;
+	data: PostData;
 }
 
-const Post = forwardRef<HTMLDivElement, PostProps>(
-	({ author, content }, ref) => {
-		Post.displayName = "Post";
-		return (
-			<Paper ref={ref} p="xs" radius="xs" withBorder>
-				<Group align="center">
-					<Avatar radius="xl" />
-					<b>{author.handle}</b>
-				</Group>
-				<Text>{content}</Text>
-			</Paper>
-		);
-	}
-);
+const Post = forwardRef<HTMLDivElement, PostProps>(({ data }, ref) => {
+	Post.displayName = "Post";
+	const { user, content } = data;
+	return (
+		<Paper ref={ref} p="xs" radius="xs" withBorder>
+			<Group align="center">
+				<Avatar radius="xl" />
+				<b>{user?.handle}</b>
+			</Group>
+			<Text my="xs">{content}</Text>
+			<PostActions {...data} />
+		</Paper>
+	);
+});
 
 export default Post;

@@ -55,3 +55,5 @@ export function createResponseInterceptor(
 		}
 	);
 }
+
+export type ErrorType<Error> = AxiosError<Error>;

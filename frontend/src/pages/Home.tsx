@@ -57,12 +57,7 @@ export default function Home() {
 					) : (
 						<Fragment key={i}>
 							{group.data.map((post) => (
-								<Post
-									author={post.user!}
-									content={post.content}
-									key={post.createdAt}
-									ref={ref}
-								/>
+								<Post data={post} key={post.createdAt} ref={ref} />
 							))}
 						</Fragment>
 					)
