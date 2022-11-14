@@ -6,14 +6,20 @@ import {
 	Button,
 	Group,
 	Text,
+	UnstyledButton,
 } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import AccountInfo from "../components/AccountInfo";
+import UsersContext from "../context/UsersContext";
 import useAuth from "../hooks/useAuth";
 
 export default function LayoutHeader() {
 	const [opened, setOpened] = useState(false);
 	const { clearAuth, auth } = useAuth();
+	const usersCtx = useContext(UsersContext);
+	usersCtx?.setUser(auth.user!.handle, auth.user!);
+
 	const location = useLocation();
 	const [route, setRoute] = useState("");
 	useEffect(() => {
@@ -28,7 +34,9 @@ export default function LayoutHeader() {
 			<Space h={60} />
 			<Header height={60} fixed>
 				<Group h={60} align="center">
-					<Avatar radius="xl" ml={11} onClick={() => setOpened(true)} />
+					<UnstyledButton onClick={() => setOpened(true)} ml={11}>
+						<Avatar radius="xl" />
+					</UnstyledButton>
 					<Text fz="xl" fw={700}>
 						{route}
 					</Text>
@@ -41,16 +49,7 @@ export default function LayoutHeader() {
 				padding="md"
 				size="md"
 			>
-				<Avatar size="lg" radius="xl" mb="xs" />
-				<b>@{auth.user?.handle}</b>
-				<Group mt="xs">
-					<span>
-						<b>{auth.user?.following}</b> Following
-					</span>
-					<span>
-						<b>{auth.user?.followers}</b> Followers
-					</span>
-				</Group>
+				<AccountInfo handle={auth.user!.handle} />
 				<Button onClick={clearAuth} fullWidth radius="xl" mt="xl">
 					Logout
 				</Button>

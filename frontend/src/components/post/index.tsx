@@ -1,10 +1,11 @@
 import { Avatar, Text, Group, Paper } from "@mantine/core";
 import { forwardRef } from "react";
-import { Post as PostData } from "../models";
+import { Post as PostsData } from "../../models";
 import PostActions from "./PostActions";
+import ProfileHoverCard from "./ProfileHoverCard";
 
 interface PostProps {
-	data: PostData;
+	data: PostsData;
 }
 
 const Post = forwardRef<HTMLDivElement, PostProps>(({ data }, ref) => {
@@ -13,8 +14,12 @@ const Post = forwardRef<HTMLDivElement, PostProps>(({ data }, ref) => {
 	return (
 		<Paper ref={ref} p="xs" radius="xs" withBorder>
 			<Group align="center">
-				<Avatar radius="xl" />
-				<b>{user?.handle}</b>
+				<ProfileHoverCard handle={user!.handle}>
+					<Avatar radius="xl" size="md" />
+				</ProfileHoverCard>
+				<ProfileHoverCard handle={user!.handle}>
+					<b>{user?.handle}</b>
+				</ProfileHoverCard>
 			</Group>
 			<Text my="xs">{content}</Text>
 			<PostActions {...data} />

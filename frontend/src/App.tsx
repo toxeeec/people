@@ -5,6 +5,7 @@ import {
 	RouterProvider,
 } from "react-router-dom";
 import AuthContext from "./context/AuthContext";
+import UsersContext, { initialUsersContext } from "./context/UsersContext";
 import {
 	AXIOS_INSTANCE,
 	createRequestInterceptor,
@@ -57,8 +58,10 @@ export default function App() {
 		},
 	]);
 	return (
-		<AuthContext.Provider value={{ auth, setAuth, clearAuth }}>
-			<RouterProvider router={router} />
-		</AuthContext.Provider>
+		<UsersContext.Provider value={initialUsersContext}>
+			<AuthContext.Provider value={{ auth, setAuth, clearAuth }}>
+				<RouterProvider router={router} />
+			</AuthContext.Provider>
+		</UsersContext.Provider>
 	);
 }

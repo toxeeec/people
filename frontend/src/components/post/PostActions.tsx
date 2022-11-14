@@ -1,7 +1,10 @@
 import { ActionIcon, Group, Text } from "@mantine/core";
 import { IconHeart, IconMessageCircle2 } from "@tabler/icons";
 import { useCallback, useState } from "react";
-import { useDeletePostsPostIDLikes, usePutPostsPostIDLikes } from "../spec.gen";
+import {
+	useDeletePostsPostIDLikes,
+	usePutPostsPostIDLikes,
+} from "../../spec.gen";
 
 interface PostActionsProps {
 	id: number;
