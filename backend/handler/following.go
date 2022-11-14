@@ -15,7 +15,7 @@ func (h *handler) PutMeFollowingHandle(c echo.Context, handle people.HandleParam
 		return echo.ErrInternalServerError
 	}
 
-	err := h.us.Follow(userID, handle)
+	follows, err := h.us.Follow(userID, handle)
 	if errors.Is(err, user.ErrAlreadyFollowed) {
 		return echo.NewHTTPError(http.StatusConflict, err.Error())
 	}
@@ -28,7 +28,7 @@ func (h *handler) PutMeFollowingHandle(c echo.Context, handle people.HandleParam
 		return echo.ErrInternalServerError
 	}
 
-	return c.NoContent(http.StatusNoContent)
+	return c.JSON(http.StatusOK, follows)
 }
 
 func (h *handler) DeleteMeFollowingHandle(c echo.Context, handle people.HandleParam) error {
@@ -37,12 +37,12 @@ func (h *handler) DeleteMeFollowingHandle(c echo.Context, handle people.HandlePa
 		return echo.ErrInternalServerError
 	}
 
-	err := h.us.Unfollow(userID, handle)
+	follows, err := h.us.Unfollow(userID, handle)
 	if err != nil {
 		return echo.ErrNotFound
 	}
 
-	return c.NoContent(http.StatusNoContent)
+	return c.JSON(http.StatusOK, follows)
 }
 
 func (h *handler) GetMeFollowingHandle(c echo.Context, handle people.HandleParam) error {

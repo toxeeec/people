@@ -51,14 +51,8 @@ components:
         - tokens
         - user
 
-    User:
-      x-oapi-codegen-extra-tags:
-        db: user
+    Follows:
       properties:
-        handle:
-          type: string
-          x-oapi-codegen-extra-tags:
-            db: handle
         followers:
           type: integer
           x-go-type: uint
@@ -71,10 +65,31 @@ components:
           x-oapi-codegen-extra-tags:
             db: following
             fake: skip
+        isFollowing:
+          type: boolean
+          x-oapi-codegen-extra-tags:
+            db: is_following
+        isFollowed:
+          type: boolean
+          x-oapi-codegen-extra-tags:
+            db: is_followed
       required:
-        - handle
         - followers
         - following
+        - isFollowing
+        - isFollowed
+
+    User:
+      allOf:
+        - $ref: '#/components/schemas/Follows'
+        - type: object
+          properties:
+            handle:
+              type: string
+              x-oapi-codegen-extra-tags:
+                db: handle
+          required:
+            - handle
 
     Users:
       properties:
@@ -87,6 +102,22 @@ components:
       x-go-type: PaginationResult[User, string]
       required:
         - data
+
+    Likes:
+      properties:
+        likes:
+          type: integer
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: likes
+            fake: skip
+        isLiked:
+          type: boolean
+          x-oapi-codegen-extra-tags:
+            db: is_liked
+      required:
+        - likes
+        - isLiked
 
     Post:
       allOf:
@@ -131,22 +162,6 @@ components:
             - content
             - createdAt
             - replies 
-
-    Likes:
-      properties:
-        likes:
-          type: integer
-          x-go-type: uint
-          x-oapi-codegen-extra-tags:
-            db: likes
-            fake: skip
-        isLiked:
-          type: boolean
-          x-oapi-codegen-extra-tags:
-            db: is_liked
-      required:
-        - likes
-        - isLiked
 
     IDPaginationMeta:
       properties:

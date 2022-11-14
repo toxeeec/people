@@ -6,6 +6,7 @@ import (
 
 	"github.com/deepmap/oapi-codegen/pkg/testutil"
 	"github.com/stretchr/testify/assert"
+	people "github.com/toxeeec/people/backend"
 )
 
 func (suite *HandlerSuite) TestPutMeFollowingHandle() {
@@ -18,19 +19,17 @@ func (suite *HandlerSuite) TestPutMeFollowingHandle() {
 		"unknown handle":   {suite.unknownUser.Handle, http.StatusNotFound},
 		"same user":        {suite.user1.Handle, http.StatusNotFound},
 		"already followed": {suite.user2.Handle, http.StatusConflict},
-		"valid":            {suite.user3.Handle, http.StatusNoContent},
+		"valid":            {suite.user3.Handle, http.StatusOK},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
 			result := testutil.NewRequest().WithJWSAuth(suite.at1).Put(fmt.Sprintf("/me/following/%s", tc.handle)).Go(suite.T(), suite.e)
 			assert.Equal(suite.T(), tc.expected, result.Code())
 			if tc.expected < http.StatusBadRequest {
-				var followers uint
-				var following uint
-				suite.db.Get(&followers, "SELECT followers FROM user_profile WHERE handle = $1", tc.handle)
-				suite.db.Get(&following, "SELECT following FROM user_profile WHERE handle = $1", suite.user1.Handle)
-				assert.Equal(suite.T(), uint(1), followers)
-				assert.Equal(suite.T(), uint(2), following)
+				var follows people.Follows
+				result.UnmarshalJsonToObject(&follows)
+				assert.Equal(suite.T(), uint(1), follows.Followers)
+				assert.Equal(suite.T(), uint(0), follows.Following)
 			}
 		})
 	}
@@ -46,19 +45,17 @@ func (suite *HandlerSuite) TestDeleteMeFollowingHandle() {
 		"unknown handle": {suite.unknownUser.Handle, http.StatusNotFound},
 		"same user":      {suite.user1.Handle, http.StatusNotFound},
 		"not followed":   {suite.user3.Handle, http.StatusNotFound},
-		"valid":          {suite.user2.Handle, http.StatusNoContent},
+		"valid":          {suite.user2.Handle, http.StatusOK},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
 			result := testutil.NewRequest().WithJWSAuth(suite.at1).Delete(fmt.Sprintf("/me/following/%s", tc.handle)).Go(suite.T(), suite.e)
 			assert.Equal(suite.T(), tc.expected, result.Code())
 			if tc.expected < http.StatusBadRequest {
-				var followers uint
-				var following uint
-				suite.db.Get(&followers, "SELECT followers FROM user_profile WHERE handle = $1", tc.handle)
-				suite.db.Get(&following, "SELECT following FROM user_profile WHERE handle = $1", suite.user1.Handle)
-				assert.Equal(suite.T(), uint(0), followers)
-				assert.Equal(suite.T(), uint(0), following)
+				var follows people.Follows
+				result.UnmarshalJsonToObject(&follows)
+				assert.Equal(suite.T(), uint(0), follows.Followers)
+				assert.Equal(suite.T(), uint(0), follows.Following)
 			}
 		})
 	}

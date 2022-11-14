@@ -33,7 +33,7 @@ func (h *handler) PostRegister(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	user, err := h.us.Get(u.Handle)
+	user, err := h.us.Get(u.Handle, nil)
 	if err != nil {
 		go h.us.Delete(u.Handle)
 		return echo.ErrInternalServerError
@@ -58,7 +58,7 @@ func (h *handler) PostLogin(c echo.Context) error {
 		return echo.ErrInternalServerError
 	}
 
-	user, err := h.us.Get(u.Handle)
+	user, err := h.us.Get(u.Handle, nil)
 	if err != nil {
 		return echo.ErrInternalServerError
 	}

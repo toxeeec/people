@@ -17,10 +17,12 @@ type UserSuite struct {
 	user1       people.AuthUser
 	user2       people.AuthUser
 	user3       people.AuthUser
+	user4       people.AuthUser
 	unknownUser people.AuthUser
 	id1         uint
 	id2         uint
 	id3         uint
+	id4         uint
 }
 
 func (suite *UserSuite) TestCreate() {
@@ -52,7 +54,7 @@ func (suite *UserSuite) TestGetAuth() {
 }
 
 func (suite *UserSuite) TestGet() {
-	actual, err := suite.us.Get(suite.user1.Handle)
+	actual, err := suite.us.Get(suite.user1.Handle, nil)
 	assert.Equal(suite.T(), suite.user1.Handle, actual.Handle)
 	assert.NoError(suite.T(), err)
 
@@ -79,10 +81,12 @@ func (suite *UserSuite) SetupTest() {
 	gofakeit.Struct(&suite.user1)
 	gofakeit.Struct(&suite.user2)
 	gofakeit.Struct(&suite.user3)
+	gofakeit.Struct(&suite.user4)
 	gofakeit.Struct(&suite.unknownUser)
 	suite.id1, _ = suite.us.Create(suite.user1)
 	suite.id2, _ = suite.us.Create(suite.user2)
 	suite.id3, _ = suite.us.Create(suite.user3)
+	suite.id4, _ = suite.us.Create(suite.user4)
 }
 
 func TestUserSuite(t *testing.T) {

@@ -15,7 +15,7 @@ const (
 // AuthResponse defines model for AuthResponse.
 type AuthResponse struct {
 	Tokens Tokens `json:"tokens"`
-	User   User   `db:"user" json:"user"`
+	User   User   `json:"user"`
 }
 
 // AuthUser defines model for AuthUser.
@@ -29,6 +29,14 @@ type AuthUser struct {
 // Error defines model for Error.
 type Error struct {
 	Message string `json:"message"`
+}
+
+// Follows defines model for Follows.
+type Follows struct {
+	Followers   uint `db:"followers" fake:"skip" json:"followers"`
+	Following   uint `db:"following" fake:"skip" json:"following"`
+	IsFollowed  bool `db:"is_followed" json:"isFollowed"`
+	IsFollowing bool `db:"is_following" json:"isFollowing"`
 }
 
 // HandlePaginationMeta defines model for HandlePaginationMeta.
@@ -52,7 +60,7 @@ type Post struct {
 	Likes     uint           `db:"likes" fake:"skip" json:"likes"`
 	Replies   uint           `db:"replies" fake:"skip" json:"replies"`
 	RepliesTo *sql.NullInt32 `db:"replies_to" fake:"skip" json:"repliesTo,omitempty"`
-	User      *User          `db:"user" json:"user,omitempty"`
+	User      *User          `json:"user,omitempty"`
 }
 
 // Posts defines model for Posts.
@@ -66,9 +74,11 @@ type Tokens struct {
 
 // User defines model for User.
 type User struct {
-	Followers uint   `db:"followers" fake:"skip" json:"followers"`
-	Following uint   `db:"following" fake:"skip" json:"following"`
-	Handle    string `db:"handle" json:"handle"`
+	Followers   uint   `db:"followers" fake:"skip" json:"followers"`
+	Following   uint   `db:"following" fake:"skip" json:"following"`
+	Handle      string `db:"handle" json:"handle"`
+	IsFollowed  bool   `db:"is_followed" json:"isFollowed"`
+	IsFollowing bool   `db:"is_following" json:"isFollowing"`
 }
 
 // Users defines model for Users.

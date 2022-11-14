@@ -15,13 +15,14 @@ var (
 
 const (
 	selectIDByHandle = "SELECT user_id FROM user_profile WHERE handle = "
+	isFollowing      = " EXISTS(SELECT 1 FROM follower WHERE follower_id = user_profile.user_id AND user_id = $1) as is_following"
 )
 
 const (
-	queryFollow             = "INSERT INTO follower(user_id, follower_id) SELECT user_id, $1 FROM user_profile WHERE handle = $2 RETURNING user_id"
-	queryUnfollow           = "DELETE FROM follower WHERE follower_id = $1 AND user_id = (" + selectIDByHandle + "$2) RETURNING user_id"
-	queryIncrementFollowers = "UPDATE user_profile SET followers = followers + 1 WHERE user_id = $1"
-	queryDecrementFollowers = "UPDATE user_profile SET followers = followers -1 WHERE user_id = $1"
+	queryFollow             = "INSERT INTO follower(user_id, follower_id) SELECT user_id, $1 FROM user_profile WHERE handle = $2"
+	queryUnfollow           = "DELETE FROM follower WHERE follower_id = $1 AND user_id = (" + selectIDByHandle + "$2)"
+	queryIncrementFollowers = "UPDATE user_profile SET followers = followers + 1 WHERE handle = $2 RETURNING following, followers," + isFollowing
+	queryDecrementFollowers = "UPDATE user_profile SET followers = followers -1 WHERE handle = $2 RETURNING following, followers," + isFollowing
 	queryIncrementFollowing = "UPDATE user_profile SET following = following + 1 WHERE user_id = $1"
 	queryDecrementFollowing = "UPDATE user_profile SET following = following -1 WHERE user_id = $1"
 	queryIsFollowing        = "SELECT EXISTS(SELECT 1 FROM follower WHERE follower_id = $1 AND user_id = (" + selectIDByHandle + "$2))"
@@ -50,66 +51,67 @@ AND followed_at > (SELECT followed_at FROM follower WHERE follower_id = (` + sel
 var followingQueries = people.PaginationQueries(followingBase, end, followingBefore, followingAfter, followingBeforeAfter)
 var followersQueries = people.PaginationQueries(followersBase, end, followersBefore, followersAfter, followersBeforeAfter)
 
-func (s *service) Follow(id uint, handle string) error {
+func (s *service) Follow(id uint, handle string) (people.Follows, error) {
 	tx, err := s.db.Beginx()
 	if err != nil {
-		return err
+		return people.Follows{}, err
 	}
 	defer tx.Rollback()
 
-	var userID uint
-	err = tx.Get(&userID, queryFollow, id, handle)
+	_, err = tx.Exec(queryFollow, id, handle)
 	if err != nil {
 		var e *pq.Error
 		if errors.As(err, &e) {
 			if e.Constraint == "different_user" {
-				return ErrSameUser
+				return people.Follows{}, ErrSameUser
 			}
 			if e.Constraint == "follower_pkey" {
-				return ErrAlreadyFollowed
+				return people.Follows{}, ErrAlreadyFollowed
 			}
-			return err
 		}
-		return ErrInvalidHandle
+		return people.Follows{}, err
 	}
 
-	_, err = tx.Exec(queryIncrementFollowers, userID)
+	var follows people.Follows
+	err = tx.Get(&follows, queryIncrementFollowers, id, handle)
 	if err != nil {
-		return err
+		return people.Follows{}, ErrInvalidHandle
 	}
+	follows.IsFollowed = true
 
 	_, err = tx.Exec(queryIncrementFollowing, id)
 	if err != nil {
-		return err
+		return people.Follows{}, err
 	}
 
-	return tx.Commit()
+	return follows, tx.Commit()
 }
 
-func (s *service) Unfollow(id uint, handle string) error {
+func (s *service) Unfollow(id uint, handle string) (people.Follows, error) {
 	tx, err := s.db.Beginx()
 	if err != nil {
-		return err
+		return people.Follows{}, err
 	}
 	defer tx.Rollback()
 
-	var userID uint
-	err = tx.Get(&userID, queryUnfollow, id, handle)
+	_, err = tx.Exec(queryUnfollow, id, handle)
 	if err != nil {
-		return err
+		return people.Follows{}, err
 	}
 
-	_, err = tx.Exec(queryDecrementFollowers, userID)
+	var follows people.Follows
+	err = tx.Get(&follows, queryDecrementFollowers, id, handle)
 	if err != nil {
-		return err
+		return people.Follows{}, err
 	}
+	follows.IsFollowed = false
 
 	_, err = tx.Exec(queryDecrementFollowing, id)
 	if err != nil {
-		return err
+		return people.Follows{}, err
 	}
 
-	return tx.Commit()
+	return follows, tx.Commit()
 }
 
 func (s *service) IsFollowing(id uint, handle string) (bool, error) {

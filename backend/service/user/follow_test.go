@@ -8,27 +8,42 @@ import (
 
 func (suite *UserSuite) TestFollow() {
 	suite.us.Follow(suite.id1, suite.user2.Handle)
+	u, _ := suite.us.Get(suite.user1.Handle, nil)
+	assert.Equal(suite.T(), uint(1), u.Following)
+	suite.us.Follow(suite.id4, suite.user1.Handle)
 
 	tests := map[string]struct {
-		handle string
-		valid  bool
+		handle      string
+		valid       bool
+		isFollowing bool
 	}{
-		"unknown handle":   {suite.unknownUser.Handle, false},
-		"same user":        {suite.user1.Handle, false},
-		"already followed": {suite.user2.Handle, false},
-		"valid":            {suite.user3.Handle, true},
+		"unknown handle":   {suite.unknownUser.Handle, false, false},
+		"same user":        {suite.user1.Handle, false, false},
+		"already followed": {suite.user2.Handle, false, false},
+		"valid":            {suite.user3.Handle, true, false},
+		"is following":     {suite.user4.Handle, true, true},
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
-			err := suite.us.Follow(suite.id1, tc.handle)
+			follows, err := suite.us.Follow(suite.id1, tc.handle)
 			assert.Equal(suite.T(), tc.valid, err == nil)
 			if tc.valid {
-				var followers uint
-				var following uint
-				suite.db.Get(&followers, "SELECT followers FROM user_profile WHERE handle = $1", tc.handle)
-				suite.db.Get(&following, "SELECT following FROM user_profile WHERE handle = $1", suite.user1.Handle)
-				assert.Equal(suite.T(), uint(1), followers)
-				assert.Equal(suite.T(), uint(2), following)
+				assert.Equal(suite.T(), uint(1), follows.Followers)
+
+				if tc.isFollowing {
+					assert.Equal(suite.T(), uint(1), follows.Following)
+					assert.True(suite.T(), follows.IsFollowing)
+					u, _ := suite.us.Get(suite.user1.Handle, &suite.id4)
+					assert.True(suite.T(), u.IsFollowing)
+					assert.True(suite.T(), u.IsFollowed)
+				} else {
+					assert.Equal(suite.T(), uint(0), follows.Following)
+					assert.False(suite.T(), follows.IsFollowing)
+					u, _ := suite.us.Get(suite.user1.Handle, &suite.id3)
+					assert.True(suite.T(), u.IsFollowing)
+					assert.False(suite.T(), u.IsFollowed)
+				}
+
 			}
 		})
 	}
@@ -36,6 +51,8 @@ func (suite *UserSuite) TestFollow() {
 
 func (suite *UserSuite) TestUnfollow() {
 	suite.us.Follow(suite.id1, suite.user2.Handle)
+	u, _ := suite.us.Get(suite.user1.Handle, nil)
+	assert.Equal(suite.T(), uint(1), u.Following)
 
 	tests := map[string]struct {
 		handle string
@@ -48,15 +65,15 @@ func (suite *UserSuite) TestUnfollow() {
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
-			err := suite.us.Unfollow(suite.id1, tc.handle)
+			follows, err := suite.us.Unfollow(suite.id1, tc.handle)
 			assert.Equal(suite.T(), tc.valid, err == nil)
 			if tc.valid {
-				var followers uint
-				var following uint
-				suite.db.Get(&followers, "SELECT followers FROM user_profile WHERE handle = $1", tc.handle)
-				suite.db.Get(&following, "SELECT following FROM user_profile WHERE handle = $1", suite.user1.Handle)
-				assert.Equal(suite.T(), uint(0), followers)
-				assert.Equal(suite.T(), uint(0), following)
+				assert.Equal(suite.T(), uint(0), follows.Followers)
+				assert.Equal(suite.T(), uint(0), follows.Following)
+				assert.False(suite.T(), follows.IsFollowed)
+
+				u, _ := suite.us.Get(suite.user1.Handle, nil)
+				assert.Equal(suite.T(), uint(0), u.Following)
 			}
 		})
 	}

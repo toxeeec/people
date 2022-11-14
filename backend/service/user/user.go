@@ -14,7 +14,8 @@ func NewService(db *sqlx.DB) people.UserService {
 }
 
 const (
-	selectUser = "SELECT handle, following, followers FROM user_profile"
+	isFollowed = " EXISTS(SELECT 1 FROM follower WHERE follower_id = $1 AND user_id = user_profile.user_id) as is_followed"
+	selectUser = "SELECT handle, following, followers," + isFollowing + "," + isFollowed + " FROM user_profile"
 )
 
 const (
@@ -22,7 +23,7 @@ const (
 	queryCreate  = "INSERT INTO user_profile(handle, hash) VALUES($1, $2) RETURNING user_id"
 	queryDelete  = "DELETE FROM user_profile WHERE handle = $1"
 	queryGetAuth = "SELECT user_id, handle, hash FROM user_profile WHERE handle = $1"
-	queryGet     = selectUser + " WHERE handle = $1"
+	queryGet     = selectUser + " WHERE handle = $2"
 )
 
 func (s *service) Exists(handle string) bool {
@@ -52,7 +53,10 @@ func (s *service) GetAuth(handle string) (people.AuthUser, error) {
 	return u, s.db.Get(&u, queryGetAuth, handle)
 }
 
-func (s *service) Get(handle string) (people.User, error) {
+func (s *service) Get(handle string, id *uint) (people.User, error) {
+	if id == nil {
+		id = new(uint)
+	}
 	var u people.User
-	return u, s.db.Get(&u, queryGet, handle)
+	return u, s.db.Get(&u, queryGet, id, handle)
 }
