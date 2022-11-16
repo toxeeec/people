@@ -1,22 +1,22 @@
 import { createContext } from "react";
-import { Tokens, User } from "../models";
+import { Tokens } from "../models";
 
 export interface AuthValues {
-	user?: User;
-	isAuthenticated: boolean;
-	accessToken: string;
-	refreshToken: string;
+	handle: string | null;
+	accessToken: string | null;
+	refreshToken: string | null;
 }
 
 export interface SetAuthProps {
 	tokens?: Tokens;
-	user?: User;
+	handle?: string;
 }
 
 interface AuthContextType {
-	auth: AuthValues;
+	getAuth: () => AuthValues;
 	setAuth: (_props: SetAuthProps) => void;
 	clearAuth: () => void;
+	isAuthenticated: boolean;
 }
 
 export default createContext<AuthContextType | null>(null);

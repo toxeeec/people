@@ -1,5 +1,5 @@
 import Axios, { AxiosError, AxiosRequestConfig } from "axios";
-import { SetAuthProps } from "./context/AuthContext";
+import { AuthValues, SetAuthProps } from "./context/AuthContext";
 import { postRefresh } from "./spec.gen";
 
 export const AXIOS_INSTANCE = Axios.create({
@@ -25,31 +25,43 @@ export const customInstance = <T>(
 	return promise;
 };
 
-export function createRequestInterceptor(accessToken: string) {
+export function createRequestInterceptor(getAuth: () => AuthValues) {
 	return AXIOS_INSTANCE.interceptors.request.use((config) => {
-		config.headers = {
-			...config.headers,
-			Authorization: `Bearer ${accessToken}`,
-		};
+		console.log(config.url);
+		const { accessToken } = getAuth();
+		if (accessToken) {
+			config.headers = {
+				...config.headers,
+				Authorization: `Bearer ${accessToken}`,
+			};
+		}
 		return config;
 	});
 }
+
 export function createResponseInterceptor(
-	refreshToken: string,
+	getAuth: () => AuthValues,
 	setAuth: (_props: SetAuthProps) => void,
 	clearAuth: () => void
 ) {
 	return AXIOS_INSTANCE.interceptors.response.use(
-		(res) => res,
+		(res) => {
+			return res;
+		},
 		(err: AxiosError) => {
 			if (err.response?.status === 403 && err.config?.url !== "/refresh") {
-				postRefresh({ refreshToken: refreshToken })
-					.then((tokens) => {
-						setAuth({ tokens });
-					})
-					.catch(() => {
-						clearAuth();
-					});
+				const { refreshToken } = getAuth();
+				if (refreshToken) {
+					postRefresh({ refreshToken: refreshToken })
+						.then((tokens) => {
+							setAuth({ tokens });
+						})
+						.catch(() => {
+							clearAuth();
+						});
+				} else {
+					clearAuth();
+				}
 			}
 			return Promise.reject(err);
 		}

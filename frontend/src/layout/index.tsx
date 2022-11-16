@@ -5,11 +5,11 @@ import Footer from "./Footer";
 import LayoutHeader from "./LayoutHeader";
 
 export default function Layout() {
-	const { auth } = useContext(AuthContext)!;
+	const { isAuthenticated } = useContext(AuthContext)!;
 	return (
 		<>
-			{auth.isAuthenticated ? <LayoutHeader /> : null}
-			{auth.isAuthenticated ? null : <Footer />}
+			{isAuthenticated ? <LayoutHeader /> : null}
+			{isAuthenticated ? null : <Footer />}
 			<Outlet />
 		</>
 	);

@@ -30,6 +30,7 @@ import type {
 	Users,
 	GetMeFollowingParams,
 	GetMeFollowersParams,
+	User,
 	GetUsersHandleFollowingParams,
 	GetUsersHandleFollowersParams,
 	Post,
@@ -42,7 +43,7 @@ import { customInstance } from "./custom-instance";
 import type { ErrorType } from "./custom-instance";
 
 // eslint-disable-next-line
-  type SecondParameter<T extends (...args: any) => any> = T extends (
+type SecondParameter<T extends (...args: any) => any> = T extends (
 	config: any,
 	args: infer P
 ) => any
@@ -257,7 +258,13 @@ export const useGetMeFeed = <
 	const query = useQuery<Awaited<ReturnType<typeof getMeFeed>>, TError, TData>(
 		queryKey,
 		queryFn,
-		queryOptions
+		{
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
 	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
@@ -324,6 +331,10 @@ export const useGetMeFollowingHandle = <
 		TData
 	>(queryKey, queryFn, {
 		enabled: !!handle,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
 		...queryOptions,
 	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -497,9 +508,13 @@ export const useGetMeFollowing = <
 		Awaited<ReturnType<typeof getMeFollowing>>,
 		TError,
 		TData
-	>(queryKey, queryFn, queryOptions) as UseQueryResult<TData, TError> & {
-		queryKey: QueryKey;
-	};
+	>(queryKey, queryFn, {
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -565,6 +580,10 @@ export const useGetMeFollowersHandle = <
 		TData
 	>(queryKey, queryFn, {
 		enabled: !!handle,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
 		...queryOptions,
 	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -622,9 +641,73 @@ export const useGetMeFollowers = <
 		Awaited<ReturnType<typeof getMeFollowers>>,
 		TError,
 		TData
-	>(queryKey, queryFn, queryOptions) as UseQueryResult<TData, TError> & {
-		queryKey: QueryKey;
-	};
+	>(queryKey, queryFn, {
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+	query.queryKey = queryKey;
+
+	return query;
+};
+
+export const getUsersHandle = (
+	handle: string,
+	options?: SecondParameter<typeof customInstance>,
+	signal?: AbortSignal
+) => {
+	return customInstance<User>(
+		{ url: `/users/${handle}`, method: "get", signal },
+		options
+	);
+};
+
+export const getGetUsersHandleQueryKey = (handle: string) => [
+	`/users/${handle}`,
+];
+
+export type GetUsersHandleQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getUsersHandle>>
+>;
+export type GetUsersHandleQueryError = ErrorType<NotFoundResponse>;
+
+export const useGetUsersHandle = <
+	TData = Awaited<ReturnType<typeof getUsersHandle>>,
+	TError = ErrorType<NotFoundResponse>
+>(
+	handle: string,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getUsersHandle>>,
+			TError,
+			TData
+		>;
+		request?: SecondParameter<typeof customInstance>;
+	}
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetUsersHandleQueryKey(handle);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersHandle>>> = ({
+		signal,
+	}) => getUsersHandle(handle, requestOptions, signal);
+
+	const query = useQuery<
+		Awaited<ReturnType<typeof getUsersHandle>>,
+		TError,
+		TData
+	>(queryKey, queryFn, {
+		enabled: !!handle,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -687,6 +770,10 @@ export const useGetUsersHandleFollowing = <
 		TData
 	>(queryKey, queryFn, {
 		enabled: !!handle,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
 		...queryOptions,
 	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -751,6 +838,10 @@ export const useGetUsersHandleFollowers = <
 		TData
 	>(queryKey, queryFn, {
 		enabled: !!handle,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
 		...queryOptions,
 	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -865,6 +956,10 @@ export const useGetPostsPostID = <
 		TData
 	>(queryKey, queryFn, {
 		enabled: !!postID,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
 		...queryOptions,
 	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -983,6 +1078,10 @@ export const useGetUsersHandlePosts = <
 		TData
 	>(queryKey, queryFn, {
 		enabled: !!handle,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
 		...queryOptions,
 	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -1044,6 +1143,10 @@ export const useGetPostsPostIDReplies = <
 		TData
 	>(queryKey, queryFn, {
 		enabled: !!postID,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
 		...queryOptions,
 	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

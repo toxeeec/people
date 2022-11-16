@@ -1,11 +1,9 @@
-import { Button, HoverCard } from "@mantine/core";
-import { useCallback, useContext, useState } from "react";
+import { HoverCard } from "@mantine/core";
+import { useContext, useState } from "react";
 import UsersContext from "../../context/UsersContext";
-import {
-	useDeleteMeFollowingHandle,
-	usePutMeFollowingHandle,
-} from "../../spec.gen";
+import { User } from "../../models";
 import AccountInfo from "../AccountInfo";
+import FollowButton from "../FollowButton";
 
 interface ProfileHoverCardProps {
 	handle: string;
@@ -16,41 +14,19 @@ export default function ProfileHoverCard({
 	children,
 	handle,
 }: ProfileHoverCardProps) {
-	const { mutate: follow } = usePutMeFollowingHandle();
-	const { mutate: unfollow } = useDeleteMeFollowingHandle();
-	const [isFollowed, setIsFollowed] = useState(false);
-	const usersCtx = useContext(UsersContext);
+	const usersCtx = useContext(UsersContext)!;
+	const [user, setUser] = useState(usersCtx.users.get(handle)!);
 
-	const handleOpen = () => {
-		const user = usersCtx?.users[handle];
-		setIsFollowed(user?.isFollowed || false);
+	const updateUser = (u: Partial<User>) => {
+		setUser(usersCtx.setUser(handle, u));
 	};
 
-	const handleFollow = useCallback(() => {
-		const fn = isFollowed ? unfollow : follow;
-		fn(
-			{ handle },
-			{
-				onSuccess(follows) {
-					usersCtx?.setUser(handle, follows);
-					setIsFollowed(follows.isFollowed);
-				},
-			}
-		);
-	}, [follow, unfollow, handle, isFollowed, usersCtx]);
-
 	return (
-		<HoverCard onOpen={handleOpen}>
+		<HoverCard onOpen={() => setUser(usersCtx.users.get(handle)!)}>
 			<HoverCard.Target>{children}</HoverCard.Target>
 			<HoverCard.Dropdown>
-				<AccountInfo handle={handle}>
-					<Button
-						onClick={handleFollow}
-						variant={isFollowed ? "outline" : "filled"}
-						radius="xl"
-					>
-						{isFollowed ? "Unfollow" : "Follow"}
-					</Button>
+				<AccountInfo user={user!}>
+					<FollowButton user={user} updateUser={updateUser} />
 				</AccountInfo>
 			</HoverCard.Dropdown>
 		</HoverCard>

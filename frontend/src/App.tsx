@@ -1,11 +1,12 @@
-import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useContext, useEffect } from "react";
 import {
 	createBrowserRouter,
 	redirect,
 	RouterProvider,
 } from "react-router-dom";
 import AuthContext from "./context/AuthContext";
-import UsersContext, { initialUsersContext } from "./context/UsersContext";
+import UsersContext from "./context/UsersContext";
 import {
 	AXIOS_INSTANCE,
 	createRequestInterceptor,
@@ -15,29 +16,33 @@ import useAuth from "./hooks/useAuth";
 import Layout from "./layout";
 import Auth from "./pages/Auth";
 import Home from "./pages/Home";
+import Profile from "./pages/Profile";
+import { getUsersHandle } from "./spec.gen";
 
 export default function App() {
-	const { auth, setAuth, clearAuth } = useAuth();
+	const { getAuth, setAuth, clearAuth, isAuthenticated } = useAuth();
+	const queryClient = useQueryClient();
+	const usersCtx = useContext(UsersContext);
 
 	useEffect(() => {
-		const requestInterceptor = createRequestInterceptor(auth.accessToken);
+		const requestInterceptor = createRequestInterceptor(getAuth);
 		const responseInterceptor = createResponseInterceptor(
-			auth.refreshToken,
+			getAuth,
 			setAuth,
 			clearAuth
 		);
-
 		return () => {
 			AXIOS_INSTANCE.interceptors.request.eject(requestInterceptor);
 			AXIOS_INSTANCE.interceptors.response.eject(responseInterceptor);
 		};
-	}, [clearAuth, auth, setAuth]);
+	}, [getAuth, setAuth, clearAuth]);
+
 	const router = createBrowserRouter([
 		{
 			index: true,
 			element: <Auth />,
 			loader: () => {
-				if (auth.isAuthenticated) {
+				if (isAuthenticated) {
 					return redirect("/home");
 				}
 			},
@@ -49,19 +54,34 @@ export default function App() {
 					path: "/home",
 					element: <Home />,
 					loader: () => {
-						if (!auth.isAuthenticated) {
+						if (!isAuthenticated) {
 							return redirect("/");
 						}
+					},
+				},
+				{
+					path: "/:handle",
+					element: <Profile />,
+					loader: async ({ params }) => {
+						return queryClient.fetchQuery({
+							queryKey: [params.handle!],
+							queryFn: () =>
+								getUsersHandle(params.handle!).then((u) => {
+									usersCtx?.setUser(u.handle, u);
+									return u;
+								}),
+						});
 					},
 				},
 			],
 		},
 	]);
+
 	return (
-		<UsersContext.Provider value={initialUsersContext}>
-			<AuthContext.Provider value={{ auth, setAuth, clearAuth }}>
-				<RouterProvider router={router} />
-			</AuthContext.Provider>
-		</UsersContext.Provider>
+		<AuthContext.Provider
+			value={{ getAuth, setAuth, clearAuth, isAuthenticated }}
+		>
+			<RouterProvider router={router} />
+		</AuthContext.Provider>
 	);
 }

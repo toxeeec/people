@@ -37,8 +37,8 @@ export default function Login({
 	const handleSubmit = (values: AuthUser) => {
 		const data = { data: values };
 		mutate(data, {
-			onSuccess(data) {
-				setAuth(data);
+			onSuccess(res) {
+				setAuth({ tokens: res.tokens, handle: res.user.handle });
 				setLoginOpened(false);
 			},
 			onError(error) {

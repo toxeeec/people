@@ -9,33 +9,32 @@ import {
 	UnstyledButton,
 } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router";
 import AccountInfo from "../components/AccountInfo";
+import AuthContext from "../context/AuthContext";
 import UsersContext from "../context/UsersContext";
-import useAuth from "../hooks/useAuth";
 
 export default function LayoutHeader() {
-	const [opened, setOpened] = useState(false);
-	const { clearAuth, auth } = useAuth();
+	const [isOpened, setIsOpened] = useState(false);
+	const { getAuth, clearAuth } = useContext(AuthContext)!;
 	const usersCtx = useContext(UsersContext);
-	usersCtx?.setUser(auth.user!.handle, auth.user!);
-
+	const user = usersCtx!.users.get(getAuth().handle!)!;
+	const params = useParams();
 	const location = useLocation();
 	const [route, setRoute] = useState("");
 	useEffect(() => {
-		switch (location.pathname) {
-			case "/home":
-				setRoute("Home");
+		if (location.pathname === "/home") {
+			setRoute("Home");
 		}
-	}, [location]);
+	}, [params, location]);
 
 	return (
 		<>
 			<Space h={60} />
 			<Header height={60} fixed>
 				<Group h={60} align="center">
-					<UnstyledButton onClick={() => setOpened(true)} ml={11}>
-						<Avatar radius="xl" />
+					<UnstyledButton onClick={() => setIsOpened(true)} ml={11}>
+						<Avatar radius="xl" onClick={() => setIsOpened(true)} />
 					</UnstyledButton>
 					<Text fz="xl" fw={700}>
 						{route}
@@ -43,13 +42,13 @@ export default function LayoutHeader() {
 				</Group>
 			</Header>
 			<Drawer
-				opened={opened}
-				onClose={() => setOpened(false)}
+				opened={isOpened}
+				onClose={() => setIsOpened(false)}
 				title="Account info"
 				padding="md"
 				size="md"
 			>
-				<AccountInfo handle={auth.user!.handle} />
+				<AccountInfo user={user} />
 				<Button onClick={clearAuth} fullWidth radius="xl" mt="xl">
 					Logout
 				</Button>

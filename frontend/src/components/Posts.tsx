@@ -25,40 +25,29 @@ interface QueryFunctionArgs {
 	pageParam?: PaginationParams;
 }
 
-export default function Posts({ query }: PostsProps) {
+function Posts({ query }: PostsProps) {
+	const usersCtx = useContext(UsersContext);
+	const { ref, inView } = useInView();
+
 	function queryFn({ pageParam }: QueryFunctionArgs) {
 		pageParam = { ...pageParam, limit: queryLimit };
 		return query(pageParam);
 	}
-	const {
-		data,
-		refetch,
-		fetchNextPage,
-		hasNextPage,
-		isLoading,
-		isFetchingNextPage,
-		isError,
-	} = useInfiniteQuery({
-		queryKey: ["feed"],
-		queryFn,
-		getNextPageParam: (lastPage) => {
-			if (!lastPage.meta) return undefined;
-			return { before: lastPage.meta?.oldest };
-		},
-		enabled: false,
-	});
-	useEffect(() => {
-		refetch();
-	}, [refetch]);
+	const { isLoading, data, hasNextPage, isFetching, fetchNextPage } =
+		useInfiniteQuery({
+			queryKey: ["feed"],
+			queryFn,
+			getNextPageParam: (lastPage) => {
+				if (!lastPage.meta) return undefined;
+				return { before: lastPage.meta?.oldest };
+			},
+		});
 
-	const { ref, inView } = useInView();
 	useEffect(() => {
-		if (inView && hasNextPage && !isFetchingNextPage && !isError) {
+		if (inView && hasNextPage) {
 			fetchNextPage();
 		}
-	}, [fetchNextPage, inView, hasNextPage, isFetchingNextPage, isError]);
-
-	const users = useContext(UsersContext);
+	}, [fetchNextPage, inView, hasNextPage]);
 
 	return (
 		<Container px={0}>
@@ -66,12 +55,12 @@ export default function Posts({ query }: PostsProps) {
 				<CenterLoader />
 			) : (
 				data?.pages.map((group, i) =>
-					i > 0 && i === data.pages.length - 1 && isFetchingNextPage ? (
+					i > 0 && i === data.pages.length - 1 && isFetching ? (
 						<CenterLoader key={i} />
 					) : (
 						<Fragment key={i}>
 							{group.data.map((post) => {
-								users?.setUser(post.user!.handle, post.user!);
+								usersCtx?.setUser(post.user!.handle, post.user!);
 								return <Post data={post} key={post.createdAt} ref={ref} />;
 							})}
 						</Fragment>
@@ -81,3 +70,5 @@ export default function Posts({ query }: PostsProps) {
 		</Container>
 	);
 }
+
+export default Posts;

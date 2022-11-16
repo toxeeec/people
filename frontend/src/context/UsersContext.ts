@@ -1,20 +1,16 @@
 import { createContext } from "react";
 import { User } from "../models";
 
-type Users = { [key: string]: Partial<User> };
-
 interface UsersContextType {
-	users: Users;
-	setUser: (_handle: string, _user: Partial<User>) => void;
+	users: Map<string, Partial<User>>;
+	setUser: (_handle: string, _user: Partial<User>) => Partial<User>;
 }
 
 export const initialUsersContext: UsersContextType = {
-	users: {},
+	users: new Map(),
 	setUser(handle, user) {
-		this.users = {
-			...this.users,
-			[handle]: { ...this.users[handle], ...user },
-		};
+		this.users.set(handle, { ...this.users.get(handle), ...user });
+		return this.users.get(handle)!;
 	},
 };
 

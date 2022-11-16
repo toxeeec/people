@@ -1,24 +1,34 @@
-import { Avatar, Group } from "@mantine/core";
-import { useContext } from "react";
-import UsersContext from "../context/UsersContext";
+import { Avatar, Group, Text } from "@mantine/core";
+import { Link } from "react-router-dom";
+import { User } from "../models";
 
 interface AccountInfoProps {
-	handle: string;
+	user: Partial<User>;
 	children?: React.ReactNode;
 }
 
-export default function AccountInfo({ handle, children }: AccountInfoProps) {
-	const user = useContext(UsersContext)?.users[handle];
+export default function AccountInfo({ user, children }: AccountInfoProps) {
 	return (
 		<>
 			<Group align="start" position="apart">
-				<Avatar size="lg" radius="xl" mb="xs" />
+				<Avatar
+					size="lg"
+					radius="xl"
+					mb="xs"
+					component={Link}
+					to={`/${user!.handle}`}
+				/>
 				{children}
 			</Group>
-			<b>@{user?.handle}</b>
+			<Text component={Link} to={`/${user!.handle}`} weight="bold">
+				@{user?.handle}
+			</Text>
 			<Group mt="xs">
 				<span>
-					<b>{user?.following}</b> Following
+					<Text component={Link} to={`/${user!.handle}`} weight="bold">
+						{user?.following}
+					</Text>
+					{" Following"}
 				</span>
 				<span>
 					<b>{user?.followers}</b>

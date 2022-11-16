@@ -1,50 +1,55 @@
-import { useLocalStorage } from "@mantine/hooks";
-import { useMemo } from "react";
-import { AuthValues } from "../context/AuthContext";
-import { Tokens, User } from "../models";
+import { useContext, useState } from "react";
+import UsersContext from "../context/UsersContext";
+import { Tokens } from "../models";
+import { useGetUsersHandle } from "../spec.gen";
 
 export default function useAuth() {
-	const [accessToken, setAccessToken] = useLocalStorage({
-		key: "accessToken",
-		defaultValue: "",
-		getInitialValueInEffect: false,
-	});
-	const [refreshToken, setRefreshToken] = useLocalStorage({
-		key: "refreshToken",
-		defaultValue: "",
-		getInitialValueInEffect: false,
-	});
-	const [userString, setUserString] = useLocalStorage({
-		key: "user",
-		defaultValue: "",
-		getInitialValueInEffect: false,
+	const getAuth = () => {
+		const accessToken = localStorage.getItem("accessToken");
+		const refreshToken = localStorage.getItem("refreshToken");
+		const handle = localStorage.getItem("handle");
+		return { accessToken, refreshToken, handle };
+	};
+
+	const [isAuthenticated, setIsAuthenticated] = useState(!!getAuth().handle);
+	const usersCtx = useContext(UsersContext);
+
+	const { data: user } = useGetUsersHandle(getAuth().handle!, {
+		query: { enabled: isAuthenticated },
 	});
 
-	const auth: AuthValues = useMemo(() => {
-		const isAuthenticated = !!(accessToken && refreshToken);
-		const user = userString ? JSON.parse(userString) : undefined;
-		return { accessToken, refreshToken, isAuthenticated, user };
-	}, [accessToken, refreshToken, userString]);
+	if (user) {
+		usersCtx?.setUser(user!.handle!, user!);
+	}
 
-	const setAuth = ({ tokens, user }: { tokens?: Tokens; user?: User }) => {
+	const setAuth = ({
+		tokens,
+		handle,
+	}: {
+		tokens?: Tokens;
+		handle?: string;
+	}) => {
 		if (tokens) {
-			setAccessToken(tokens.accessToken);
-			setRefreshToken(tokens.refreshToken);
+			localStorage.setItem("accessToken", tokens.accessToken);
+			localStorage.setItem("refreshToken", tokens.refreshToken);
 		}
-		if (user) {
-			setUserString(JSON.stringify(user));
+		if (handle) {
+			localStorage.setItem("handle", handle);
 		}
+		setIsAuthenticated(true);
 	};
 
 	const clearAuth = () => {
-		setAccessToken("");
-		setRefreshToken("");
-		setUserString("");
+		localStorage.removeItem("accessToken");
+		localStorage.removeItem("refreshToken");
+		localStorage.removeItem("handle");
+		setIsAuthenticated(false);
 	};
 
 	return {
-		auth,
+		getAuth,
 		setAuth,
 		clearAuth,
+		isAuthenticated,
 	};
 }
