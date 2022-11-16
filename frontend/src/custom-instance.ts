@@ -27,7 +27,6 @@ export const customInstance = <T>(
 
 export function createRequestInterceptor(getAuth: () => AuthValues) {
 	return AXIOS_INSTANCE.interceptors.request.use((config) => {
-		console.log(config.url);
 		const { accessToken } = getAuth();
 		if (accessToken) {
 			config.headers = {
