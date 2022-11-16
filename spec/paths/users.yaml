@@ -1,6 +1,25 @@
 components:
   $ref: ../components/main.yaml#/components
 
+user:
+  get:
+    tags:
+      - users
+    security:
+      - bearerAuth: []
+      - {}
+    parameters:
+      - $ref: '#/components/parameters/handleParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      404:
+        $ref: '#/components/responses/NotFound'
+
 following:
   get:
     tags:
