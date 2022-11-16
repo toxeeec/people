@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useContext, useEffect } from "react";
-import { Posts as PostsData } from "../models";
+import { Posts as PostsData, User } from "../models";
 import { Container } from "@mantine/core";
 import Post from "../components/post";
 import { useInView } from "react-intersection-observer";
@@ -15,17 +15,18 @@ interface PaginationParams {
 	after?: number;
 }
 
-type Query = (_props: PaginationParams) => Promise<PostsData>;
+export type Query = (_params: PaginationParams) => Promise<PostsData>;
 
 interface PostsProps {
 	query: Query;
+	user?: User;
 }
 
 interface QueryFunctionArgs {
 	pageParam?: PaginationParams;
 }
 
-function Posts({ query }: PostsProps) {
+function Posts({ query, user }: PostsProps) {
 	const usersCtx = useContext(UsersContext);
 	const { ref, inView } = useInView();
 
@@ -60,7 +61,11 @@ function Posts({ query }: PostsProps) {
 					) : (
 						<Fragment key={i}>
 							{group.data.map((post) => {
-								usersCtx?.setUser(post.user!.handle, post.user!);
+								{
+									post.user
+										? usersCtx?.setUser(post.user.handle, post.user)
+										: (post.user = user);
+								}
 								return <Post data={post} key={post.createdAt} ref={ref} />;
 							})}
 						</Fragment>

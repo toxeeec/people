@@ -11,7 +11,7 @@ interface PostProps {
 
 const Post = forwardRef<HTMLDivElement, PostProps>(({ data }, ref) => {
 	Post.displayName = "Post";
-	const { user, content } = data;
+	const { content, user } = data;
 	return (
 		<Paper ref={ref} p="xs" radius="xs" withBorder>
 			<Group align="center">

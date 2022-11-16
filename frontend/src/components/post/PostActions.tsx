@@ -19,8 +19,10 @@ export default function PostActions({
 	isLiked: initialIsLiked,
 	id,
 }: PostActionsProps) {
-	const { mutate: like } = usePutPostsPostIDLikes();
-	const { mutate: unlike } = useDeletePostsPostIDLikes();
+	const { mutate: like } = usePutPostsPostIDLikes({ mutation: { retry: 1 } });
+	const { mutate: unlike } = useDeletePostsPostIDLikes({
+		mutation: { retry: 1 },
+	});
 	const [isLiked, setIsLiked] = useState(initialIsLiked);
 	const [likes, setLikes] = useState(initialLikes);
 	const handleLike = useCallback(() => {
