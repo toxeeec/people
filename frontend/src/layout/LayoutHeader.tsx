@@ -11,7 +11,11 @@ import { useLocation, useParams } from "react-router";
 import LayoutDrawer from "./LayoutDrawer";
 import LayoutGoBack from "./LayoutGoBack";
 
-export default function LayoutHeader() {
+export default function LayoutHeader({
+	isAuthenticated,
+}: {
+	isAuthenticated: boolean;
+}) {
 	const [isOpened, setIsOpened] = useState(false);
 	const params = useParams();
 	const location = useLocation();
@@ -20,6 +24,8 @@ export default function LayoutHeader() {
 	useEffect(() => {
 		if (location.pathname === "/home") {
 			setRoute("Home");
+		} else if (params.postID) {
+			setRoute("Post");
 		} else if (params.handle) {
 			setRoute(params.handle);
 		}
@@ -32,7 +38,7 @@ export default function LayoutHeader() {
 			<Space h={60} />
 			<Header height={60} fixed>
 				<Group h={60} align="center" px="xs">
-					{isHome ? (
+					{isHome && isAuthenticated ? (
 						<UnstyledButton onClick={() => setIsOpened(true)}>
 							<Avatar radius="xl" onClick={() => setIsOpened(true)} />
 						</UnstyledButton>

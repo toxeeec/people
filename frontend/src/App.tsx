@@ -16,8 +16,9 @@ import useAuth from "./hooks/useAuth";
 import Layout from "./layout";
 import Auth from "./pages/Auth";
 import Home from "./pages/Home";
+import MainPost from "./pages/MainPost";
 import Profile from "./pages/Profile";
-import { getUsersHandle } from "./spec.gen";
+import { getPostsPostID, getUsersHandle } from "./spec.gen";
 
 export default function App() {
 	const { getAuth, setAuth, clearAuth, isAuthenticated } = useAuth();
@@ -47,6 +48,7 @@ export default function App() {
 				}
 			},
 		},
+
 		{
 			element: <Layout />,
 			children: [
@@ -59,17 +61,29 @@ export default function App() {
 						}
 					},
 				},
+
 				{
 					path: "/:handle",
 					element: <Profile />,
 					loader: async ({ params }) => {
 						return queryClient.fetchQuery({
-							queryKey: [params.handle!],
+							queryKey: ["user", params.handle],
 							queryFn: () =>
 								getUsersHandle(params.handle!).then((u) => {
 									usersCtx?.setUser(u.handle, u);
 									return u;
 								}),
+						});
+					},
+				},
+
+				{
+					path: "/:handle/:postID",
+					element: <MainPost />,
+					loader: async ({ params }) => {
+						return queryClient.fetchQuery({
+							queryKey: ["post", params.postID],
+							queryFn: () => getPostsPostID(parseInt(params.postID!)),
 						});
 					},
 				},

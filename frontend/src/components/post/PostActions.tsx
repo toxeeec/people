@@ -1,6 +1,6 @@
 import { ActionIcon, Group, Text } from "@mantine/core";
 import { IconHeart, IconMessageCircle2 } from "@tabler/icons";
-import { useCallback, useState } from "react";
+import { MouseEvent, useCallback, useState } from "react";
 import {
 	useDeletePostsPostIDLikes,
 	usePutPostsPostIDLikes,
@@ -25,18 +25,22 @@ export default function PostActions({
 	});
 	const [isLiked, setIsLiked] = useState(initialIsLiked);
 	const [likes, setLikes] = useState(initialLikes);
-	const handleLike = useCallback(() => {
-		const fn = isLiked ? unlike : like;
-		fn(
-			{ postID: id },
-			{
-				onSuccess(likes) {
-					setIsLiked((liked) => !liked);
-					setLikes(likes.likes);
-				},
-			}
-		);
-	}, [id, isLiked, like, unlike]);
+	const handleLike = useCallback(
+		(e: MouseEvent) => {
+			e.stopPropagation();
+			const fn = isLiked ? unlike : like;
+			fn(
+				{ postID: id },
+				{
+					onSuccess(likes) {
+						setIsLiked((liked) => !liked);
+						setLikes(likes.likes);
+					},
+				}
+			);
+		},
+		[id, isLiked, like, unlike]
+	);
 	return (
 		<Group position="apart" align="center" mx="30%">
 			<Group align="center" spacing="xs">

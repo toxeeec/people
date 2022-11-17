@@ -19,6 +19,7 @@ export type Query = (_params: PaginationParams) => Promise<PostsData>;
 
 interface PostsProps {
 	query: Query;
+	queryKey: string[];
 	user?: User;
 }
 
@@ -26,7 +27,7 @@ interface QueryFunctionArgs {
 	pageParam?: PaginationParams;
 }
 
-function Posts({ query, user }: PostsProps) {
+function Posts({ query, user, queryKey }: PostsProps) {
 	const usersCtx = useContext(UsersContext);
 	const { ref, inView } = useInView();
 
@@ -36,7 +37,7 @@ function Posts({ query, user }: PostsProps) {
 	}
 	const { isLoading, data, hasNextPage, isFetching, fetchNextPage } =
 		useInfiniteQuery({
-			queryKey: ["feed"],
+			queryKey,
 			queryFn,
 			getNextPageParam: (lastPage) => {
 				if (!lastPage.meta) return undefined;

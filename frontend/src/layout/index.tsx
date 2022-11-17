@@ -8,7 +8,7 @@ export default function Layout() {
 	const { isAuthenticated } = useContext(AuthContext)!;
 	return (
 		<>
-			{isAuthenticated ? <LayoutHeader /> : null}
+			<LayoutHeader isAuthenticated={isAuthenticated} />
 			{isAuthenticated ? null : <Footer />}
 			<Outlet />
 		</>

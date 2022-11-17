@@ -39,7 +39,7 @@ export default function Profile() {
 					</span>
 				</Group>
 			</Container>
-			<Posts query={query} user={user as User} />
+			<Posts query={query} user={user as User} queryKey={["posts", handle]} />
 		</Paper>
 	);
 }

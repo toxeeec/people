@@ -1,6 +1,7 @@
 import { Avatar, Group, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { User } from "../models";
+import { stopPropagation } from "../utils";
 
 interface AccountInfoProps {
 	user: Partial<User>;
@@ -17,18 +18,21 @@ export default function AccountInfo({ user, children }: AccountInfoProps) {
 					mb="xs"
 					component={Link}
 					to={`/${user!.handle}`}
+					onClick={stopPropagation}
 				/>
 				{children}
 			</Group>
-			<Text component={Link} to={`/${user!.handle}`} weight="bold">
+			<Text
+				component={Link}
+				to={`/${user!.handle}`}
+				weight="bold"
+				onClick={stopPropagation}
+			>
 				@{user?.handle}
 			</Text>
 			<Group mt="xs">
 				<span>
-					<Text component={Link} to={`/${user!.handle}`} weight="bold">
-						{user?.following}
-					</Text>
-					{" Following"}
+					<b>{user?.following}</b> Following
 				</span>
 				<span>
 					<b>{user?.followers}</b>
