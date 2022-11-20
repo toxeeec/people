@@ -2,7 +2,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useContext, useEffect } from "react";
 import { Posts as PostsData, User } from "../models";
 import { Container } from "@mantine/core";
-import Post from "../components/post";
+import PostComponent from "../components/post";
 import { useInView } from "react-intersection-observer";
 import CenterLoader from "../components/CenterLoader";
 import UsersContext from "../context/UsersContext";
@@ -67,7 +67,9 @@ function Posts({ query, user, queryKey }: PostsProps) {
 										? usersCtx?.setUser(post.user.handle, post.user)
 										: (post.user = user);
 								}
-								return <Post data={post} key={post.createdAt} ref={ref} />;
+								return (
+									<PostComponent post={post} key={post.createdAt} ref={ref} />
+								);
 							})}
 						</Fragment>
 					)

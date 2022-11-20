@@ -1,5 +1,5 @@
-import { Button, Loader } from "@mantine/core";
-import { useCallback, useEffect, useState } from "react";
+import { Button } from "@mantine/core";
+import { MouseEvent, useCallback, useEffect, useState } from "react";
 import { User } from "../models";
 import {
 	useDeleteMeFollowingHandle,
@@ -26,22 +26,26 @@ export default function FollowButton({ user, updateUser }: FollowButtonProps) {
 		setIsLoading(isFollowLoading || isUnfollowLoading);
 	}, [isFollowLoading, isUnfollowLoading]);
 
-	const handleFollow = useCallback(() => {
-		const fn = user?.isFollowed ? unfollow : follow;
-		fn(
-			{ handle: user.handle! },
-			{
-				onSuccess(follows) {
-					updateUser(follows);
-				},
-			}
-		);
-	}, [follow, unfollow, user, updateUser]);
+	const handleFollow = useCallback(
+		(e: MouseEvent) => {
+			e.stopPropagation();
+			const fn = user?.isFollowed ? unfollow : follow;
+			fn(
+				{ handle: user.handle! },
+				{
+					onSuccess(follows) {
+						updateUser(follows);
+					},
+				}
+			);
+		},
+		[follow, unfollow, user, updateUser]
+	);
 
-	return isLoading ? (
-		<Loader />
-	) : (
+	return (
 		<Button
+			loading={isLoading}
+			loaderPosition="center"
 			onClick={handleFollow}
 			variant={user.isFollowed ? "outline" : "filled"}
 			radius="xl"

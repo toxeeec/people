@@ -1,60 +1,73 @@
 import { ActionIcon, Group, Text } from "@mantine/core";
 import { IconHeart, IconMessageCircle2 } from "@tabler/icons";
-import { MouseEvent, useCallback, useState } from "react";
+import {
+	Dispatch,
+	MouseEvent,
+	SetStateAction,
+	useCallback,
+	useState,
+} from "react";
+import { Post } from "../../models/post";
 import {
 	useDeletePostsPostIDLikes,
 	usePutPostsPostIDLikes,
 } from "../../spec.gen";
+import PostInput from "./PostInput";
 
 interface PostActionsProps {
-	id: number;
-	likes: number;
-	replies: number;
-	isLiked: boolean;
+	post: Post;
+	setPost: Dispatch<SetStateAction<Post>>;
 }
 
-export default function PostActions({
-	likes: initialLikes,
-	replies,
-	isLiked: initialIsLiked,
-	id,
-}: PostActionsProps) {
+export default function PostActions({ post, setPost }: PostActionsProps) {
 	const { mutate: like } = usePutPostsPostIDLikes({ mutation: { retry: 1 } });
 	const { mutate: unlike } = useDeletePostsPostIDLikes({
 		mutation: { retry: 1 },
 	});
-	const [isLiked, setIsLiked] = useState(initialIsLiked);
-	const [likes, setLikes] = useState(initialLikes);
 	const handleLike = useCallback(
 		(e: MouseEvent) => {
 			e.stopPropagation();
-			const fn = isLiked ? unlike : like;
+			const fn = post.isLiked ? unlike : like;
 			fn(
-				{ postID: id },
+				{ postID: post.id },
 				{
-					onSuccess(likes) {
-						setIsLiked((liked) => !liked);
-						setLikes(likes.likes);
+					onSuccess({ likes, isLiked }) {
+						setPost((p) => ({ ...p, likes, isLiked }));
 					},
 				}
 			);
 		},
-		[id, isLiked, like, unlike]
+		[post, setPost, like, unlike]
 	);
+
+	const [opened, setOpened] = useState(false);
+
+	const handleOpen = (e: MouseEvent) => {
+		e.stopPropagation();
+		setOpened(true);
+	};
+
 	return (
 		<Group position="apart" align="center" mx="30%">
 			<Group align="center" spacing="xs">
-				<ActionIcon>
+				<ActionIcon onClick={handleOpen}>
 					<IconMessageCircle2 size={18} />
 				</ActionIcon>
-				<Text size="sm">{replies}</Text>
+				<Text size="sm">{post.replies}</Text>
 			</Group>
 			<Group align="center" spacing="xs">
 				<ActionIcon onClick={handleLike}>
-					<IconHeart size={18} fill={isLiked ? "currentColor" : "none"} />
+					<IconHeart size={18} fill={post.isLiked ? "currentColor" : "none"} />
 				</ActionIcon>
-				<Text size="sm">{likes}</Text>
+				<Text size="sm">{post.likes}</Text>
 			</Group>
+			<PostInput
+				opened={opened}
+				setOpened={setOpened}
+				isReply={true}
+				post={post}
+				setPost={setPost}
+			/>
 		</Group>
 	);
 }

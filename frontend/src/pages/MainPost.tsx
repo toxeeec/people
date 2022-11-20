@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { Link, useLoaderData } from "react-router-dom";
 import Posts, { Query } from "../components/Posts";
 import UsersContext from "../context/UsersContext";
@@ -12,7 +12,7 @@ import PostActions from "../components/post/PostActions";
 export default function MainPost() {
 	const params = useParams();
 	const data = useLoaderData();
-	const post = data as PostType;
+	const [post, setPost] = useState(data as PostType);
 	const usersCtx = useContext(UsersContext)!;
 	usersCtx.setUser(post.user!.handle, post.user!);
 
@@ -39,7 +39,7 @@ export default function MainPost() {
 					</ProfileHoverCard>
 				</Group>
 				<Text my="xs">{post.content}</Text>
-				<PostActions {...post} />
+				<PostActions post={post} setPost={setPost} />
 			</Paper>
 			<Posts query={query} queryKey={["replies", post.id.toString()]} />
 		</>

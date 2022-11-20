@@ -16,7 +16,7 @@ export default function LayoutHeader({
 }: {
 	isAuthenticated: boolean;
 }) {
-	const [isOpened, setIsOpened] = useState(false);
+	const [opened, setOpened] = useState(false);
 	const params = useParams();
 	const location = useLocation();
 	const [route, setRoute] = useState("");
@@ -39,8 +39,8 @@ export default function LayoutHeader({
 			<Header height={60} fixed>
 				<Group h={60} align="center" px="xs">
 					{isHome && isAuthenticated ? (
-						<UnstyledButton onClick={() => setIsOpened(true)}>
-							<Avatar radius="xl" onClick={() => setIsOpened(true)} />
+						<UnstyledButton onClick={() => setOpened(true)}>
+							<Avatar radius="xl" onClick={() => setOpened(true)} />
 						</UnstyledButton>
 					) : (
 						<LayoutGoBack />
@@ -50,7 +50,7 @@ export default function LayoutHeader({
 					</Text>
 				</Group>
 			</Header>
-			<LayoutDrawer isOpened={isOpened} setIsOpened={setIsOpened} />
+			<LayoutDrawer isOpened={opened} setIsOpened={setOpened} />
 		</>
 	);
 }
