@@ -35,15 +35,21 @@ function Posts({ query, user, queryKey }: PostsProps) {
 		pageParam = { ...pageParam, limit: queryLimit };
 		return query(pageParam);
 	}
-	const { isLoading, data, hasNextPage, isFetching, fetchNextPage } =
-		useInfiniteQuery({
-			queryKey,
-			queryFn,
-			getNextPageParam: (lastPage) => {
-				if (!lastPage.meta) return undefined;
-				return { before: lastPage.meta?.oldest };
-			},
-		});
+	const {
+		isLoading,
+		data,
+		hasNextPage,
+		isFetching,
+		fetchNextPage,
+		isRefetching,
+	} = useInfiniteQuery({
+		queryKey,
+		queryFn,
+		getNextPageParam: (lastPage) => {
+			if (!lastPage.meta) return undefined;
+			return { before: lastPage.meta?.oldest };
+		},
+	});
 
 	useEffect(() => {
 		if (inView && hasNextPage) {
@@ -53,7 +59,7 @@ function Posts({ query, user, queryKey }: PostsProps) {
 
 	return (
 		<Container px={0}>
-			{isLoading ? (
+			{isLoading || isRefetching ? (
 				<CenterLoader />
 			) : (
 				data?.pages.map((group, i) =>

@@ -7,6 +7,8 @@ import {
 	Text,
 	Textarea,
 } from "@mantine/core";
+import { useFocusTrap } from "@mantine/hooks";
+import { useQueryClient } from "@tanstack/react-query";
 import {
 	Dispatch,
 	MouseEvent,
@@ -14,15 +16,10 @@ import {
 	useCallback,
 	useState,
 } from "react";
-import { ErrorType } from "../../custom-instance";
-import { Error as CustomError, Post } from "../../models";
-import {
-	getPostsPostID,
-	usePostPosts,
-	usePostPostsPostIDReplies,
-} from "../../spec.gen";
+import { Post } from "../../models";
+import { getPostsPostID, usePostPostsPostIDReplies } from "../../spec.gen";
 
-interface PostInputProps {
+interface PostReplyProps {
 	isReply: boolean;
 	opened: boolean;
 	setOpened: Dispatch<SetStateAction<boolean>>;
@@ -30,52 +27,42 @@ interface PostInputProps {
 	setPost: Dispatch<SetStateAction<Post>>;
 }
 
-export default function PostInput({
-	isReply,
+export default function PostReply({
 	opened,
 	setOpened,
 	post,
 	setPost,
-}: PostInputProps) {
+}: PostReplyProps) {
 	const [content, setContent] = useState("");
 	const [error, setError] = useState("");
-	const { mutate: reply } = usePostPostsPostIDReplies({
+	const focusTrapRef = useFocusTrap();
+	const queryClient = useQueryClient();
+	const { mutate } = usePostPostsPostIDReplies({
 		mutation: { retry: 1 },
 	});
-	const { mutate: create } = usePostPosts({ mutation: { retry: 1 } });
 
 	const handleSubmit = useCallback(
 		(e: MouseEvent) => {
 			e.stopPropagation();
-			const onError = (error: ErrorType<CustomError>) => {
-				const err = error.response?.data.message;
-				setError(err!);
-			};
-
-			if (isReply) {
-				reply(
-					{ postID: post.id, data: { content: content.trim() } },
-					{
-						onSuccess: () => {
-							getPostsPostID(post.id).then((p) => setPost(p));
-							setOpened(false);
-						},
-						onError,
-					}
-				);
-			} else {
-				create(
-					{ data: { content: content.trim() } },
-					{
-						onSuccess: () => {
-							setOpened(false);
-						},
-						onError,
-					}
-				);
-			}
+			mutate(
+				{ postID: post.id, data: { content: content.trim() } },
+				{
+					onSuccess: () => {
+						setContent("");
+						getPostsPostID(post.id).then((p) => setPost(p));
+						queryClient.invalidateQueries({
+							queryKey: ["replies", post.id.toString()],
+						});
+						setOpened(false);
+					},
+					onError: (error) => {
+						const err = error.response?.data.message;
+						setError(err!);
+					},
+				}
+			);
 		},
-		[isReply, create, reply, content, post, setPost, setOpened]
+		[content, post, setPost, setOpened, mutate, queryClient]
 	);
 
 	return (
@@ -96,6 +83,10 @@ export default function PostInput({
 		>
 			<Text my="xs">{post.content}</Text>
 			<Textarea
+				ref={focusTrapRef}
+				data-autofocus
+				placeholder="Create reply"
+				variant="unstyled"
 				value={content}
 				onChange={(e) => setContent(e.currentTarget.value)}
 				error={error}
@@ -106,9 +97,9 @@ export default function PostInput({
 					onClick={handleSubmit}
 					variant="filled"
 					radius="xl"
-					disabled={content.trim().length === 0}
+					disabled={content.trim().length === 0 || content.trim().length > 280}
 				>
-					Submit
+					Reply
 				</Button>
 			</Flex>
 		</Modal>

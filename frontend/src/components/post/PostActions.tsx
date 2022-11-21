@@ -12,7 +12,7 @@ import {
 	useDeletePostsPostIDLikes,
 	usePutPostsPostIDLikes,
 } from "../../spec.gen";
-import PostInput from "./PostInput";
+import PostReply from "./PostReply";
 
 interface PostActionsProps {
 	post: Post;
@@ -61,7 +61,7 @@ export default function PostActions({ post, setPost }: PostActionsProps) {
 				</ActionIcon>
 				<Text size="sm">{post.likes}</Text>
 			</Group>
-			<PostInput
+			<PostReply
 				opened={opened}
 				setOpened={setOpened}
 				isReply={true}
