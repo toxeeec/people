@@ -15,6 +15,7 @@ import {
 import useAuth from "./hooks/useAuth";
 import Layout from "./layout";
 import Auth from "./pages/Auth";
+import Follows, { FollowsPage } from "./pages/Follows";
 import Home from "./pages/Home";
 import MainPost from "./pages/MainPost";
 import Profile from "./pages/Profile";
@@ -86,6 +87,14 @@ export default function App() {
 							queryFn: () => getPostsPostID(parseInt(params.postID!)),
 						});
 					},
+				},
+				{
+					path: "/:handle/followers",
+					element: <Follows defaultValue={FollowsPage.Followers} />,
+				},
+				{
+					path: "/:handle/following",
+					element: <Follows defaultValue={FollowsPage.Following} />,
 				},
 			],
 		},

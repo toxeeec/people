@@ -1,9 +1,7 @@
 import { HoverCard } from "@mantine/core";
 import { useContext, useState } from "react";
 import UsersContext from "../../context/UsersContext";
-import { User } from "../../models";
-import AccountInfo from "../AccountInfo";
-import FollowButton from "../FollowButton";
+import Profile from "../Profile";
 
 interface ProfileHoverCardProps {
 	handle: string;
@@ -17,17 +15,11 @@ export default function ProfileHoverCard({
 	const usersCtx = useContext(UsersContext)!;
 	const [user, setUser] = useState(usersCtx.users.get(handle)!);
 
-	const updateUser = (u: Partial<User>) => {
-		setUser(usersCtx.setUser(handle, u));
-	};
-
 	return (
 		<HoverCard onOpen={() => setUser(usersCtx.users.get(handle)!)}>
 			<HoverCard.Target>{children}</HoverCard.Target>
-			<HoverCard.Dropdown>
-				<AccountInfo user={user!}>
-					<FollowButton user={user} updateUser={updateUser} />
-				</AccountInfo>
+			<HoverCard.Dropdown p={0}>
+				<Profile user={user} setUser={setUser} />
 			</HoverCard.Dropdown>
 		</HoverCard>
 	);

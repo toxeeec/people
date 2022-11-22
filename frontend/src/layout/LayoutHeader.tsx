@@ -31,6 +31,10 @@ export default function LayoutHeader({
 		}
 	}, [params, location]);
 
+	useEffect(() => {
+		setOpened(false);
+	}, [location]);
+
 	const isHome = route === "Home";
 
 	return (

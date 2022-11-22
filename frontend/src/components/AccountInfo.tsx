@@ -1,4 +1,4 @@
-import { Avatar, Group, Text } from "@mantine/core";
+import { Avatar, Group, Text, UnstyledButton } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { User } from "../models";
 import { stopPropagation } from "../utils";
@@ -31,13 +31,21 @@ export default function AccountInfo({ user, children }: AccountInfoProps) {
 				@{user?.handle}
 			</Text>
 			<Group mt="xs">
-				<span>
+				<UnstyledButton
+					component={Link}
+					to={`/${user.handle}/following`}
+					onClick={stopPropagation}
+				>
 					<b>{user?.following}</b> Following
-				</span>
-				<span>
+				</UnstyledButton>
+				<UnstyledButton
+					component={Link}
+					to={`/${user.handle}/followers`}
+					onClick={stopPropagation}
+				>
 					<b>{user?.followers}</b>
 					{user?.followers === 1 ? " Follower" : " Followers"}
-				</span>
+				</UnstyledButton>
 			</Group>
 		</>
 	);

@@ -1,11 +1,19 @@
-import { Avatar, Container, Group, Paper, Text } from "@mantine/core";
+import {
+	Avatar,
+	Container,
+	Group,
+	Paper,
+	Text,
+	UnstyledButton,
+} from "@mantine/core";
 import { useContext, useState } from "react";
-import { useLoaderData } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
 import FollowButton from "../components/FollowButton";
 import Posts, { Query } from "../components/Posts";
 import UsersContext from "../context/UsersContext";
 import { User } from "../models";
 import { getUsersHandlePosts } from "../spec.gen";
+import { stopPropagation } from "../utils";
 
 export default function Profile() {
 	const data = useLoaderData();
@@ -30,13 +38,21 @@ export default function Profile() {
 				</Group>
 				<Text weight="bold">@{handle}</Text>
 				<Group mt="xs">
-					<span>
+					<UnstyledButton
+						component={Link}
+						to={`/${user.handle}/following`}
+						onClick={stopPropagation}
+					>
 						<b>{user?.following}</b> Following
-					</span>
-					<span>
+					</UnstyledButton>
+					<UnstyledButton
+						component={Link}
+						to={`/${user.handle}/followers`}
+						onClick={stopPropagation}
+					>
 						<b>{user?.followers}</b>
 						{user?.followers === 1 ? " Follower" : " Followers"}
-					</span>
+					</UnstyledButton>
 				</Group>
 			</Container>
 			<Posts query={query} user={user as User} queryKey={["posts", handle]} />

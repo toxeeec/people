@@ -1,5 +1,5 @@
 import { Button } from "@mantine/core";
-import { MouseEvent, useCallback, useEffect, useState } from "react";
+import { MouseEvent, useCallback } from "react";
 import { User } from "../models";
 import {
 	useDeleteMeFollowingHandle,
@@ -21,10 +21,7 @@ export default function FollowButton({ user, updateUser }: FollowButtonProps) {
 			mutation: { retry: 1 },
 		});
 
-	const [isLoading, setIsLoading] = useState(false);
-	useEffect(() => {
-		setIsLoading(isFollowLoading || isUnfollowLoading);
-	}, [isFollowLoading, isUnfollowLoading]);
+	const isLoading = isFollowLoading || isUnfollowLoading;
 
 	const handleFollow = useCallback(
 		(e: MouseEvent) => {
