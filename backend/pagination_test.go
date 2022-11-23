@@ -48,6 +48,11 @@ func TestPaginationSelect(t *testing.T) {
 		}
 	}
 
+	t.Logf("oldest %v", oldest)
+	t.Logf("before %v", before)
+	t.Logf("after %v", after)
+	t.Logf("newest %v", newest)
+
 	tests := map[string]struct {
 		pagination people.Pagination[uint]
 		oldest     uint

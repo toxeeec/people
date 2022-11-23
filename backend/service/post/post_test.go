@@ -22,7 +22,6 @@ type PostSuite struct {
 	user3ID   uint
 	post1     people.Post
 	post2     people.Post
-	post3     people.Post
 	postBody1 people.PostBody
 	postBody2 people.PostBody
 	postBody3 people.PostBody
@@ -119,7 +118,7 @@ func (suite *PostSuite) TestFeed() {
 
 	pagination := people.NewPagination[uint](nil, nil, nil)
 	res, _ := suite.ps.Feed(suite.user1ID, pagination)
-	assert.Equal(suite.T(), count, len(res.Data))
+	assert.Equal(suite.T(), count+2, len(res.Data))
 }
 
 func (suite *PostSuite) TestExists() {

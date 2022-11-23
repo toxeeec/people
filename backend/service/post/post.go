@@ -32,7 +32,7 @@ const (
 )
 
 const (
-	feedBase     = selectPostAndAuthor + " WHERE post.user_id IN (SELECT user_id FROM follower WHERE follower_id = $2) OR post.user_id = $2 "
+	feedBase     = selectPostAndAuthor + " WHERE (post.user_id IN (SELECT user_id FROM follower WHERE follower_id = $2) OR post.user_id = $2) "
 	fromUserBase = `SELECT post_id, content, created_at,` + isLiked + ` FROM post 
 WHERE user_id = (SELECT user_id FROM user_profile WHERE handle = $2) AND replies_to IS NULL `
 )

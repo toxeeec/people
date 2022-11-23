@@ -31,5 +31,5 @@ func (suite *HandlerSuite) TestGetMeFeed() {
 
 	var res people.PaginationResult[people.Post, uint]
 	result.UnmarshalJsonToObject(&res)
-	assert.Equal(suite.T(), count, len(res.Data))
+	assert.Equal(suite.T(), count+2, len(res.Data))
 }
