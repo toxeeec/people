@@ -47,11 +47,9 @@ func (h *handler) GetUsersHandleFollowers(c echo.Context, handle string, params 
 		return echo.ErrNotFound
 	}
 
-	println(userID)
 	pagination := people.NewPagination(params.Before, params.After, params.Limit)
 	following, err := h.us.Followers(*u.ID, &userID, pagination)
 	if err != nil {
-		println(err.Error())
 		return echo.ErrInternalServerError
 	}
 

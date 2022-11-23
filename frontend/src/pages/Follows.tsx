@@ -1,7 +1,7 @@
 import { Tabs } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
-import Profiles from "../components/Profiles";
-import { getMeFollowers, getMeFollowing } from "../spec.gen";
+import Profiles, { Query } from "../components/Profiles";
+import { getUsersHandleFollowers, getUsersHandleFollowing } from "../spec.gen";
 
 export enum FollowsPage {
 	// eslint-disable-next-line
@@ -10,17 +10,21 @@ export enum FollowsPage {
 	Following = "following",
 }
 
-export default function Follows({
-	defaultValue,
-}: {
-	defaultValue: FollowsPage;
-}) {
+export default function Follows({ value }: { value: FollowsPage }) {
 	const navigate = useNavigate();
 	const params = useParams();
 
+	const queryFollowing: Query = (queryParams) => {
+		return getUsersHandleFollowing(params.handle!, queryParams);
+	};
+
+	const queryFollowers: Query = (queryParams) => {
+		return getUsersHandleFollowers(params.handle!, queryParams);
+	};
+
 	return (
 		<Tabs
-			defaultValue={defaultValue}
+			value={value}
 			onTabChange={(value) => navigate(`/${params.handle}/${value}`)}
 		>
 			<Tabs.List grow position="center">
@@ -30,13 +34,13 @@ export default function Follows({
 
 			<Tabs.Panel value="following">
 				<Profiles
-					query={getMeFollowing}
+					query={queryFollowing}
 					queryKey={["following", params.handle!]}
 				/>
 			</Tabs.Panel>
 			<Tabs.Panel value="followers">
 				<Profiles
-					query={getMeFollowers}
+					query={queryFollowers}
 					queryKey={["followers", params.handle!]}
 				/>
 			</Tabs.Panel>

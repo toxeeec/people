@@ -45,7 +45,7 @@ function Posts({ query, queryKey }: PostsProps) {
 		queryKey,
 		queryFn,
 		getNextPageParam: (lastPage) => {
-			if (!lastPage.meta) return undefined;
+			if (!lastPage.meta || lastPage.data.length < queryLimit) return undefined;
 			return { before: lastPage.meta?.oldest };
 		},
 	});

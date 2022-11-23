@@ -1,7 +1,5 @@
-import { useContext, useState } from "react";
-import UsersContext from "../context/UsersContext";
+import { useState } from "react";
 import { Tokens } from "../models";
-import { useGetUsersHandle } from "../spec.gen";
 
 export default function useAuth() {
 	const getAuth = () => {
@@ -12,15 +10,6 @@ export default function useAuth() {
 	};
 
 	const [isAuthenticated, setIsAuthenticated] = useState(!!getAuth().handle);
-	const usersCtx = useContext(UsersContext);
-
-	const { data: user } = useGetUsersHandle(getAuth().handle!, {
-		query: { enabled: isAuthenticated },
-	});
-
-	if (user) {
-		usersCtx?.setUser(user!.handle!, user!);
-	}
 
 	const setAuth = ({
 		tokens,

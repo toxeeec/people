@@ -8,7 +8,6 @@ import {
 import AuthContext from "./context/AuthContext";
 import UsersContext from "./context/UsersContext";
 import {
-	AXIOS_INSTANCE,
 	createRequestInterceptor,
 	createResponseInterceptor,
 } from "./custom-instance";
@@ -22,22 +21,20 @@ import Profile from "./pages/Profile";
 import { getPostsPostID, getUsersHandle } from "./spec.gen";
 
 export default function App() {
+	const usersCtx = useContext(UsersContext);
 	const { getAuth, setAuth, clearAuth, isAuthenticated } = useAuth();
 	const queryClient = useQueryClient();
-	const usersCtx = useContext(UsersContext);
 
 	useEffect(() => {
-		const requestInterceptor = createRequestInterceptor(getAuth);
-		const responseInterceptor = createResponseInterceptor(
-			getAuth,
-			setAuth,
-			clearAuth
-		);
-		return () => {
-			AXIOS_INSTANCE.interceptors.request.eject(requestInterceptor);
-			AXIOS_INSTANCE.interceptors.response.eject(responseInterceptor);
-		};
-	}, [getAuth, setAuth, clearAuth]);
+		if (isAuthenticated) {
+			getUsersHandle(getAuth().handle!).then((user) =>
+				usersCtx?.setUser(user!.handle!, user!)
+			);
+		}
+	}, [isAuthenticated, getAuth, usersCtx]);
+
+	createRequestInterceptor(getAuth);
+	createResponseInterceptor(getAuth, setAuth, clearAuth);
 
 	const router = createBrowserRouter([
 		{
@@ -89,12 +86,12 @@ export default function App() {
 					},
 				},
 				{
-					path: "/:handle/followers",
-					element: <Follows defaultValue={FollowsPage.Followers} />,
+					path: "/:handle/following",
+					element: <Follows value={FollowsPage.Following} />,
 				},
 				{
-					path: "/:handle/following",
-					element: <Follows defaultValue={FollowsPage.Following} />,
+					path: "/:handle/followers",
+					element: <Follows value={FollowsPage.Followers} />,
 				},
 			],
 		},

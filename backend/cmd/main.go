@@ -24,7 +24,7 @@ func main() {
 	}
 
 	e := echo.New()
-	e.Use(echomiddleware.Logger())
+	// e.Use(echomiddleware.Logger())
 	e.Use(echomiddleware.Recover())
 	e.Use(echomiddleware.CORSWithConfig(echomiddleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:5173"},
