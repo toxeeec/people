@@ -70,7 +70,7 @@ func (h *handler) GetMeFollowing(c echo.Context, params people.GetMeFollowingPar
 	}
 
 	pagination := people.NewPagination(params.Before, params.After, params.Limit)
-	following, err := h.us.Following(userID, pagination)
+	following, err := h.us.Following(userID, &userID, pagination)
 	if err != nil {
 		return echo.ErrInternalServerError
 	}
@@ -79,28 +79,14 @@ func (h *handler) GetMeFollowing(c echo.Context, params people.GetMeFollowingPar
 }
 
 func (h *handler) GetUsersHandleFollowing(c echo.Context, handle string, params people.GetUsersHandleFollowingParams) error {
-	u, err := h.us.GetAuth(handle)
+	userID, _ := people.FromContext(c.Request().Context(), people.UserIDKey)
+	u, err := h.us.GetAuthUser(handle)
 	if err != nil {
 		return echo.ErrNotFound
 	}
 
 	pagination := people.NewPagination(params.Before, params.After, params.Limit)
-	following, err := h.us.Following(*u.ID, pagination)
-	if err != nil {
-		return echo.ErrInternalServerError
-	}
-
-	return c.JSON(http.StatusOK, following)
-}
-
-func (h *handler) GetUsersHandleFollowers(c echo.Context, handle string, params people.GetUsersHandleFollowersParams) error {
-	u, err := h.us.GetAuth(handle)
-	if err != nil {
-		return echo.ErrNotFound
-	}
-
-	pagination := people.NewPagination(params.Before, params.After, params.Limit)
-	following, err := h.us.Following(*u.ID, pagination)
+	following, err := h.us.Following(*u.ID, &userID, pagination)
 	if err != nil {
 		return echo.ErrInternalServerError
 	}

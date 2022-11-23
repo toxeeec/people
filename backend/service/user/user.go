@@ -48,7 +48,7 @@ func (s *service) Delete(handle string) error {
 	return err
 }
 
-func (s *service) GetAuth(handle string) (people.AuthUser, error) {
+func (s *service) GetAuthUser(handle string) (people.AuthUser, error) {
 	var u people.AuthUser
 	return u, s.db.Get(&u, queryGetAuth, handle)
 }

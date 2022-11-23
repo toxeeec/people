@@ -44,12 +44,12 @@ func (suite *UserSuite) TestDelete() {
 	assert.False(suite.T(), suite.us.Exists(suite.user1.Handle))
 }
 
-func (suite *UserSuite) TestGetAuth() {
-	actual, err := suite.us.GetAuth(suite.user1.Handle)
+func (suite *UserSuite) TestGetAuthUser() {
+	actual, err := suite.us.GetAuthUser(suite.user1.Handle)
 	assert.Equal(suite.T(), suite.user1.Handle, actual.Handle)
 	assert.NoError(suite.T(), err)
 
-	_, err = suite.us.GetAuth(suite.unknownUser.Handle)
+	_, err = suite.us.GetAuthUser(suite.unknownUser.Handle)
 	assert.Error(suite.T(), err)
 }
 
@@ -58,7 +58,7 @@ func (suite *UserSuite) TestGet() {
 	assert.Equal(suite.T(), suite.user1.Handle, actual.Handle)
 	assert.NoError(suite.T(), err)
 
-	_, err = suite.us.GetAuth(suite.unknownUser.Handle)
+	_, err = suite.us.GetAuthUser(suite.unknownUser.Handle)
 	assert.Error(suite.T(), err)
 }
 

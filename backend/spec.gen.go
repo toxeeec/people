@@ -460,6 +460,8 @@ func (w *ServerInterfaceWrapper) GetUsersHandleFollowers(ctx echo.Context) error
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter handle: %s", err))
 	}
 
+	ctx.Set(BearerAuthScopes, []string{""})
+
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetUsersHandleFollowersParams
 	// ------------- Optional query parameter "limit" -------------
@@ -498,6 +500,8 @@ func (w *ServerInterfaceWrapper) GetUsersHandleFollowing(ctx echo.Context) error
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter handle: %s", err))
 	}
+
+	ctx.Set(BearerAuthScopes, []string{""})
 
 	// Parameter object where we will unmarshal all parameters from the context
 	var params GetUsersHandleFollowingParams
@@ -651,8 +655,8 @@ var swaggerSpec = []string{
 	"ywa9cfGlRbbjtur52Vl31AxADljDR/NxTodUrpG7zD/l6Rcr3G+EDqF9k9CeI7c6Ae8Qn712sG0eOH7s",
 	"5i3D4mqss89c2IutPQXG3pp91xZlh+5j8GoriA5Q/RdKGwWgW9qUl9k9DcXj884dZ4cYfFVcYD7BjPBh",
 	"mu3eDxS3pfaz45YSc4sgTA/V6jOJ8qV9KPe1l77t/ciVXbQBxs4H0rtEOf/Ec6s4924wPFd0HBZUSPuZ",
-	"aMsB21U/4H2o/9xS0fUWRM+N9308U/53hP/Mdlef64P0Hmq3W0bneDe/blz2u3j48e42vkFLVzWI5qWV",
-	"1zjWXGA1jGOTm6yDceyrcZRDy5pxFDPMDoaRDzP3ziieXYW/wVAmy/4NAAD//9koD27oOgAA",
+	"aMsB21U/4H2o/9xS0fUWRM+N9308U/53hP/Mdlef64P0Hmq3W0bneDe/blz2u3j48e429qqlMybTvNby",
+	"ms+aK66G+Wxy13Uwn+drPuXgs2Y+xRy0g+nkA9G9M5tn1yVsMNjJsn8DAAD//+2saRosOwAA",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

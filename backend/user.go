@@ -9,11 +9,11 @@ type UserService interface {
 	Exists(handle string) bool
 	Delete(handle string) error
 	Get(handle string, id *uint) (User, error)
-	GetAuth(handle string) (AuthUser, error)
+	GetAuthUser(handle string) (AuthUser, error)
 	Follow(id uint, handle string) (Follows, error)
 	Unfollow(id uint, handle string) (Follows, error)
 	IsFollowing(id uint, handle string) (bool, error)
 	IsFollowed(id uint, handle string) (bool, error)
-	Following(id uint, p HandlePagination) (Users, error)
-	Followers(id uint, p HandlePagination) (Users, error)
+	Following(id uint, userID *uint, p HandlePagination) (Users, error)
+	Followers(id uint, userID *uint, p HandlePagination) (Users, error)
 }

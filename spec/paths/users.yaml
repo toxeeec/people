@@ -22,6 +22,9 @@ user:
 
 following:
   get:
+    security:
+      - bearerAuth: []
+      - {}
     tags:
       - users
       - following
@@ -44,6 +47,9 @@ following:
 
 followers:
   get:
+    security:
+      - bearerAuth: []
+      - {}
     tags:
       - users
       - followers

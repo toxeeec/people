@@ -138,7 +138,7 @@ func (suite *UserSuite) TestFollowing() {
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
-			following, _ := suite.us.Following(tc.id, people.NewPagination[string](nil, nil, nil))
+			following, _ := suite.us.Following(tc.id, new(uint), people.NewPagination[string](nil, nil, nil))
 			assert.Equal(suite.T(), tc.expected, len(following.Data))
 		})
 	}
@@ -163,7 +163,7 @@ func (suite *UserSuite) TestFollowers() {
 	}
 	for name, tc := range tests {
 		suite.Run(name, func() {
-			followers, _ := suite.us.Followers(tc.id, people.NewPagination[string](nil, nil, nil))
+			followers, _ := suite.us.Followers(tc.id, new(uint), people.NewPagination[string](nil, nil, nil))
 			assert.Equal(suite.T(), tc.expected, len(followers.Data))
 		})
 	}

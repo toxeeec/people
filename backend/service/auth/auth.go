@@ -16,7 +16,7 @@ func NewService(db *sqlx.DB, us people.UserService) people.AuthService {
 
 // VerifyCredentials returns id of the user.
 func (s *service) VerifyCredentials(u people.AuthUser) (uint, error) {
-	expected, err := s.us.GetAuth(u.Handle)
+	expected, err := s.us.GetAuthUser(u.Handle)
 	if err != nil {
 		return 0, err
 	}
