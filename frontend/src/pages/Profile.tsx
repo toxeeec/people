@@ -1,5 +1,6 @@
 import {
 	Avatar,
+	Badge,
 	Container,
 	Group,
 	Paper,
@@ -36,7 +37,10 @@ export default function Profile() {
 					<Avatar size="xl" radius={999} mb="xs" />
 					<FollowButton user={user} updateUser={updateUser} />
 				</Group>
-				<Text weight="bold">@{handle}</Text>
+				<Group>
+					<Text weight="bold">@{handle}</Text>
+					{user.isFollowing ? <Badge>follows you</Badge> : null}
+				</Group>
 				<Group mt="xs">
 					<UnstyledButton
 						component={Link}

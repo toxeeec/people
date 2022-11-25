@@ -1,4 +1,4 @@
-import { Avatar, Group, Text, UnstyledButton } from "@mantine/core";
+import { Avatar, Badge, Group, Text, UnstyledButton } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { User } from "../models";
 import { stopPropagation } from "../utils";
@@ -30,6 +30,7 @@ export default function AccountInfo({ user, children }: AccountInfoProps) {
 			>
 				@{user?.handle}
 			</Text>
+			{user.isFollowing ? <Badge ml="xs">follows you</Badge> : null}
 			<Group mt="xs">
 				<UnstyledButton
 					component={Link}
