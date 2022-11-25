@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { QueryKey, useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useContext, useEffect } from "react";
 import { Users } from "../models";
 import { Container } from "@mantine/core";
@@ -19,7 +19,7 @@ export type Query = (_params: PaginationParams) => Promise<Users>;
 
 interface PostsProps {
 	query: Query;
-	queryKey: string[];
+	queryKey: QueryKey;
 }
 
 interface QueryFunctionArgs {

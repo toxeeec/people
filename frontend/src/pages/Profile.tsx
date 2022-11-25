@@ -11,6 +11,7 @@ import { useContext, useState } from "react";
 import { Link, useLoaderData } from "react-router-dom";
 import FollowButton from "../components/FollowButton";
 import Posts, { Query } from "../components/Posts";
+import AuthContext from "../context/AuthContext";
 import UsersContext from "../context/UsersContext";
 import { User } from "../models";
 import { getUsersHandlePosts } from "../spec.gen";
@@ -21,6 +22,7 @@ export default function Profile() {
 	const handle = (data as User).handle!;
 	const [user, setUser] = useState<Partial<User>>(data as User);
 	const usersCtx = useContext(UsersContext)!;
+	const { getAuth } = useContext(AuthContext)!;
 
 	const updateUser = (u: Partial<User>) => {
 		setUser(usersCtx.setUser(handle, u));
@@ -35,7 +37,9 @@ export default function Profile() {
 			<Container p="xs">
 				<Group align="center" position="apart">
 					<Avatar size="xl" radius={999} mb="xs" />
-					<FollowButton user={user} updateUser={updateUser} />
+					{getAuth().handle === user.handle ? null : (
+						<FollowButton user={user} updateUser={updateUser} />
+					)}
 				</Group>
 				<Group>
 					<Text weight="bold">@{handle}</Text>

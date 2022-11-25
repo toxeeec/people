@@ -18,7 +18,7 @@ import Follows, { FollowsPage } from "./pages/Follows";
 import Home from "./pages/Home";
 import MainPost from "./pages/MainPost";
 import Profile from "./pages/Profile";
-import { getPostsPostID, getUsersHandle } from "./spec.gen";
+import { getUsersHandle } from "./spec.gen";
 
 export default function App() {
 	const usersCtx = useContext(UsersContext);
@@ -63,7 +63,7 @@ export default function App() {
 				{
 					path: "/:handle",
 					element: <Profile />,
-					loader: async ({ params }) => {
+					loader: ({ params }) => {
 						return queryClient.fetchQuery({
 							queryKey: ["user", params.handle],
 							queryFn: () =>
@@ -78,12 +78,6 @@ export default function App() {
 				{
 					path: "/:handle/:postID",
 					element: <MainPost />,
-					loader: async ({ params }) => {
-						return queryClient.fetchQuery({
-							queryKey: ["post", params.postID],
-							queryFn: () => getPostsPostID(parseInt(params.postID!)),
-						});
-					},
 				},
 				{
 					path: "/:handle/following",

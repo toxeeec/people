@@ -51,7 +51,7 @@ export default function PostReply({
 						setContent("");
 						getPostsPostID(post.id).then((p) => setPost(p));
 						queryClient.invalidateQueries({
-							queryKey: ["replies", post.id.toString()],
+							queryKey: ["replies", post.id],
 						});
 						setOpened(false);
 					},

@@ -1,40 +1,41 @@
-import { useCallback, useContext, useState, MouseEvent } from "react";
-import { Link, useLoaderData } from "react-router-dom";
+import {
+	useCallback,
+	useContext,
+	useState,
+	MouseEvent,
+	useEffect,
+} from "react";
 import Posts, { Query } from "../components/Posts";
 import UsersContext from "../context/UsersContext";
-import { Post as PostType } from "../models";
+import Post from "../components/post";
 import { useParams } from "react-router";
 import {
 	getPostsPostIDReplies,
 	usePostPostsPostIDReplies,
-	getPostsPostID,
+	useGetPostsPostID,
 } from "../spec.gen";
-import {
-	Avatar,
-	Button,
-	Flex,
-	Group,
-	Paper,
-	Text,
-	Textarea,
-} from "@mantine/core";
-import ProfileHoverCard from "../components/post/ProfileHoverCard";
-import PostActions from "../components/post/PostActions";
+import { Button, Flex, Paper, Text, Textarea } from "@mantine/core";
 import { useQueryClient } from "@tanstack/react-query";
+import CenterLoader from "../components/CenterLoader";
 
 export default function MainPost() {
 	const params = useParams();
-	const data = useLoaderData();
-	const [post, setPost] = useState(data as PostType);
+	const { data, isLoading, refetch, isRefetching } = useGetPostsPostID(
+		parseInt(params.postID!)
+	);
 	const [content, setContent] = useState("");
 	const [error, setError] = useState("");
 	const usersCtx = useContext(UsersContext)!;
 	const queryClient = useQueryClient();
-
-	usersCtx.setUser(post.user!.handle, post.user!);
 	const { mutate } = usePostPostsPostIDReplies({
 		mutation: { retry: 1 },
 	});
+
+	useEffect(() => {
+		if (!isLoading && data) {
+			usersCtx.setUser(data.user!.handle, data.user!);
+		}
+	}, [isLoading, data, usersCtx]);
 
 	const query: Query = (queryParams) => {
 		return getPostsPostIDReplies(parseInt(params.postID!), queryParams);
@@ -43,47 +44,34 @@ export default function MainPost() {
 	const handleSubmit = useCallback(
 		(e: MouseEvent) => {
 			e.stopPropagation();
-			mutate(
-				{ postID: post.id, data: { content: content.trim() } },
-				{
-					onSuccess: () => {
-						setContent("");
-						getPostsPostID(post.id).then((p) => setPost(p));
-						queryClient.invalidateQueries({
-							queryKey: ["replies", post.id.toString()],
-						});
-					},
-					onError: (error) => {
-						const err = error.response?.data.message;
-						setError(err!);
-					},
-				}
-			);
+			if (data) {
+				mutate(
+					{ postID: data.id, data: { content: content.trim() } },
+					{
+						onSuccess: () => {
+							setContent("");
+							refetch();
+
+							queryClient.invalidateQueries({
+								queryKey: ["replies", data.id],
+							});
+						},
+						onError: (error) => {
+							const err = error.response?.data.message;
+							setError(err!);
+						},
+					}
+				);
+			}
 		},
-		[content, post, setPost, mutate, queryClient]
+		[content, mutate, queryClient, data, refetch]
 	);
 
-	return (
+	return isLoading || isRefetching ? (
+		<CenterLoader />
+	) : (
 		<>
-			<Paper p="xs" radius="xs" withBorder>
-				<Group align="center">
-					<ProfileHoverCard handle={post.user!.handle}>
-						<Avatar
-							radius="xl"
-							size="md"
-							component={Link}
-							to={`/${post.user!.handle}`}
-						/>
-					</ProfileHoverCard>
-					<ProfileHoverCard handle={post.user!.handle}>
-						<Text component={Link} to={`/${post.user!.handle}`} weight="bold">
-							{post.user?.handle}
-						</Text>
-					</ProfileHoverCard>
-				</Group>
-				<Text my="xs">{post.content}</Text>
-				<PostActions post={post} setPost={setPost} />
-			</Paper>
+			<Post post={data!} />
 			<Paper withBorder p="xs">
 				<Textarea
 					placeholder="Create reply"
@@ -106,7 +94,7 @@ export default function MainPost() {
 					</Button>
 				</Flex>
 			</Paper>
-			<Posts query={query} queryKey={["replies", post.id.toString()]} />
+			<Posts query={query} queryKey={["replies", parseInt(params.postID!)]} />
 		</>
 	);
 }

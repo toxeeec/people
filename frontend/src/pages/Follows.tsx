@@ -25,7 +25,9 @@ export default function Follows({ value }: { value: FollowsPage }) {
 	return (
 		<Tabs
 			value={value}
-			onTabChange={(value) => navigate(`/${params.handle}/${value}`)}
+			onTabChange={(value) =>
+				navigate(`/${params.handle}/${value}`, { replace: true })
+			}
 		>
 			<Tabs.List grow position="center">
 				<Tabs.Tab value="following">Following</Tabs.Tab>

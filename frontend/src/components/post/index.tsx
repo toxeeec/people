@@ -8,23 +8,24 @@ import ProfileHoverCard from "./ProfileHoverCard";
 
 interface PostProps {
 	post: PostData;
+	clickable?: boolean;
 }
 
 const Post = forwardRef<HTMLDivElement, PostProps>(
-	({ post: initialPost }, ref) => {
+	({ post: initialPost, clickable }, ref) => {
 		const [post, setPost] = useState(initialPost);
 		const navigate = useNavigate();
+		const props = clickable
+			? {
+					onClick: () => {
+						navigate(`/${post.user!.handle}/${post.id}`);
+					},
+					style: { cursor: "pointer" },
+			  }
+			: {};
+
 		return (
-			<Paper
-				p="xs"
-				radius="xs"
-				withBorder
-				ref={ref}
-				onClick={() => {
-					navigate(`/${post.user!.handle}/${post.id}`);
-				}}
-				style={{ cursor: "pointer" }}
-			>
+			<Paper p="xs" radius="xs" withBorder ref={ref} {...props}>
 				<Group align="center">
 					<ProfileHoverCard handle={post.user!.handle}>
 						<Avatar
