@@ -16,7 +16,7 @@ import Layout from "./layout";
 import Auth from "./pages/Auth";
 import Follows, { FollowsPage } from "./pages/Follows";
 import Home from "./pages/Home";
-import MainPost from "./pages/MainPost";
+import Post from "./pages/Post";
 import Profile from "./pages/Profile";
 import { getUsersHandle } from "./spec.gen";
 
@@ -77,7 +77,7 @@ export default function App() {
 
 				{
 					path: "/:handle/:postID",
-					element: <MainPost />,
+					element: <Post />,
 				},
 				{
 					path: "/:handle/following",

@@ -7,7 +7,7 @@ import {
 } from "react";
 import Posts, { Query } from "../components/Posts";
 import UsersContext from "../context/UsersContext";
-import Post from "../components/post";
+import MainPost from "../components/post/MainPost";
 import { useParams } from "react-router";
 import {
 	getPostsPostIDReplies,
@@ -18,7 +18,7 @@ import { Button, Flex, Paper, Text, Textarea } from "@mantine/core";
 import { useQueryClient } from "@tanstack/react-query";
 import CenterLoader from "../components/CenterLoader";
 
-export default function MainPost() {
+export default function Post() {
 	const params = useParams();
 	const { data, isLoading, refetch, isRefetching } = useGetPostsPostID(
 		parseInt(params.postID!)
@@ -71,7 +71,7 @@ export default function MainPost() {
 		<CenterLoader />
 	) : (
 		<>
-			<Post post={data!} />
+			<MainPost post={data!} />
 			<Paper withBorder p="xs">
 				<Textarea
 					placeholder="Create reply"

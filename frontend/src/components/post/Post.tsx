@@ -4,28 +4,28 @@ import { Link, useNavigate } from "react-router-dom";
 import { Post as PostData } from "../../models";
 import { stopPropagation } from "../../utils";
 import PostActions from "./PostActions";
-import ProfileHoverCard from "./ProfileHoverCard";
+import ProfileHoverCard from "../ProfileHoverCard";
 
 interface PostProps {
 	post: PostData;
-	clickable?: boolean;
 }
 
 const Post = forwardRef<HTMLDivElement, PostProps>(
-	({ post: initialPost, clickable }, ref) => {
+	({ post: initialPost }, ref) => {
 		const [post, setPost] = useState(initialPost);
 		const navigate = useNavigate();
-		const props = clickable
-			? {
-					onClick: () => {
-						navigate(`/${post.user!.handle}/${post.id}`);
-					},
-					style: { cursor: "pointer" },
-			  }
-			: {};
 
 		return (
-			<Paper p="xs" radius="xs" withBorder ref={ref} {...props}>
+			<Paper
+				p="xs"
+				radius="xs"
+				withBorder
+				ref={ref}
+				onClick={() => {
+					navigate(`/${post.user!.handle}/${post.id}`);
+				}}
+				style={{ cursor: "pointer" }}
+			>
 				<Group align="center">
 					<ProfileHoverCard handle={post.user!.handle}>
 						<Avatar

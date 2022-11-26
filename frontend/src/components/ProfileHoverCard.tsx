@@ -1,7 +1,7 @@
 import { HoverCard } from "@mantine/core";
 import { useContext, useState } from "react";
-import UsersContext from "../../context/UsersContext";
-import Profile from "../Profile";
+import UsersContext from "../context/UsersContext";
+import Profile from "./Profile";
 
 interface ProfileHoverCardProps {
 	handle: string;

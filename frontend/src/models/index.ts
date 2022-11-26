@@ -13,6 +13,7 @@ export * from "./forbiddenResponse";
 export * from "./getMeFeedParams";
 export * from "./getMeFollowersParams";
 export * from "./getMeFollowingParams";
+export * from "./getPostsPostIDLikesParams";
 export * from "./getPostsPostIDRepliesParams";
 export * from "./getUsersHandleFollowersParams";
 export * from "./getUsersHandleFollowingParams";

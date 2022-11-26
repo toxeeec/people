@@ -37,6 +37,7 @@ import type {
 	PostBodyBody,
 	GetUsersHandlePostsParams,
 	GetPostsPostIDRepliesParams,
+	GetPostsPostIDLikesParams,
 	Likes,
 } from "./models";
 import { customInstance } from "./custom-instance";
@@ -1216,6 +1217,71 @@ export const usePostPostsPostIDReplies = <
 		{ postID: number; data: PostBodyBody },
 		TContext
 	>(mutationFn, mutationOptions);
+};
+
+export const getPostsPostIDLikes = (
+	postID: number,
+	params?: GetPostsPostIDLikesParams,
+	options?: SecondParameter<typeof customInstance>,
+	signal?: AbortSignal
+) => {
+	return customInstance<Users>(
+		{ url: `/posts/${postID}/likes`, method: "get", params, signal },
+		options
+	);
+};
+
+export const getGetPostsPostIDLikesQueryKey = (
+	postID: number,
+	params?: GetPostsPostIDLikesParams
+) => [`/posts/${postID}/likes`, ...(params ? [params] : [])];
+
+export type GetPostsPostIDLikesQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getPostsPostIDLikes>>
+>;
+export type GetPostsPostIDLikesQueryError = ErrorType<NotFoundResponse>;
+
+export const useGetPostsPostIDLikes = <
+	TData = Awaited<ReturnType<typeof getPostsPostIDLikes>>,
+	TError = ErrorType<NotFoundResponse>
+>(
+	postID: number,
+	params?: GetPostsPostIDLikesParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getPostsPostIDLikes>>,
+			TError,
+			TData
+		>;
+		request?: SecondParameter<typeof customInstance>;
+	}
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey =
+		queryOptions?.queryKey ?? getGetPostsPostIDLikesQueryKey(postID, params);
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getPostsPostIDLikes>>
+	> = ({ signal }) =>
+		getPostsPostIDLikes(postID, params, requestOptions, signal);
+
+	const query = useQuery<
+		Awaited<ReturnType<typeof getPostsPostIDLikes>>,
+		TError,
+		TData
+	>(queryKey, queryFn, {
+		enabled: !!postID,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+	query.queryKey = queryKey;
+
+	return query;
 };
 
 export const putPostsPostIDLikes = (
