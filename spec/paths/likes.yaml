@@ -2,6 +2,26 @@ components:
   $ref: ../components/main.yaml#/components
 
 likes:
+  get:
+    tags:
+      - likes
+    security:
+      - bearerAuth: []
+      - {}
+    parameters:
+      - $ref: '#/components/parameters/postIDParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/beforeHandleParam'
+      - $ref: '#/components/parameters/afterHandleParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Users'
+      404:
+        $ref: '#/components/responses/NotFound'
   put:
     tags:
       - likes

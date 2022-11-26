@@ -26,6 +26,20 @@ const (
 	queryGet     = selectUser + " WHERE handle = $2"
 )
 
+const (
+	likedBase = selectUser + " JOIN post_like ON user_profile.user_id = post_like.user_id WHERE user_profile.user_id IN (SELECT user_id FROM post_like WHERE post_id = $2)"
+)
+
+const (
+	likedEnd         = " ORDER BY liked_at DESC LIMIT $3"
+	likedBefore      = " AND liked_at < (SELECT liked_at FROM post_like WHERE user_id = (" + selectIDByHandle + "$4) AND post_like.user_id = $1)"
+	likedAfter       = " AND liked_at > (SELECT liked_at FROM post_like WHERE user_id = (" + selectIDByHandle + "$4) AND post_like.user_id = $1)"
+	likedBeforeAfter = " AND liked_at < (SELECT liked_at FROM post_like WHERE user_id = (" + selectIDByHandle + `$4) AND post_like.user_id = $1) 
+AND liked_at > (SELECT liked_at FROM post_like WHERE user_id = (` + selectIDByHandle + "$5) AND post_like.user_id = $1)"
+)
+
+var likedQueries = people.PaginationQueries(likedBase, likedEnd, likedBefore, likedAfter, likedBeforeAfter)
+
 func (s *service) Exists(handle string) bool {
 	var exists bool
 	s.db.Get(&exists, queryExists, handle)
@@ -59,4 +73,12 @@ func (s *service) Get(handle string, id *uint) (people.User, error) {
 	}
 	var u people.User
 	return u, s.db.Get(&u, queryGet, id, handle)
+}
+
+func (s *service) Liked(postID uint, userID *uint, p people.HandlePagination) (people.Users, error) {
+	if userID == nil {
+		userID = new(uint)
+	}
+
+	return people.PaginationSelect[people.User](s.db, &likedQueries, p, userID, postID)
 }

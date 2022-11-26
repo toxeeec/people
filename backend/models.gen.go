@@ -159,6 +159,13 @@ type PostPostsJSONBody struct {
 	Content string `fake:"{sentence}" json:"content"`
 }
 
+// GetPostsPostIDLikesParams defines parameters for GetPostsPostIDLikes.
+type GetPostsPostIDLikesParams struct {
+	Limit  *LimitParam        `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeHandleParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterHandleParam  `form:"after,omitempty" json:"after,omitempty"`
+}
+
 // GetPostsPostIDRepliesParams defines parameters for GetPostsPostIDReplies.
 type GetPostsPostIDRepliesParams struct {
 	Limit  *LimitParam  `form:"limit,omitempty" json:"limit,omitempty"`

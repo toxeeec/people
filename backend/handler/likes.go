@@ -44,3 +44,15 @@ func (h *handler) DeletePostsPostIDLikes(c echo.Context, postID uint) error {
 
 	return c.JSON(http.StatusOK, l)
 }
+
+func (h *handler) GetPostsPostIDLikes(c echo.Context, postID uint, params people.GetPostsPostIDLikesParams) error {
+	userID, _ := people.FromContext(c.Request().Context(), people.UserIDKey)
+	pagination := people.NewPagination(params.Before, params.After, params.Limit)
+
+	u, err := h.us.Liked(postID, &userID, pagination)
+	if err != nil {
+		return echo.ErrNotFound
+	}
+
+	return c.JSON(http.StatusOK, u)
+}
