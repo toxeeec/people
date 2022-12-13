@@ -6,8 +6,6 @@
  */
 
 export interface Follows {
-	followers: number;
-	following: number;
 	isFollowing: boolean;
 	isFollowed: boolean;
 }

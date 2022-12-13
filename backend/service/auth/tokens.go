@@ -1,58 +1,121 @@
 package auth
 
 import (
+	"errors"
+	"fmt"
+	"os"
+	"strconv"
+	"time"
+
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	people "github.com/toxeeec/people/backend"
-	"github.com/toxeeec/people/backend/token"
+)
+
+var (
+	ErrInvalidSigningMethod = errors.New("Invalid signing method")
 )
 
 const (
-	queryInsert = "INSERT INTO token(token_id, value, user_id) VALUES (:token_id, :value, :user_id)"
-	queryUpdate = "UPDATE token SET value = $1 WHERE token_id = $2 AND user_id = $3"
-	queryExists = "SELECT EXISTS(SELECT 1 FROM token WHERE value = $1)"
-	queryDelete = "DELETE FROM token WHERE token_id = $1"
+	day = 24 * time.Hour
+
+	// accessTokenDuration  = 15 * time.Minute
+	accessTokenDuration  = 30 * day
+	refreshTokenDuration = 30 * day
 )
 
-func (s *service) NewTokens(id uint) (people.Tokens, error) {
-	at, err := token.NewAccessToken(id)
+var (
+	accessTokenSecret  = []byte(os.Getenv("ACCESS_TOKEN_SECRET"))
+	refreshTokenSecret = []byte(os.Getenv("REFRESH_TOKEN_SECRET"))
+)
+
+// validateAccessToken returns user id if the tokenString is valid.
+func ValidateAccessToken(tokenString string) (uint, error) {
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (any, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, ErrInvalidSigningMethod
+		}
+		return accessTokenSecret, nil
+	})
+	if err != nil || !token.Valid {
+		return 0, err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		sub := claims["sub"].(string)
+		id, err := strconv.ParseUint(sub, 10, 64)
+		return uint(id), err
+	}
+	return 0, errors.New("Unknown error")
+}
+
+func (s *authService) newTokens(id uint) (people.Tokens, error) {
+	at, err := NewAccessToken(id)
 	if err != nil {
 		return people.Tokens{}, err
 	}
-
-	rt, err := token.NewRefreshToken(id, nil)
+	rt, err := NewRefreshToken(id, nil)
 	if err != nil {
 		return people.Tokens{}, err
 	}
-
-	_, err = s.db.NamedExec(queryInsert, rt)
+	err = s.tr.Create(rt)
 	if err != nil {
 		return people.Tokens{}, err
 	}
-
 	return people.Tokens{AccessToken: at, RefreshToken: rt.Value}, nil
 }
 
-func (s *service) UpdateRefreshToken(userID uint, tokenID uuid.UUID) (people.RefreshToken, error) {
-	rt, err := token.NewRefreshToken(userID, &tokenID)
-	if err != nil {
-		return people.RefreshToken{}, err
+func NewAccessToken(userID uint) (string, error) {
+	claims := jwt.RegisteredClaims{
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(accessTokenDuration)),
+		Subject:   fmt.Sprint(userID),
 	}
-
-	_, err = s.db.Exec(queryUpdate, rt.Value, tokenID, userID)
-	if err != nil {
-		return people.RefreshToken{}, err
-	}
-
-	return rt, nil
+	at := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	atString, err := at.SignedString(accessTokenSecret)
+	return atString, err
 }
 
-func (s *service) CheckRefreshToken(token people.RefreshToken) bool {
-	var exists bool
-	s.db.Get(&exists, queryExists, token.Value)
-	if exists {
-		return true
+// NewRefreshToken creates new uuid if nil is passed.
+func NewRefreshToken(userID uint, id *uuid.UUID) (people.RefreshToken, error) {
+	if id == nil {
+		newID := uuid.New()
+		id = &newID
 	}
+	claims := jwt.RegisteredClaims{
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(refreshTokenDuration)),
+		Subject:   fmt.Sprint(userID),
+		ID:        id.String(),
+	}
+	rt := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	rtString, err := rt.SignedString(refreshTokenSecret)
+	if err != nil {
+		return people.RefreshToken{}, err
+	}
+	return people.RefreshToken{ID: *id, Value: rtString, UserID: userID}, nil
+}
 
-	s.db.Exec(queryDelete, token.ID)
-	return false
+func parseRefreshToken(tokenString string) (people.RefreshToken, error) {
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, ErrInvalidSigningMethod
+		}
+		return refreshTokenSecret, nil
+	})
+	if err != nil || !token.Valid {
+		return people.RefreshToken{}, err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		uuid, err := uuid.Parse(claims["jti"].(string))
+		if err != nil {
+			return people.RefreshToken{}, err
+		}
+		sub := claims["sub"].(string)
+		userID, err := strconv.ParseUint(sub, 10, 64)
+		if err != nil {
+			return people.RefreshToken{}, err
+		}
+		return people.RefreshToken{ID: uuid, Value: tokenString, UserID: uint(userID)}, nil
+	}
+	return people.RefreshToken{}, errors.New("Unknown error")
 }

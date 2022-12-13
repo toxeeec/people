@@ -2,45 +2,21 @@ package main
 
 import (
 	"log"
-	"net/http"
 
-	"github.com/deepmap/oapi-codegen/pkg/middleware"
-	"github.com/getkin/kin-openapi/openapi3filter"
-	"github.com/labstack/echo/v4"
-	echomiddleware "github.com/labstack/echo/v4/middleware"
-	people "github.com/toxeeec/people/backend"
-	"github.com/toxeeec/people/backend/handler"
-	"github.com/toxeeec/people/backend/token"
+	"github.com/go-playground/validator/v10"
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+	"github.com/toxeeec/people/backend/http"
+	"github.com/toxeeec/people/backend/repository/postgres"
 )
 
 func main() {
-	swagger, err := people.GetSwagger()
-	if err != nil {
-		log.Fatal(err)
-	}
-	db, err := people.PostgresConnect()
+	db, err := sqlx.Connect("postgres", postgres.DSN)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	e := echo.New()
-	// e.Use(echomiddleware.Logger())
-	e.Use(echomiddleware.Recover())
-	e.Use(echomiddleware.CORSWithConfig(echomiddleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:5173"},
-	}))
-	e.GET("openapi.json", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, swagger)
-	})
-
-	validator := middleware.OapiRequestValidatorWithOptions(swagger,
-		&middleware.Options{
-			Options: openapi3filter.Options{
-				AuthenticationFunc: token.NewAuthenticator(),
-			},
-		})
-	g := e.Group("", validator)
-	h := handler.New(db)
-	people.RegisterHandlers(g, h)
+	v := validator.New()
+	e := http.NewServer(db, v)
 	e.Logger.Fatal(e.Start(":8000"))
 }

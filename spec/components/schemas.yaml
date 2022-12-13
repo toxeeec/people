@@ -10,7 +10,21 @@ components:
         - accessToken
         - refreshToken
 
-    AuthUser:
+    FollowStatus:
+      properties:
+        isFollowing:
+          type: boolean
+          x-oapi-codegen-extra-tags:
+            db: is_following
+        isFollowed:
+          type: boolean
+          x-oapi-codegen-extra-tags:
+            db: is_followed
+      required:
+        - isFollowing
+        - isFollowed
+
+    User:
       properties:
         id:
           type: integer
@@ -18,7 +32,45 @@ components:
           x-go-type: uint
           x-oapi-codegen-extra-tags:
             db: user_id
+          x-go-json-ignore: true
+        handle:
+          type: string
+          x-oapi-codegen-extra-tags:
+            db: handle
+        following:
+          type: integer
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: following
             fake: skip
+        followers:
+          type: integer
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: followers
+            fake: skip
+        status:
+          $ref: '#/components/schemas/FollowStatus'
+      required:
+        - id
+        - handle
+        - following
+        - followers
+
+    Users:
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        meta:
+          $ref: '#/components/schemas/HandlePaginationMeta'
+      x-go-type: PaginatedResults[User, string]
+      required:
+        - data
+
+    AuthUser:
+      properties:
         handle:
           type: string
           minLength: 5
@@ -30,13 +82,8 @@ components:
           type: string
           format: password
           minLength: 12
-          x-go-type: Password
           x-oapi-codegen-extra-tags:
             fake: '{password:true,true,true,true,false,12}'
-        hash:
-          type: string
-          x-oapi-codegen-extra-tags:
-            db: hash
       required:
         - handle
         - password
@@ -51,117 +98,90 @@ components:
         - tokens
         - user
 
-    Follows:
+    LikeStatus:
       properties:
-        followers:
-          type: integer
-          x-go-type: uint
-          x-oapi-codegen-extra-tags:
-            db: followers
-            fake: skip
-        following:
-          type: integer
-          x-go-type: uint
-          x-oapi-codegen-extra-tags:
-            db: following
-            fake: skip
-        isFollowing:
+        isLiked:
           type: boolean
           x-oapi-codegen-extra-tags:
-            db: is_following
-        isFollowed:
-          type: boolean
+            db: is_liked
+      required:
+        - isLiked
+
+    Post:
+      properties:
+        id:
+          type: integer
+          x-go-name: ID
+          x-go-type: uint
           x-oapi-codegen-extra-tags:
-            db: is_followed
-      required:
-        - followers
-        - following
-        - isFollowing
-        - isFollowed
-
-    User:
-      allOf:
-        - $ref: '#/components/schemas/Follows'
-        - type: object
-          properties:
-            handle:
-              type: string
-              x-oapi-codegen-extra-tags:
-                db: handle
-          required:
-            - handle
-
-    Users:
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/User'
-        meta:
-          $ref: '#/components/schemas/HandlePaginationMeta'
-      x-go-type: PaginationResult[User, string]
-      required:
-        - data
-
-    Likes:
-      properties:
+            db: post_id
+            fake: skip
+        userID:
+          type: integer
+          x-go-type: uint
+          x-go-json-ignore: true
+          x-oapi-codegen-extra-tags:
+            db: user_id
+        content:
+          type: string
+          x-oapi-codegen-extra-tags:
+            db: content
+            fake: '{sentence}'
         likes:
           type: integer
           x-go-type: uint
           x-oapi-codegen-extra-tags:
             db: likes
             fake: skip
-        isLiked:
-          type: boolean
+        replies:
+          type: integer
+          x-go-type: uint
           x-oapi-codegen-extra-tags:
-            db: is_liked
+            db: replies
+            fake: skip
+        createdAt:
+          type: string
+          format: date-time
+          x-go-type: time.Time
+          x-oapi-codegen-extra-tags:
+            db: created_at
+            fake: skip
+        repliesTo:
+          type: integer
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            db: replies_to
+            fake: skip
+        status:
+          $ref: '#/components/schemas/LikeStatus'
       required:
+        - id
+        - userID
+        - content
         - likes
-        - isLiked
+        - replies 
+        - createdAt
 
-    Post:
-      allOf:
-        - $ref: '#/components/schemas/Likes'
-        - type: object
-          properties:
-            id:
-              type: integer
-              x-go-name: ID
-              x-go-type: uint
-              x-oapi-codegen-extra-tags:
-                db: post_id
-                fake: skip
-            content:
-              type: string
-              x-oapi-codegen-extra-tags:
-                db: content
-                fake: '{sentence}'
-            createdAt:
-              type: string
-              format: date-time
-              x-go-type: time.Time
-              x-oapi-codegen-extra-tags:
-                db: created_at
-                fake: skip
-            repliesTo:
-              type: integer
-              x-go-type: sql.NullInt32
-              x-oapi-codegen-extra-tags:
-                db: replies_to
-                fake: skip
-            replies:
-              type: integer
-              x-go-type: uint
-              x-oapi-codegen-extra-tags:
-                db: replies
-                fake: skip
-            user:
-              $ref: '#/components/schemas/User'
-          required:
-            - id
-            - content
-            - createdAt
-            - replies 
+    PostResponse:
+      properties:
+        data:
+          $ref: '#/components/schemas/Post'
+        user: 
+          $ref: '#/components/schemas/User'
+      required:
+        - data
+        - user
+
+    NewPost:
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 280
+          x-oapi-codegen-extra-tags:
+            fake: '{sentence}'
+      required:
+        - content
 
     IDPaginationMeta:
       properties:
@@ -187,15 +207,15 @@ components:
         - newest
       x-go-type: PaginationMeta[string]
 
-    Posts:
+    PostsResponse:
       properties:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/Post'
+            $ref: '#/components/schemas/PostResponse'
         meta:
           $ref: '#/components/schemas/IDPaginationMeta'
-      x-go-type: PaginationResult[Post, uint]
+      x-go-type: PaginatedResults[PostResponse, uint]
       required:
         - data
 
@@ -203,6 +223,8 @@ components:
       properties:
         message:
           type: string
+        kind:
+          type: string
+          x-go-type: ErrorKind
       required:
         - message
-

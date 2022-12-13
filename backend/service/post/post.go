@@ -1,101 +1,322 @@
 package post
 
 import (
-	"github.com/jmoiron/sqlx"
+	"context"
+	"errors"
+	"strings"
+
+	"github.com/go-playground/validator/v10"
 	people "github.com/toxeeec/people/backend"
+	"github.com/toxeeec/people/backend/pagination"
+	"github.com/toxeeec/people/backend/repository"
+	"github.com/toxeeec/people/backend/service"
+	"github.com/toxeeec/people/backend/service/user"
+	"golang.org/x/sync/errgroup"
 )
 
-type service struct {
-	db *sqlx.DB
+func TrimContent(p people.NewPost) people.NewPost {
+	p.Content = strings.TrimSpace(p.Content)
+	return p
 }
 
-func NewService(db *sqlx.DB) people.PostService {
-	return &service{db}
+type IDPaginationParams struct {
+	Limit  *uint
+	Before *uint
+	After  *uint
 }
 
-const (
-	isLiked             = " EXISTS(SELECT 1 FROM post_like WHERE post_id = post.post_id AND user_id = $1) as is_liked"
-	isFollowing         = ` EXISTS(SELECT 1 FROM follower WHERE follower_id = user_profile.user_id AND user_id = $1) as "user.is_following"`
-	isFollowed          = ` EXISTS(SELECT 1 FROM follower WHERE follower_id = $1 AND user_id = user_profile.user_id) as "user.is_followed"`
-	selectPostAndAuthor = `SELECT post_id, content, created_at, replies_to, replies, likes, 
-user_profile.handle AS "user.handle", user_profile.followers AS "user.followers", 
-user_profile.following AS "user.following",` + isLiked + "," + isFollowing + "," + isFollowed +
-		" FROM post JOIN user_profile ON post.user_id = user_profile.user_id"
-)
-
-const (
-	queryCreate           = "INSERT INTO post(user_id, content) VALUES($1, $2) RETURNING post_id, content, created_at"
-	queryGet              = selectPostAndAuthor + " WHERE post_id = $2"
-	queryExists           = "SELECT EXISTS(SELECT 1 FROM post WHERE post_id = $1)"
-	queryDelete           = `DELETE FROM post WHERE post_id = $1 AND user_id = $2 RETURNING replies_to`
-	queryDecrementReplies = "UPDATE post SET replies = replies - 1 WHERE post_id = $1"
-)
-
-const (
-	feedBase     = selectPostAndAuthor + " WHERE (post.user_id IN (SELECT user_id FROM follower WHERE follower_id = $2) OR post.user_id = $2) "
-	fromUserBase = `SELECT post_id, content, created_at, replies_to, replies, likes,` + isLiked + ` FROM post 
-WHERE user_id = (SELECT user_id FROM user_profile WHERE handle = $2) AND replies_to IS NULL `
-)
-
-const (
-	end         = " ORDER BY post_id DESC LIMIT $3"
-	before      = " AND post_id < $4"
-	after       = " AND post_id > $4"
-	beforeAfter = " AND post_id < $4 AND post_id > $5"
-)
-
-var feedQueries = people.PaginationQueries(feedBase, end, before, after, beforeAfter)
-var fromUserQueries = people.PaginationQueries(fromUserBase, end, before, after, beforeAfter)
-
-func (s *service) Create(userID uint, post people.PostBody) (people.Post, error) {
-	var p people.Post
-	return p, s.db.Get(&p, queryCreate, userID, post.Content)
+type Service interface {
+	Create(ctx context.Context, np people.NewPost, userID uint, repliesTo *uint) (people.PostResponse, error)
+	Get(ctx context.Context, postID, userID uint, auth bool) (people.PostResponse, error)
+	Delete(postID, userID uint) error
+	ListUserPosts(ctx context.Context, handle string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error)
+	ListFeed(ctx context.Context, userID uint, params IDPaginationParams) (people.PostsResponse, error)
+	ListReplies(ctx context.Context, postID, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error)
+	Like(ctx context.Context, postID, userID uint) (people.PostResponse, error)
+	Unlike(ctx context.Context, postID, userID uint) (people.PostResponse, error)
 }
 
-func (s *service) Get(postID uint, userID *uint) (people.Post, error) {
-	if userID == nil {
-		userID = new(uint)
-	}
-	var p people.Post
-	return p, s.db.Get(&p, queryGet, userID, postID)
+type postService struct {
+	pr repository.Post
+	ur repository.User
+	fr repository.Follow
+	lr repository.Like
+	us user.Service
+	v  *validator.Validate
 }
 
-func (s *service) Delete(postID, userID uint) error {
-	var p people.Post
-	tx, err := s.db.Beginx()
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
+func NewService(v *validator.Validate, pr repository.Post, ur repository.User, fr repository.Follow, lr repository.Like, us user.Service) Service {
+	s := postService{}
+	s.v = v
+	s.pr = pr
+	s.ur = ur
+	s.fr = fr
+	s.lr = lr
+	s.us = us
+	return &s
+}
 
-	err = s.db.Get(&p, queryDelete, postID, userID)
-	if err != nil {
-		return err
-	}
-
-	if p.RepliesTo != nil && p.RepliesTo.Valid {
-		_, err = s.db.Exec(queryDecrementReplies, postID)
-		if err != nil {
-			return err
+func (s *postService) validate(p people.NewPost) error {
+	if err := s.v.Var(p.Content, "min=1"); err != nil {
+		err := err.(validator.ValidationErrors)
+		switch err[0].Tag() {
+		case "min":
+			return service.NewError(people.ValidationError, "Content cannot be empty")
+		default:
+			return errors.New("Unknown")
 		}
 	}
-
-	return tx.Commit()
+	return nil
 }
 
-func (s *service) FromUser(handle string, userID *uint, p people.IDPagination) (people.Posts, error) {
-	if userID == nil {
-		userID = new(uint)
+func (s *postService) Create(ctx context.Context, np people.NewPost, userID uint, repliesTo *uint) (people.PostResponse, error) {
+	np = TrimContent(np)
+	if err := s.validate(np); err != nil {
+		return people.PostResponse{}, err
 	}
-	return people.PaginationSelect[people.Post](s.db, &fromUserQueries, p, userID, handle)
+	var p people.Post
+	var u people.User
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		var err error
+		p, err = s.pr.Create(np, userID, repliesTo)
+		if err != nil {
+			return service.NewError(people.NotFoundError, "Post not found")
+		}
+		return nil
+	})
+	g.Go(func() error {
+		var err error
+		u, err = s.us.GetUserWithStatus(context.Background(), userID, userID, true)
+		return err
+	})
+	if err := g.Wait(); err != nil {
+		return people.PostResponse{}, err
+	}
+	return people.PostResponse{Data: p, User: u}, nil
 }
 
-func (s *service) Feed(userID uint, p people.IDPagination) (people.Posts, error) {
-	return people.PaginationSelect[people.Post](s.db, &feedQueries, p, userID, userID)
+func (s *postService) Get(ctx context.Context, postID uint, userID uint, auth bool) (people.PostResponse, error) {
+	return s.getPostResponseWithStatuses(ctx, postID, userID, auth)
 }
 
-func (s *service) Exists(postID uint) bool {
-	var exists bool
-	s.db.Get(&exists, queryExists, postID)
-	return exists
+func (s *postService) Delete(postID, userID uint) error {
+	err := s.pr.Delete(postID, userID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *postService) ListUserPosts(ctx context.Context, handle string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error) {
+	p := pagination.New(params.Before, params.After, params.Limit)
+	id, err := s.ur.GetID(handle)
+	if err != nil {
+		return people.PostsResponse{}, service.NewError(people.NotFoundError, "User not found")
+	}
+	var ps []people.Post
+	var u people.User
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		var err error
+		ps, err = s.pr.ListUserPosts(id, p)
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		u, err = s.us.GetUserWithStatus(context.Background(), id, userID, auth)
+		return err
+	})
+	if err := g.Wait(); err != nil {
+		return people.PostsResponse{}, err
+	}
+
+	if auth {
+		lss, err := s.listStatus(Slice(ps).IDs(), userID)
+		if err != nil {
+			return people.PostsResponse{}, nil
+		}
+		Slice(ps).AddStatus(lss)
+	}
+	prs := make([]people.PostResponse, len(ps))
+	for i, p := range ps {
+		prs[i] = people.PostResponse{Data: p, User: u}
+	}
+	return pagination.NewResults[people.PostResponse, uint](prs), nil
+}
+
+func (s *postService) ListFeed(ctx context.Context, userID uint, params IDPaginationParams) (people.PostsResponse, error) {
+	p := pagination.New(params.Before, params.After, params.Limit)
+	us, err := s.fr.ListFollowing(userID, p)
+	if err != nil {
+		return people.PostsResponse{}, err
+	}
+	ids := user.Slice(us).IDs()
+	ids = append(ids, userID)
+	var ps []people.Post
+	var fss map[uint]people.FollowStatus
+	var u people.User
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		var err error
+		ps, err = s.pr.ListFeed(ids, userID, p)
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		fss, err = s.us.ListStatus(context.Background(), ids, userID)
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		u, err = s.us.GetUserWithStatus(context.Background(), userID, 0, false)
+		return err
+	})
+	if err := g.Wait(); err != nil {
+		return people.PostsResponse{}, err
+	}
+
+	lss, err := s.listStatus(Slice(ps).IDs(), userID)
+	if err != nil {
+		return people.PostsResponse{}, nil
+	}
+	Slice(ps).AddStatus(lss)
+	user.Slice(us).AddStatus(fss)
+	um := user.Slice(append(us, u)).ToMap()
+	prs := make([]people.PostResponse, len(ps))
+	for i, p := range ps {
+		prs[i] = people.PostResponse{Data: p, User: um[p.UserID]}
+	}
+	return pagination.NewResults[people.PostResponse, uint](prs), nil
+}
+
+func (s *postService) ListReplies(ctx context.Context, postID uint, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error) {
+	p := pagination.New(params.Before, params.After, params.Limit)
+	ps, err := s.pr.ListReplies(postID, p)
+	if err != nil {
+		return people.PostsResponse{}, service.NewError(people.NotFoundError, "Post not found")
+	}
+	ids := Slice(ps).UserIDs()
+	us, err := s.us.ListUsersWithStatus(context.Background(), ids, userID, auth)
+	if err != nil {
+		return people.PostsResponse{}, err
+	}
+	if auth {
+		lss, err := s.listStatus(Slice(ps).IDs(), userID)
+		if err != nil {
+			return people.PostsResponse{}, nil
+		}
+		Slice(ps).AddStatus(lss)
+	}
+	um := user.Slice(us).ToMap()
+	prs := make([]people.PostResponse, len(ps))
+	for i, p := range ps {
+		prs[i] = people.PostResponse{Data: p, User: um[p.UserID]}
+	}
+	return pagination.NewResults[people.PostResponse, uint](prs), nil
+}
+
+func (s *postService) Like(ctx context.Context, postID uint, userID uint) (people.PostResponse, error) {
+	g, ctx := errgroup.WithContext(ctx)
+	var pr people.PostResponse
+	g.Go(func() error {
+		err := s.lr.Create(postID, userID)
+		if err != nil {
+			if errors.Is(err, repository.ErrPostNotFound) {
+				return service.NewError(people.NotFoundError, err.Error())
+			}
+			if errors.Is(err, repository.ErrAlreadyLiked) {
+				return service.NewError(people.ConflictError, err.Error())
+			}
+		}
+		return err
+	})
+	g.Go(func() error {
+		var err error
+		pr, err = s.getPostResponseWithStatuses(context.Background(), postID, userID, true)
+		return err
+	})
+	if err := g.Wait(); err != nil {
+		return people.PostResponse{}, err
+	}
+
+	pr.Data.Status.IsLiked = true
+	return pr, nil
+}
+
+func (s *postService) Unlike(ctx context.Context, postID uint, userID uint) (people.PostResponse, error) {
+	g, ctx := errgroup.WithContext(ctx)
+	var pr people.PostResponse
+	g.Go(func() error {
+		err := s.lr.Delete(postID, userID)
+		if err != nil {
+			return service.NewError(people.NotFoundError, "Post not found")
+		}
+		return nil
+	})
+	g.Go(func() error {
+		var err error
+		pr, err = s.getPostResponseWithStatuses(context.Background(), postID, userID, true)
+		return err
+	})
+	if err := g.Wait(); err != nil {
+		return people.PostResponse{}, err
+	}
+
+	pr.Data.Status.IsLiked = false
+	return pr, nil
+}
+
+func (s *postService) listStatus(ids []uint, userID uint) (map[uint]people.LikeStatus, error) {
+	lss := make(map[uint]people.LikeStatus, len(ids))
+	liked, err := s.lr.ListStatusLiked(ids, userID)
+	if err != nil {
+		return nil, err
+	}
+	for _, id := range ids {
+		_, likedOk := liked[id]
+		lss[id] = people.LikeStatus{IsLiked: likedOk}
+	}
+	return lss, nil
+}
+
+func (s *postService) getPostResponseWithStatuses(ctx context.Context, postID uint, userID uint, auth bool) (people.PostResponse, error) {
+	pc := make(chan people.Post, 1)
+	var u people.User
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		p, err := s.pr.Get(postID)
+		if err != nil {
+			return service.NewError(people.NotFoundError, "Post not found")
+		}
+		select {
+		case pc <- p:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+		return nil
+	})
+	if auth {
+		g.Go(func() error {
+			ls := s.lr.Status(postID, userID)
+			select {
+			case p := <-pc:
+				p.Status = &ls
+				pc <- p
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return people.PostResponse{}, err
+	}
+
+	p := <-pc
+	u, err := s.us.GetUserWithStatus(context.Background(), p.UserID, userID, auth)
+	if err != nil {
+		return people.PostResponse{}, err
+	}
+	return people.PostResponse{Data: p, User: u}, nil
 }

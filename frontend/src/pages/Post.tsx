@@ -46,14 +46,14 @@ export default function Post() {
 			e.stopPropagation();
 			if (data) {
 				mutate(
-					{ postID: data.id, data: { content: content.trim() } },
+					{ postID: data.data.id, data: { content: content.trim() } },
 					{
 						onSuccess: () => {
 							setContent("");
 							refetch();
 
 							queryClient.invalidateQueries({
-								queryKey: ["replies", data.id],
+								queryKey: ["replies", data.data.id],
 							});
 						},
 						onError: (error) => {

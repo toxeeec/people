@@ -16,15 +16,15 @@ import {
 	useCallback,
 	useState,
 } from "react";
-import { Post } from "../../models";
+import { PostResponse } from "../../models";
 import { getPostsPostID, usePostPostsPostIDReplies } from "../../spec.gen";
 
 interface PostReplyProps {
 	isReply: boolean;
 	opened: boolean;
 	setOpened: Dispatch<SetStateAction<boolean>>;
-	post: Post;
-	setPost: Dispatch<SetStateAction<Post>>;
+	post: PostResponse;
+	setPost: Dispatch<SetStateAction<PostResponse>>;
 }
 
 export default function PostReply({
@@ -45,13 +45,13 @@ export default function PostReply({
 		(e: MouseEvent) => {
 			e.stopPropagation();
 			mutate(
-				{ postID: post.id, data: { content: content.trim() } },
+				{ postID: post.data.id, data: { content: content.trim() } },
 				{
 					onSuccess: () => {
 						setContent("");
-						getPostsPostID(post.id).then((p) => setPost(p));
+						getPostsPostID(post.data.id).then((p) => setPost(p));
 						queryClient.invalidateQueries({
-							queryKey: ["replies", post.id],
+							queryKey: ["replies", post.data.id],
 						});
 						setOpened(false);
 					},
@@ -81,7 +81,7 @@ export default function PostReply({
 				</Group>
 			}
 		>
-			<Text my="xs">{post.content}</Text>
+			<Text my="xs">{post.data.content}</Text>
 			<Textarea
 				ref={focusTrapRef}
 				data-autofocus

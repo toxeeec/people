@@ -3,6 +3,9 @@ components:
 
 replies:
   get:
+    security:
+      - bearerAuth: []
+      - {}
     tags:
       - replies
     parameters:
@@ -16,7 +19,13 @@ replies:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Posts'
+              $ref: '#/components/schemas/PostsResponse'
+      400:
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
   post:
     tags:
@@ -26,19 +35,35 @@ replies:
     parameters:
       - $ref: '#/components/parameters/postIDParam'
     requestBody:
-      $ref: '#/components/requestBodies/PostBody'
+      $ref: '#/components/requestBodies/NewPostBody'
     responses:
       200:
         description: OK
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Post'
+              $ref: '#/components/schemas/PostResponse'
       400:
-        $ref: '#/components/responses/BadRequest'
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       401:
-        $ref: '#/components/responses/Unauthorized'
+        description: Access Token Required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       403:
-        $ref: '#/components/responses/Forbidden'
+        description: Malformed Token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       404:
-        $ref: '#/components/responses/NotFound'
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'

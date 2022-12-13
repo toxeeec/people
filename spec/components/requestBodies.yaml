@@ -10,7 +10,7 @@ components:
           schema:
             $ref: '#/components/schemas/AuthUser'
 
-    TokensBody:
+    RefreshTokenBody:
       required: true
       content:
         application/json:
@@ -18,22 +18,12 @@ components:
             properties:
               refreshToken:
                 type: string
-                x-oapi-codegen-extra-tags:
-                  db: refreshToken
             required:
               - refreshToken
 
-    PostBody:
+    NewPostBody:
       required: true
       content:
         application/json:
           schema:
-            properties:
-              content:
-                type: string
-                minLength: 1
-                maxLength: 280
-                x-oapi-codegen-extra-tags:
-                  fake: '{sentence}'
-            required:
-              - content
+            $ref: '#/components/schemas/NewPost'

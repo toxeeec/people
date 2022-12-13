@@ -1,172 +1,183 @@
-package post
+package post_test
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	people "github.com/toxeeec/people/backend"
+	"github.com/toxeeec/people/backend/repository"
+	"github.com/toxeeec/people/backend/repository/inmem"
+	"github.com/toxeeec/people/backend/service/post"
 	"github.com/toxeeec/people/backend/service/user"
 )
 
 type PostSuite struct {
 	suite.Suite
-	ps        service
-	us        people.UserService
-	user1     people.AuthUser
-	user2     people.AuthUser
-	user3     people.AuthUser
-	user1ID   uint
-	user2ID   uint
-	user3ID   uint
-	post1     people.Post
-	post2     people.Post
-	postBody1 people.PostBody
-	postBody2 people.PostBody
-	postBody3 people.PostBody
-	replyBody people.PostBody
+	ps post.Service
+	pr repository.Post
+	ur repository.User
 }
 
-func (suite *PostSuite) TestCreate() {
-	row := suite.ps.db.QueryRowx(`SELECT post_id, content FROM post WHERE post_id = $1`, suite.post1.ID)
-	var actual people.Post
-	row.StructScan(&actual)
-	assert.Equal(suite.T(), suite.post1.ID, actual.ID)
-	assert.Equal(suite.T(), suite.postBody1.Content, actual.Content)
-}
+func (s *PostSuite) TestCreate() {
+	emptyContent := people.NewPost{Content: "\t\n \n\t"}
+	var np people.NewPost
+	var au people.AuthUser
+	gofakeit.Struct(&np)
+	gofakeit.Struct(&au)
+	u, _ := s.ur.Create(au)
+	p, _ := s.pr.Create(np, u.ID, nil)
+	invalidID := p.ID + 5
 
-func (suite *PostSuite) TestGet() {
+	validationError := people.ValidationError
+	notFoundError := people.NotFoundError
+
 	tests := map[string]struct {
-		id    uint
-		valid bool
+		np        people.NewPost
+		repliesTo *uint
+		valid     bool
+		kind      *people.ErrorKind
 	}{
-		"unknown id": {suite.post1.ID + 5, false},
-		"valid":      {suite.post1.ID, true},
+		"empty content":       {emptyContent, nil, false, &validationError},
+		"invalid parent post": {np, &invalidID, false, &notFoundError},
+		"valid reply":         {np, &p.ID, true, nil},
+		"valid":               {np, nil, true, nil},
 	}
 	for name, tc := range tests {
-		suite.Run(name, func() {
-			p, err := suite.ps.Get(tc.id, nil)
-			assert.Equal(suite.T(), tc.valid, err == nil)
+		s.Run(name, func() {
+			pr, err := s.ps.Create(context.Background(), tc.np, u.ID, tc.repliesTo)
+			assert.Equal(s.T(), tc.valid, err == nil)
 			if tc.valid {
-				assert.Equal(suite.T(), suite.post1.Content, p.Content)
-				assert.Equal(suite.T(), suite.user1.Handle, p.User.Handle)
+				assert.Equal(s.T(), tc.np.Content, pr.Data.Content)
+				assert.Equal(s.T(), u.ID, pr.User.ID)
+			} else {
+				var e *people.Error
+				assert.ErrorAs(s.T(), err, &e)
+				assert.Equal(s.T(), *tc.kind, *e.Kind)
 			}
 		})
 	}
 }
 
-func (suite *PostSuite) TestDelete() {
-	r, _ := suite.ps.CreateReply(suite.post2.ID, suite.user1ID, suite.replyBody)
+func (s *PostSuite) TestGet() {
+	var np people.NewPost
+	var au people.AuthUser
+	gofakeit.Struct(&np)
+	gofakeit.Struct(&au)
+	u, _ := s.ur.Create(au)
+	p, _ := s.pr.Create(np, u.ID, nil)
 
-	tests := map[string]struct {
-		id     uint
-		userID uint
-		valid  bool
-	}{
-		"not owned":     {suite.post1.ID, suite.user1ID + 5, false},
-		"unknown id":    {suite.post1.ID + 5, suite.user1ID, false},
-		"valid (reply)": {r.ID, suite.user1ID, true},
-		"valid":         {suite.post1.ID, suite.user1ID, true},
-	}
-	for name, tc := range tests {
-		suite.Run(name, func() {
-			err := suite.ps.Delete(tc.id, tc.userID)
-			assert.Equal(suite.T(), tc.valid, err == nil)
-		})
-	}
-}
+	notFoundError := people.NotFoundError
 
-func (suite *PostSuite) TestFromUser() {
-	count := 5
-	for i := 0; i < count; i++ {
-		var p people.PostBody
-		gofakeit.Struct(&p)
-		suite.ps.Create(suite.user2ID, p)
-	}
-
-	tests := map[string]struct {
-		handle   string
-		expected int
-	}{
-		"invalid handle": {gofakeit.Username(), 0},
-		"0 posts":        {suite.user3.Handle, 0},
-		"valid":          {suite.user2.Handle, count},
-	}
-	for name, tc := range tests {
-		suite.Run(name, func() {
-			pagination := people.NewPagination[uint](nil, nil, nil)
-			posts, _ := suite.ps.FromUser(tc.handle, nil, pagination)
-			assert.Equal(suite.T(), tc.expected, len(posts.Data))
-		})
-	}
-}
-
-func (suite *PostSuite) TestFeed() {
-	suite.us.Follow(suite.user1ID, suite.user2.Handle)
-	count := 5
-	for i := 0; i < count; i++ {
-		var p people.PostBody
-		gofakeit.Struct(&p)
-		suite.ps.Create(suite.user2ID, p)
-	}
-
-	// not followed by user1
-	var p people.PostBody
-	gofakeit.Struct(&p)
-	suite.ps.Create(suite.user3ID, p)
-
-	pagination := people.NewPagination[uint](nil, nil, nil)
-	res, _ := suite.ps.Feed(suite.user1ID, pagination)
-	assert.Equal(suite.T(), count+2, len(res.Data))
-}
-
-func (suite *PostSuite) TestExists() {
 	tests := map[string]struct {
 		id    uint
 		valid bool
+		kind  *people.ErrorKind
 	}{
-		"invalid id": {suite.post1.ID + 5, false},
-		"valid":      {suite.post1.ID, true},
+		"not found": {p.ID + 5, false, &notFoundError},
+		"valid":     {p.ID, true, nil},
 	}
 	for name, tc := range tests {
-		suite.Run(name, func() {
-			assert.Equal(suite.T(), tc.valid, suite.ps.Exists(tc.id))
+		s.Run(name, func() {
+			pr, err := s.ps.Get(context.Background(), tc.id, 0, false)
+			assert.Equal(s.T(), tc.valid, err == nil)
+			if tc.valid {
+				assert.Equal(s.T(), tc.id, pr.Data.ID)
+			} else {
+				var e *people.Error
+				assert.ErrorAs(s.T(), err, &e)
+				assert.Equal(s.T(), *tc.kind, *e.Kind)
+			}
 		})
 	}
 }
 
-func (suite *PostSuite) SetupSuite() {
-	db, err := people.PostgresConnect()
-	if err != nil {
-		suite.T().Fatal(err.Error())
-	}
+func (s *PostSuite) TestLike() {
+	var np people.NewPost
+	var au people.AuthUser
+	gofakeit.Struct(&np)
+	gofakeit.Struct(&au)
+	u, _ := s.ur.Create(au)
+	p1, _ := s.pr.Create(np, u.ID, nil)
+	p2, _ := s.pr.Create(np, u.ID, nil)
+	s.ps.Like(context.Background(), p1.ID, u.ID)
 
-	if err != nil {
-		suite.T().Fatal(err.Error())
-	}
+	conflictError := people.ConflictError
 
-	suite.us = user.NewService(db)
-	suite.ps = service{db}
-	gofakeit.Struct(&suite.user1)
-	gofakeit.Struct(&suite.user2)
-	gofakeit.Struct(&suite.user3)
-	suite.user1ID, _ = suite.us.Create(suite.user1)
-	suite.user2ID, _ = suite.us.Create(suite.user2)
-	suite.user3ID, _ = suite.us.Create(suite.user3)
+	tests := map[string]struct {
+		id    uint
+		valid bool
+		kind  *people.ErrorKind
+	}{
+		"already liked": {p1.ID, false, &conflictError},
+		"valid":         {p2.ID, true, nil},
+	}
+	for name, tc := range tests {
+		s.Run(name, func() {
+			pr, err := s.ps.Like(context.Background(), tc.id, u.ID)
+			assert.Equal(s.T(), tc.valid, err == nil)
+			if tc.valid {
+				assert.True(s.T(), pr.Data.Status.IsLiked)
+			} else {
+				var e *people.Error
+				assert.ErrorAs(s.T(), err, &e)
+				assert.Equal(s.T(), *tc.kind, *e.Kind)
+			}
+		})
+	}
 }
 
-func (suite *PostSuite) TearDownSuite() {
-	suite.ps.db.Close()
+func (s *PostSuite) TestUnlike() {
+	var np people.NewPost
+	var au people.AuthUser
+	gofakeit.Struct(&np)
+	gofakeit.Struct(&au)
+	u, _ := s.ur.Create(au)
+	p1, _ := s.pr.Create(np, u.ID, nil)
+	p2, _ := s.pr.Create(np, u.ID, nil)
+	s.ps.Like(context.Background(), p2.ID, u.ID)
+
+	notFoundError := people.NotFoundError
+
+	tests := map[string]struct {
+		id    uint
+		valid bool
+		kind  *people.ErrorKind
+	}{
+		"not liked": {p1.ID, false, &notFoundError},
+		"valid":     {p2.ID, true, nil},
+	}
+	for name, tc := range tests {
+		s.Run(name, func() {
+			pr, err := s.ps.Unlike(context.Background(), tc.id, u.ID)
+			assert.Equal(s.T(), tc.valid, err == nil)
+			if tc.valid {
+				assert.False(s.T(), pr.Data.Status.IsLiked)
+			} else {
+				var e *people.Error
+				assert.ErrorAs(s.T(), err, &e)
+				assert.Equal(s.T(), *tc.kind, *e.Kind)
+			}
+		})
+	}
 }
 
-func (suite *PostSuite) SetupTest() {
-	suite.ps.db.MustExec("TRUNCATE post CASCADE")
-	gofakeit.Struct(&suite.postBody1)
-	gofakeit.Struct(&suite.postBody2)
-	gofakeit.Struct(&suite.replyBody)
-	suite.post1, _ = suite.ps.Create(suite.user1ID, suite.postBody1)
-	suite.post2, _ = suite.ps.Create(suite.user1ID, suite.postBody2)
+func (s *PostSuite) SetupTest() {
+	um := map[uint]people.User{}
+	fm := map[inmem.FollowKey]time.Time{}
+	pm := map[uint]people.Post{}
+	lm := map[inmem.LikeKey]struct{}{}
+	v := validator.New()
+	s.pr = inmem.NewPostRepository(pm)
+	s.ur = inmem.NewUserRepository(um)
+	fr := inmem.NewFollowRepository(fm, um)
+	lr := inmem.NewLikeRepository(lm, pm, um)
+	us := user.NewService(s.ur, fr, lr)
+	s.ps = post.NewService(v, s.pr, s.ur, fr, lr, us)
 }
 
 func TestPostSuite(t *testing.T) {

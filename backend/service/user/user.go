@@ -1,84 +1,207 @@
 package user
 
 import (
-	"github.com/jmoiron/sqlx"
+	"context"
+	"errors"
+
 	people "github.com/toxeeec/people/backend"
+	"github.com/toxeeec/people/backend/pagination"
+	"github.com/toxeeec/people/backend/repository"
+	"github.com/toxeeec/people/backend/service"
+	"golang.org/x/sync/errgroup"
 )
 
-type service struct {
-	db *sqlx.DB
+type HandlePaginationParams struct {
+	Limit  *uint
+	Before *string
+	After  *string
 }
 
-func NewService(db *sqlx.DB) people.UserService {
-	return &service{db}
+type Service interface {
+	GetUserWithStatus(ctx context.Context, srcID, userID uint, auth bool) (people.User, error)
+	GetUser(ctx context.Context, handle string, userID uint, auth bool) (people.User, error)
+	Follow(ctx context.Context, handle string, userID uint) (people.User, error)
+	Unfollow(ctx context.Context, handle string, userID uint) (people.User, error)
+	ListFollowing(ctx context.Context, handle string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error)
+	ListFollowers(ctx context.Context, handle string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error)
+	ListCurrUserFollowing(ctx context.Context, userID uint, params HandlePaginationParams) (people.Users, error)
+	ListCurrUserFollowers(ctx context.Context, userID uint, params HandlePaginationParams) (people.Users, error)
+	ListPostLikes(ctx context.Context, postID, userID uint, auth bool, params HandlePaginationParams) (people.Users, error)
+	ListStatus(ctx context.Context, srcIDs []uint, userID uint) (map[uint]people.FollowStatus, error)
+	ListUsersWithStatus(ctx context.Context, srcIDs []uint, userID uint, auth bool) ([]people.User, error)
 }
 
-const (
-	isFollowed = " EXISTS(SELECT 1 FROM follower WHERE follower_id = $1 AND user_id = user_profile.user_id) as is_followed"
-	selectUser = "SELECT handle, following, followers," + isFollowing + "," + isFollowed + " FROM user_profile"
-)
-
-const (
-	queryExists  = "SELECT EXISTS(SELECT 1 FROM user_profile WHERE handle = $1)"
-	queryCreate  = "INSERT INTO user_profile(handle, hash) VALUES($1, $2) RETURNING user_id"
-	queryDelete  = "DELETE FROM user_profile WHERE handle = $1"
-	queryGetAuth = "SELECT user_id, handle, hash FROM user_profile WHERE handle = $1"
-	queryGet     = selectUser + " WHERE handle = $2"
-)
-
-const (
-	likedBase = selectUser + " JOIN post_like ON user_profile.user_id = post_like.user_id WHERE user_profile.user_id IN (SELECT user_id FROM post_like WHERE post_id = $2)"
-)
-
-const (
-	likedEnd         = " ORDER BY liked_at DESC LIMIT $3"
-	likedBefore      = " AND liked_at < (SELECT liked_at FROM post_like WHERE user_id = (" + selectIDByHandle + "$4) AND post_like.user_id = $1)"
-	likedAfter       = " AND liked_at > (SELECT liked_at FROM post_like WHERE user_id = (" + selectIDByHandle + "$4) AND post_like.user_id = $1)"
-	likedBeforeAfter = " AND liked_at < (SELECT liked_at FROM post_like WHERE user_id = (" + selectIDByHandle + `$4) AND post_like.user_id = $1) 
-AND liked_at > (SELECT liked_at FROM post_like WHERE user_id = (` + selectIDByHandle + "$5) AND post_like.user_id = $1)"
-)
-
-var likedQueries = people.PaginationQueries(likedBase, likedEnd, likedBefore, likedAfter, likedBeforeAfter)
-
-func (s *service) Exists(handle string) bool {
-	var exists bool
-	s.db.Get(&exists, queryExists, handle)
-	return exists
+type userService struct {
+	ur repository.User
+	fr repository.Follow
+	lr repository.Like
 }
 
-// Create returns id of the created user.
-func (s *service) Create(u people.AuthUser) (uint, error) {
-	var id uint
-	hash, err := u.Password.Hash()
+func NewService(ur repository.User, fr repository.Follow, lr repository.Like) Service {
+	s := userService{}
+	s.ur = ur
+	s.fr = fr
+	s.lr = lr
+	return &s
+}
+
+func (s *userService) GetUser(ctx context.Context, handle string, userID uint, auth bool) (people.User, error) {
+	id, err := s.ur.GetID(handle)
 	if err != nil {
-		return 0, err
+		return people.User{}, service.NewError(people.NotFoundError, "User not found")
+	}
+	return s.GetUserWithStatus(ctx, id, userID, auth)
+}
+
+func (s *userService) Follow(ctx context.Context, handle string, userID uint) (people.User, error) {
+	id, err := s.ur.GetID(handle)
+	if err != nil {
+		return people.User{}, service.NewError(people.NotFoundError, "User not found")
+	}
+	err = s.fr.Create(id, userID)
+	if err != nil {
+		if errors.Is(err, repository.ErrAlreadyFollowed) {
+			return people.User{}, service.NewError(people.ConflictError, err.Error())
+		}
+		if errors.Is(err, repository.ErrSameUser) {
+			return people.User{}, service.NewError(people.NotFoundError, err.Error())
+		}
+		return people.User{}, err
+	}
+	u, err := s.GetUserWithStatus(context.Background(), id, userID, true)
+	if err != nil {
+		return people.User{}, err
+	}
+	return u, nil
+}
+
+func (s *userService) Unfollow(ctx context.Context, handle string, userID uint) (people.User, error) {
+	id, err := s.ur.GetID(handle)
+	if err != nil {
+		return people.User{}, service.NewError(people.NotFoundError, "User not found")
+	}
+	err = s.fr.Delete(id, userID)
+	if err != nil {
+		return people.User{}, service.NewError(people.NotFoundError, "User not found")
+	}
+	u, err := s.GetUserWithStatus(context.Background(), id, userID, true)
+	if err != nil {
+		return people.User{}, err
+	}
+	return u, nil
+}
+
+func (s *userService) ListFollowing(ctx context.Context, handle string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error) {
+	hp := pagination.New(params.Before, params.After, params.Limit)
+	var p pagination.ID
+	var id uint
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		var err error
+		p, err = pagination.Handle(hp).IDPagination(ctx, s.ur.GetID)
+		if err != nil {
+			return service.NewError(people.NotFoundError, "User not found")
+		}
+		return nil
+	})
+	g.Go(func() error {
+		var err error
+		id, err = s.ur.GetID(handle)
+		if err != nil {
+			return service.NewError(people.NotFoundError, "User not found")
+		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
+		return people.Users{}, err
 	}
 
-	return id, s.db.Get(&id, queryCreate, u.Handle, hash)
-}
-
-func (s *service) Delete(handle string) error {
-	_, err := s.db.Exec(queryDelete, handle)
-	return err
-}
-
-func (s *service) GetAuthUser(handle string) (people.AuthUser, error) {
-	var u people.AuthUser
-	return u, s.db.Get(&u, queryGetAuth, handle)
-}
-
-func (s *service) Get(handle string, id *uint) (people.User, error) {
-	if id == nil {
-		id = new(uint)
+	us, err := s.fr.ListFollowing(id, p)
+	if err != nil {
+		return people.Users{}, err
 	}
-	var u people.User
-	return u, s.db.Get(&u, queryGet, id, handle)
+	if auth {
+		fss, err := s.ListStatus(context.Background(), Slice(us).IDs(), userID)
+		if err != nil {
+			return people.Users{}, err
+		}
+		Slice(us).AddStatus(fss)
+	}
+	return pagination.NewResults[people.User, string](us), nil
 }
 
-func (s *service) Liked(postID uint, userID *uint, p people.HandlePagination) (people.Users, error) {
-	if userID == nil {
-		userID = new(uint)
+func (s *userService) ListFollowers(ctx context.Context, handle string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error) {
+	hp := pagination.New(params.Before, params.After, params.Limit)
+	var p pagination.ID
+	var id uint
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		var err error
+		p, err = pagination.Handle(hp).IDPagination(ctx, s.ur.GetID)
+		if err != nil {
+			return service.NewError(people.NotFoundError, "User not found")
+		}
+		return nil
+	})
+	g.Go(func() error {
+		var err error
+		id, err = s.ur.GetID(handle)
+		if err != nil {
+			return service.NewError(people.NotFoundError, "User not found")
+		}
+		return nil
+	})
+	if err := g.Wait(); err != nil {
+		return people.Users{}, err
 	}
 
-	return people.PaginationSelect[people.User](s.db, &likedQueries, p, userID, postID)
+	us, err := s.fr.ListFollowers(id, p)
+	if err != nil {
+		return people.Users{}, err
+	}
+	if auth {
+		fss, err := s.ListStatus(context.Background(), Slice(us).IDs(), userID)
+		if err != nil {
+			return people.Users{}, err
+		}
+		Slice(us).AddStatus(fss)
+	}
+	return pagination.NewResults[people.User, string](us), nil
+}
+
+func (s *userService) ListCurrUserFollowing(ctx context.Context, userID uint, params HandlePaginationParams) (people.Users, error) {
+	u, err := s.ur.Get(userID)
+	if err != nil {
+		return people.Users{}, err
+	}
+	return s.ListFollowing(ctx, u.Handle, userID, true, params)
+}
+
+func (s *userService) ListCurrUserFollowers(ctx context.Context, userID uint, params HandlePaginationParams) (people.Users, error) {
+	u, err := s.ur.Get(userID)
+	if err != nil {
+		return people.Users{}, err
+	}
+	return s.ListFollowers(ctx, u.Handle, userID, true, params)
+}
+
+func (s *userService) ListPostLikes(ctx context.Context, postID, userID uint, auth bool, params HandlePaginationParams) (people.Users, error) {
+	hp := pagination.New(params.Before, params.After, params.Limit)
+	p, err := pagination.Handle(hp).IDPagination(ctx, s.ur.GetID)
+	if err != nil {
+		return people.Users{}, service.NewError(people.NotFoundError, "User not found")
+	}
+
+	us, err := s.lr.ListUsers(postID, p)
+	if err != nil {
+		return people.Users{}, err
+	}
+	if auth {
+		fss, err := s.ListStatus(context.Background(), Slice(us.Data).IDs(), userID)
+		if err != nil {
+			return people.Users{}, err
+		}
+		Slice(us.Data).AddStatus(fss)
+	}
+	return us, nil
 }

@@ -4,7 +4,12 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { Follows } from "./follows";
-import type { UserAllOf } from "./userAllOf";
+import type { FollowStatus } from "./followStatus";
 
-export type User = Follows & UserAllOf;
+export interface User {
+	id: number;
+	handle: string;
+	following: number;
+	followers: number;
+	status?: FollowStatus;
+}

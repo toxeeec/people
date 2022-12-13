@@ -15,30 +15,23 @@ import type {
 } from "@tanstack/react-query";
 import type {
 	AuthResponse,
-	BadRequestResponse,
-	AuthUserBodyBody,
-	UnauthorizedResponse,
-	Tokens,
-	ForbiddenResponse,
-	TokensBodyBody,
-	Posts,
-	GetMeFeedParams,
-	NoContentResponse,
-	NotFoundResponse,
-	Follows,
 	Error,
+	AuthUserBodyBody,
+	Tokens,
+	RefreshTokenBodyBody,
+	PostsResponse,
+	GetMeFeedParams,
+	User,
 	Users,
 	GetMeFollowingParams,
 	GetMeFollowersParams,
-	User,
 	GetUsersHandleFollowingParams,
 	GetUsersHandleFollowersParams,
-	Post,
-	PostBodyBody,
+	PostResponse,
+	NewPostBodyBody,
 	GetUsersHandlePostsParams,
 	GetPostsPostIDRepliesParams,
 	GetPostsPostIDLikesParams,
-	Likes,
 } from "./models";
 import { customInstance } from "./custom-instance";
 import type { ErrorType } from "./custom-instance";
@@ -70,10 +63,10 @@ export type PostRegisterMutationResult = NonNullable<
 	Awaited<ReturnType<typeof postRegister>>
 >;
 export type PostRegisterMutationBody = AuthUserBodyBody;
-export type PostRegisterMutationError = ErrorType<BadRequestResponse>;
+export type PostRegisterMutationError = ErrorType<Error>;
 
 export const usePostRegister = <
-	TError = ErrorType<BadRequestResponse>,
+	TError = ErrorType<Error>,
 	TContext = unknown
 >(options?: {
 	mutation?: UseMutationOptions<
@@ -122,12 +115,10 @@ export type PostLoginMutationResult = NonNullable<
 	Awaited<ReturnType<typeof postLogin>>
 >;
 export type PostLoginMutationBody = AuthUserBodyBody;
-export type PostLoginMutationError = ErrorType<
-	BadRequestResponse | UnauthorizedResponse
->;
+export type PostLoginMutationError = ErrorType<Error>;
 
 export const usePostLogin = <
-	TError = ErrorType<BadRequestResponse | UnauthorizedResponse>,
+	TError = ErrorType<Error>,
 	TContext = unknown
 >(options?: {
 	mutation?: UseMutationOptions<
@@ -158,7 +149,7 @@ export const usePostLogin = <
 };
 
 export const postRefresh = (
-	tokensBodyBody: TokensBodyBody,
+	refreshTokenBodyBody: RefreshTokenBodyBody,
 	options?: SecondParameter<typeof customInstance>
 ) => {
 	return customInstance<Tokens>(
@@ -166,7 +157,7 @@ export const postRefresh = (
 			url: `/refresh`,
 			method: "post",
 			headers: { "Content-Type": "application/json" },
-			data: tokensBodyBody,
+			data: refreshTokenBodyBody,
 		},
 		options
 	);
@@ -175,19 +166,17 @@ export const postRefresh = (
 export type PostRefreshMutationResult = NonNullable<
 	Awaited<ReturnType<typeof postRefresh>>
 >;
-export type PostRefreshMutationBody = TokensBodyBody;
-export type PostRefreshMutationError = ErrorType<
-	BadRequestResponse | ForbiddenResponse
->;
+export type PostRefreshMutationBody = RefreshTokenBodyBody;
+export type PostRefreshMutationError = ErrorType<Error>;
 
 export const usePostRefresh = <
-	TError = ErrorType<BadRequestResponse | ForbiddenResponse>,
+	TError = ErrorType<Error>,
 	TContext = unknown
 >(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof postRefresh>>,
 		TError,
-		{ data: TokensBodyBody },
+		{ data: RefreshTokenBodyBody },
 		TContext
 	>;
 	request?: SecondParameter<typeof customInstance>;
@@ -196,7 +185,7 @@ export const usePostRefresh = <
 
 	const mutationFn: MutationFunction<
 		Awaited<ReturnType<typeof postRefresh>>,
-		{ data: TokensBodyBody }
+		{ data: RefreshTokenBodyBody }
 	> = (props) => {
 		const { data } = props ?? {};
 
@@ -206,7 +195,7 @@ export const usePostRefresh = <
 	return useMutation<
 		Awaited<ReturnType<typeof postRefresh>>,
 		TError,
-		{ data: TokensBodyBody },
+		{ data: RefreshTokenBodyBody },
 		TContext
 	>(mutationFn, mutationOptions);
 };
@@ -216,7 +205,7 @@ export const getMeFeed = (
 	options?: SecondParameter<typeof customInstance>,
 	signal?: AbortSignal
 ) => {
-	return customInstance<Posts>(
+	return customInstance<PostsResponse>(
 		{ url: `/me/feed`, method: "get", params, signal },
 		options
 	);
@@ -230,13 +219,11 @@ export const getGetMeFeedQueryKey = (params?: GetMeFeedParams) => [
 export type GetMeFeedQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getMeFeed>>
 >;
-export type GetMeFeedQueryError = ErrorType<
-	UnauthorizedResponse | ForbiddenResponse
->;
+export type GetMeFeedQueryError = ErrorType<Error>;
 
 export const useGetMeFeed = <
 	TData = Awaited<ReturnType<typeof getMeFeed>>,
-	TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+	TError = ErrorType<Error>
 >(
 	params?: GetMeFeedParams,
 	options?: {
@@ -273,82 +260,11 @@ export const useGetMeFeed = <
 	return query;
 };
 
-export const getMeFollowingHandle = (
-	handle: string,
-	options?: SecondParameter<typeof customInstance>,
-	signal?: AbortSignal
-) => {
-	return customInstance<NoContentResponse>(
-		{ url: `/me/following/${handle}`, method: "get", signal },
-		options
-	);
-};
-
-export const getGetMeFollowingHandleQueryKey = (handle: string) => [
-	`/me/following/${handle}`,
-];
-
-export type GetMeFollowingHandleQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getMeFollowingHandle>>
->;
-export type GetMeFollowingHandleQueryError = ErrorType<
-	| BadRequestResponse
-	| UnauthorizedResponse
-	| ForbiddenResponse
-	| NotFoundResponse
->;
-
-export const useGetMeFollowingHandle = <
-	TData = Awaited<ReturnType<typeof getMeFollowingHandle>>,
-	TError = ErrorType<
-		| BadRequestResponse
-		| UnauthorizedResponse
-		| ForbiddenResponse
-		| NotFoundResponse
-	>
->(
-	handle: string,
-	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getMeFollowingHandle>>,
-			TError,
-			TData
-		>;
-		request?: SecondParameter<typeof customInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-	const { query: queryOptions, request: requestOptions } = options ?? {};
-
-	const queryKey =
-		queryOptions?.queryKey ?? getGetMeFollowingHandleQueryKey(handle);
-
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getMeFollowingHandle>>
-	> = ({ signal }) => getMeFollowingHandle(handle, requestOptions, signal);
-
-	const query = useQuery<
-		Awaited<ReturnType<typeof getMeFollowingHandle>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!handle,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-	query.queryKey = queryKey;
-
-	return query;
-};
-
 export const putMeFollowingHandle = (
 	handle: string,
 	options?: SecondParameter<typeof customInstance>
 ) => {
-	return customInstance<Follows>(
+	return customInstance<User>(
 		{ url: `/me/following/${handle}`, method: "put" },
 		options
 	);
@@ -358,22 +274,10 @@ export type PutMeFollowingHandleMutationResult = NonNullable<
 	Awaited<ReturnType<typeof putMeFollowingHandle>>
 >;
 
-export type PutMeFollowingHandleMutationError = ErrorType<
-	| BadRequestResponse
-	| UnauthorizedResponse
-	| ForbiddenResponse
-	| NotFoundResponse
-	| Error
->;
+export type PutMeFollowingHandleMutationError = ErrorType<Error>;
 
 export const usePutMeFollowingHandle = <
-	TError = ErrorType<
-		| BadRequestResponse
-		| UnauthorizedResponse
-		| ForbiddenResponse
-		| NotFoundResponse
-		| Error
-	>,
+	TError = ErrorType<Error>,
 	TContext = unknown
 >(options?: {
 	mutation?: UseMutationOptions<
@@ -407,7 +311,7 @@ export const deleteMeFollowingHandle = (
 	handle: string,
 	options?: SecondParameter<typeof customInstance>
 ) => {
-	return customInstance<Follows>(
+	return customInstance<User>(
 		{ url: `/me/following/${handle}`, method: "delete" },
 		options
 	);
@@ -417,20 +321,10 @@ export type DeleteMeFollowingHandleMutationResult = NonNullable<
 	Awaited<ReturnType<typeof deleteMeFollowingHandle>>
 >;
 
-export type DeleteMeFollowingHandleMutationError = ErrorType<
-	| BadRequestResponse
-	| UnauthorizedResponse
-	| ForbiddenResponse
-	| NotFoundResponse
->;
+export type DeleteMeFollowingHandleMutationError = ErrorType<Error>;
 
 export const useDeleteMeFollowingHandle = <
-	TError = ErrorType<
-		| BadRequestResponse
-		| UnauthorizedResponse
-		| ForbiddenResponse
-		| NotFoundResponse
-	>,
+	TError = ErrorType<Error>,
 	TContext = unknown
 >(options?: {
 	mutation?: UseMutationOptions<
@@ -479,13 +373,11 @@ export const getGetMeFollowingQueryKey = (params?: GetMeFollowingParams) => [
 export type GetMeFollowingQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getMeFollowing>>
 >;
-export type GetMeFollowingQueryError = ErrorType<
-	UnauthorizedResponse | ForbiddenResponse
->;
+export type GetMeFollowingQueryError = ErrorType<Error>;
 
 export const useGetMeFollowing = <
 	TData = Awaited<ReturnType<typeof getMeFollowing>>,
-	TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+	TError = ErrorType<Error>
 >(
 	params?: GetMeFollowingParams,
 	options?: {
@@ -522,77 +414,6 @@ export const useGetMeFollowing = <
 	return query;
 };
 
-export const getMeFollowersHandle = (
-	handle: string,
-	options?: SecondParameter<typeof customInstance>,
-	signal?: AbortSignal
-) => {
-	return customInstance<NoContentResponse>(
-		{ url: `/me/followers/${handle}`, method: "get", signal },
-		options
-	);
-};
-
-export const getGetMeFollowersHandleQueryKey = (handle: string) => [
-	`/me/followers/${handle}`,
-];
-
-export type GetMeFollowersHandleQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getMeFollowersHandle>>
->;
-export type GetMeFollowersHandleQueryError = ErrorType<
-	| BadRequestResponse
-	| UnauthorizedResponse
-	| ForbiddenResponse
-	| NotFoundResponse
->;
-
-export const useGetMeFollowersHandle = <
-	TData = Awaited<ReturnType<typeof getMeFollowersHandle>>,
-	TError = ErrorType<
-		| BadRequestResponse
-		| UnauthorizedResponse
-		| ForbiddenResponse
-		| NotFoundResponse
-	>
->(
-	handle: string,
-	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getMeFollowersHandle>>,
-			TError,
-			TData
-		>;
-		request?: SecondParameter<typeof customInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-	const { query: queryOptions, request: requestOptions } = options ?? {};
-
-	const queryKey =
-		queryOptions?.queryKey ?? getGetMeFollowersHandleQueryKey(handle);
-
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getMeFollowersHandle>>
-	> = ({ signal }) => getMeFollowersHandle(handle, requestOptions, signal);
-
-	const query = useQuery<
-		Awaited<ReturnType<typeof getMeFollowersHandle>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!handle,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-	query.queryKey = queryKey;
-
-	return query;
-};
-
 export const getMeFollowers = (
 	params?: GetMeFollowersParams,
 	options?: SecondParameter<typeof customInstance>,
@@ -612,13 +433,11 @@ export const getGetMeFollowersQueryKey = (params?: GetMeFollowersParams) => [
 export type GetMeFollowersQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getMeFollowers>>
 >;
-export type GetMeFollowersQueryError = ErrorType<
-	UnauthorizedResponse | ForbiddenResponse
->;
+export type GetMeFollowersQueryError = ErrorType<Error>;
 
 export const useGetMeFollowers = <
 	TData = Awaited<ReturnType<typeof getMeFollowers>>,
-	TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+	TError = ErrorType<Error>
 >(
 	params?: GetMeFollowersParams,
 	options?: {
@@ -673,11 +492,11 @@ export const getGetUsersHandleQueryKey = (handle: string) => [
 export type GetUsersHandleQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getUsersHandle>>
 >;
-export type GetUsersHandleQueryError = ErrorType<NotFoundResponse>;
+export type GetUsersHandleQueryError = ErrorType<Error>;
 
 export const useGetUsersHandle = <
 	TData = Awaited<ReturnType<typeof getUsersHandle>>,
-	TError = ErrorType<NotFoundResponse>
+	TError = ErrorType<Error>
 >(
 	handle: string,
 	options?: {
@@ -735,13 +554,11 @@ export const getGetUsersHandleFollowingQueryKey = (
 export type GetUsersHandleFollowingQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getUsersHandleFollowing>>
 >;
-export type GetUsersHandleFollowingQueryError = ErrorType<
-	BadRequestResponse | NotFoundResponse
->;
+export type GetUsersHandleFollowingQueryError = ErrorType<Error>;
 
 export const useGetUsersHandleFollowing = <
 	TData = Awaited<ReturnType<typeof getUsersHandleFollowing>>,
-	TError = ErrorType<BadRequestResponse | NotFoundResponse>
+	TError = ErrorType<Error>
 >(
 	handle: string,
 	params?: GetUsersHandleFollowingParams,
@@ -803,13 +620,11 @@ export const getGetUsersHandleFollowersQueryKey = (
 export type GetUsersHandleFollowersQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getUsersHandleFollowers>>
 >;
-export type GetUsersHandleFollowersQueryError = ErrorType<
-	BadRequestResponse | NotFoundResponse
->;
+export type GetUsersHandleFollowersQueryError = ErrorType<Error>;
 
 export const useGetUsersHandleFollowers = <
 	TData = Awaited<ReturnType<typeof getUsersHandleFollowers>>,
-	TError = ErrorType<BadRequestResponse | NotFoundResponse>
+	TError = ErrorType<Error>
 >(
 	handle: string,
 	params?: GetUsersHandleFollowersParams,
@@ -852,15 +667,15 @@ export const useGetUsersHandleFollowers = <
 };
 
 export const postPosts = (
-	postBodyBody: PostBodyBody,
+	newPostBodyBody: NewPostBodyBody,
 	options?: SecondParameter<typeof customInstance>
 ) => {
-	return customInstance<Post>(
+	return customInstance<PostResponse>(
 		{
 			url: `/posts`,
 			method: "post",
 			headers: { "Content-Type": "application/json" },
-			data: postBodyBody,
+			data: newPostBodyBody,
 		},
 		options
 	);
@@ -869,21 +684,17 @@ export const postPosts = (
 export type PostPostsMutationResult = NonNullable<
 	Awaited<ReturnType<typeof postPosts>>
 >;
-export type PostPostsMutationBody = PostBodyBody;
-export type PostPostsMutationError = ErrorType<
-	BadRequestResponse | UnauthorizedResponse | ForbiddenResponse
->;
+export type PostPostsMutationBody = NewPostBodyBody;
+export type PostPostsMutationError = ErrorType<Error>;
 
 export const usePostPosts = <
-	TError = ErrorType<
-		BadRequestResponse | UnauthorizedResponse | ForbiddenResponse
-	>,
+	TError = ErrorType<Error>,
 	TContext = unknown
 >(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof postPosts>>,
 		TError,
-		{ data: PostBodyBody },
+		{ data: NewPostBodyBody },
 		TContext
 	>;
 	request?: SecondParameter<typeof customInstance>;
@@ -892,7 +703,7 @@ export const usePostPosts = <
 
 	const mutationFn: MutationFunction<
 		Awaited<ReturnType<typeof postPosts>>,
-		{ data: PostBodyBody }
+		{ data: NewPostBodyBody }
 	> = (props) => {
 		const { data } = props ?? {};
 
@@ -902,7 +713,7 @@ export const usePostPosts = <
 	return useMutation<
 		Awaited<ReturnType<typeof postPosts>>,
 		TError,
-		{ data: PostBodyBody },
+		{ data: NewPostBodyBody },
 		TContext
 	>(mutationFn, mutationOptions);
 };
@@ -912,7 +723,7 @@ export const getPostsPostID = (
 	options?: SecondParameter<typeof customInstance>,
 	signal?: AbortSignal
 ) => {
-	return customInstance<Post>(
+	return customInstance<PostResponse>(
 		{ url: `/posts/${postID}`, method: "get", signal },
 		options
 	);
@@ -925,13 +736,11 @@ export const getGetPostsPostIDQueryKey = (postID: number) => [
 export type GetPostsPostIDQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getPostsPostID>>
 >;
-export type GetPostsPostIDQueryError = ErrorType<
-	BadRequestResponse | NotFoundResponse
->;
+export type GetPostsPostIDQueryError = ErrorType<Error>;
 
 export const useGetPostsPostID = <
 	TData = Awaited<ReturnType<typeof getPostsPostID>>,
-	TError = ErrorType<BadRequestResponse | NotFoundResponse>
+	TError = ErrorType<Error>
 >(
 	postID: number,
 	options?: {
@@ -973,7 +782,7 @@ export const deletePostsPostID = (
 	postID: number,
 	options?: SecondParameter<typeof customInstance>
 ) => {
-	return customInstance<NoContentResponse>(
+	return customInstance<void>(
 		{ url: `/posts/${postID}`, method: "delete" },
 		options
 	);
@@ -983,20 +792,10 @@ export type DeletePostsPostIDMutationResult = NonNullable<
 	Awaited<ReturnType<typeof deletePostsPostID>>
 >;
 
-export type DeletePostsPostIDMutationError = ErrorType<
-	| BadRequestResponse
-	| UnauthorizedResponse
-	| ForbiddenResponse
-	| NotFoundResponse
->;
+export type DeletePostsPostIDMutationError = ErrorType<Error>;
 
 export const useDeletePostsPostID = <
-	TError = ErrorType<
-		| BadRequestResponse
-		| UnauthorizedResponse
-		| ForbiddenResponse
-		| NotFoundResponse
-	>,
+	TError = ErrorType<Error>,
 	TContext = unknown
 >(options?: {
 	mutation?: UseMutationOptions<
@@ -1032,7 +831,7 @@ export const getUsersHandlePosts = (
 	options?: SecondParameter<typeof customInstance>,
 	signal?: AbortSignal
 ) => {
-	return customInstance<Posts>(
+	return customInstance<PostsResponse>(
 		{ url: `/users/${handle}/posts`, method: "get", params, signal },
 		options
 	);
@@ -1046,11 +845,11 @@ export const getGetUsersHandlePostsQueryKey = (
 export type GetUsersHandlePostsQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getUsersHandlePosts>>
 >;
-export type GetUsersHandlePostsQueryError = ErrorType<unknown>;
+export type GetUsersHandlePostsQueryError = ErrorType<Error>;
 
 export const useGetUsersHandlePosts = <
 	TData = Awaited<ReturnType<typeof getUsersHandlePosts>>,
-	TError = ErrorType<unknown>
+	TError = ErrorType<Error>
 >(
 	handle: string,
 	params?: GetUsersHandlePostsParams,
@@ -1097,7 +896,7 @@ export const getPostsPostIDReplies = (
 	options?: SecondParameter<typeof customInstance>,
 	signal?: AbortSignal
 ) => {
-	return customInstance<Posts>(
+	return customInstance<PostsResponse>(
 		{ url: `/posts/${postID}/replies`, method: "get", params, signal },
 		options
 	);
@@ -1111,11 +910,11 @@ export const getGetPostsPostIDRepliesQueryKey = (
 export type GetPostsPostIDRepliesQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getPostsPostIDReplies>>
 >;
-export type GetPostsPostIDRepliesQueryError = ErrorType<unknown>;
+export type GetPostsPostIDRepliesQueryError = ErrorType<Error>;
 
 export const useGetPostsPostIDReplies = <
 	TData = Awaited<ReturnType<typeof getPostsPostIDReplies>>,
-	TError = ErrorType<unknown>
+	TError = ErrorType<Error>
 >(
 	postID: number,
 	params?: GetPostsPostIDRepliesParams,
@@ -1158,15 +957,15 @@ export const useGetPostsPostIDReplies = <
 
 export const postPostsPostIDReplies = (
 	postID: number,
-	postBodyBody: PostBodyBody,
+	newPostBodyBody: NewPostBodyBody,
 	options?: SecondParameter<typeof customInstance>
 ) => {
-	return customInstance<Post>(
+	return customInstance<PostResponse>(
 		{
 			url: `/posts/${postID}/replies`,
 			method: "post",
 			headers: { "Content-Type": "application/json" },
-			data: postBodyBody,
+			data: newPostBodyBody,
 		},
 		options
 	);
@@ -1175,27 +974,17 @@ export const postPostsPostIDReplies = (
 export type PostPostsPostIDRepliesMutationResult = NonNullable<
 	Awaited<ReturnType<typeof postPostsPostIDReplies>>
 >;
-export type PostPostsPostIDRepliesMutationBody = PostBodyBody;
-export type PostPostsPostIDRepliesMutationError = ErrorType<
-	| BadRequestResponse
-	| UnauthorizedResponse
-	| ForbiddenResponse
-	| NotFoundResponse
->;
+export type PostPostsPostIDRepliesMutationBody = NewPostBodyBody;
+export type PostPostsPostIDRepliesMutationError = ErrorType<Error>;
 
 export const usePostPostsPostIDReplies = <
-	TError = ErrorType<
-		| BadRequestResponse
-		| UnauthorizedResponse
-		| ForbiddenResponse
-		| NotFoundResponse
-	>,
+	TError = ErrorType<Error>,
 	TContext = unknown
 >(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof postPostsPostIDReplies>>,
 		TError,
-		{ postID: number; data: PostBodyBody },
+		{ postID: number; data: NewPostBodyBody },
 		TContext
 	>;
 	request?: SecondParameter<typeof customInstance>;
@@ -1204,7 +993,7 @@ export const usePostPostsPostIDReplies = <
 
 	const mutationFn: MutationFunction<
 		Awaited<ReturnType<typeof postPostsPostIDReplies>>,
-		{ postID: number; data: PostBodyBody }
+		{ postID: number; data: NewPostBodyBody }
 	> = (props) => {
 		const { postID, data } = props ?? {};
 
@@ -1214,7 +1003,7 @@ export const usePostPostsPostIDReplies = <
 	return useMutation<
 		Awaited<ReturnType<typeof postPostsPostIDReplies>>,
 		TError,
-		{ postID: number; data: PostBodyBody },
+		{ postID: number; data: NewPostBodyBody },
 		TContext
 	>(mutationFn, mutationOptions);
 };
@@ -1239,11 +1028,11 @@ export const getGetPostsPostIDLikesQueryKey = (
 export type GetPostsPostIDLikesQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getPostsPostIDLikes>>
 >;
-export type GetPostsPostIDLikesQueryError = ErrorType<NotFoundResponse>;
+export type GetPostsPostIDLikesQueryError = ErrorType<Error>;
 
 export const useGetPostsPostIDLikes = <
 	TData = Awaited<ReturnType<typeof getPostsPostIDLikes>>,
-	TError = ErrorType<NotFoundResponse>
+	TError = ErrorType<Error>
 >(
 	postID: number,
 	params?: GetPostsPostIDLikesParams,
@@ -1288,7 +1077,7 @@ export const putPostsPostIDLikes = (
 	postID: number,
 	options?: SecondParameter<typeof customInstance>
 ) => {
-	return customInstance<Likes>(
+	return customInstance<PostResponse>(
 		{ url: `/posts/${postID}/likes`, method: "put" },
 		options
 	);
@@ -1298,14 +1087,10 @@ export type PutPostsPostIDLikesMutationResult = NonNullable<
 	Awaited<ReturnType<typeof putPostsPostIDLikes>>
 >;
 
-export type PutPostsPostIDLikesMutationError = ErrorType<
-	UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | Error
->;
+export type PutPostsPostIDLikesMutationError = ErrorType<Error>;
 
 export const usePutPostsPostIDLikes = <
-	TError = ErrorType<
-		UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | Error
-	>,
+	TError = ErrorType<Error>,
 	TContext = unknown
 >(options?: {
 	mutation?: UseMutationOptions<
@@ -1339,7 +1124,7 @@ export const deletePostsPostIDLikes = (
 	postID: number,
 	options?: SecondParameter<typeof customInstance>
 ) => {
-	return customInstance<Likes>(
+	return customInstance<PostResponse>(
 		{ url: `/posts/${postID}/likes`, method: "delete" },
 		options
 	);
@@ -1349,14 +1134,10 @@ export type DeletePostsPostIDLikesMutationResult = NonNullable<
 	Awaited<ReturnType<typeof deletePostsPostIDLikes>>
 >;
 
-export type DeletePostsPostIDLikesMutationError = ErrorType<
-	UnauthorizedResponse | ForbiddenResponse | NotFoundResponse
->;
+export type DeletePostsPostIDLikesMutationError = ErrorType<Error>;
 
 export const useDeletePostsPostIDLikes = <
-	TError = ErrorType<
-		UnauthorizedResponse | ForbiddenResponse | NotFoundResponse
-	>,
+	TError = ErrorType<Error>,
 	TContext = unknown
 >(options?: {
 	mutation?: UseMutationOptions<

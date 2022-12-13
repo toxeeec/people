@@ -20,8 +20,12 @@ likes:
           application/json:
             schema:
               $ref: '#/components/schemas/Users'
-      404:
-        $ref: '#/components/responses/NotFound'
+      400:
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
   put:
     tags:
       - likes
@@ -35,11 +39,25 @@ likes:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Likes'
+              $ref: '#/components/schemas/PostResponse'
+      400:
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       401:
-        $ref: '#/components/responses/Unauthorized'
+        description: Access Token Required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       403:
-        $ref: '#/components/responses/Forbidden'
+        description: Malformed Token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       409:
         description: Post is already liked
         content:
@@ -47,7 +65,11 @@ likes:
             schema:
               $ref: '#/components/schemas/Error'
       404:
-        $ref: '#/components/responses/NotFound'
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
   delete:
     tags:
@@ -62,11 +84,29 @@ likes:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Likes'
+              $ref: '#/components/schemas/PostResponse'
+      400:
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       401:
-        $ref: '#/components/responses/Unauthorized'
+        description: Access Token Required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       403:
-        $ref: '#/components/responses/Forbidden'
+        description: Malformed Token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       404:
-        $ref: '#/components/responses/NotFound'
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 

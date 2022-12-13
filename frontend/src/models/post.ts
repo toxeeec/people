@@ -4,7 +4,15 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { Likes } from "./likes";
-import type { PostAllOf } from "./postAllOf";
+import type { LikeStatus } from "./likeStatus";
 
-export type Post = Likes & PostAllOf;
+export interface Post {
+	id: number;
+	userID: number;
+	content: string;
+	likes: number;
+	replies: number;
+	createdAt: string;
+	repliesTo?: number;
+	status?: LikeStatus;
+}

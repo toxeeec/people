@@ -10,7 +10,7 @@ import {
 } from "@mantine/core";
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
-import { Post as PostData } from "../../models";
+import { PostResponse } from "../../models";
 import { stopPropagation } from "../../utils";
 import ProfileHoverCard from "../ProfileHoverCard";
 import {
@@ -22,7 +22,7 @@ import PostReply from "./PostReply";
 import PostLikes from "./PostLikes";
 
 interface MainPostProps {
-	post: PostData;
+	post: PostResponse;
 }
 
 export default function MainPost({ post: initialPost }: MainPostProps) {
@@ -34,12 +34,16 @@ export default function MainPost({ post: initialPost }: MainPostProps) {
 		mutation: { retry: 1 },
 	});
 	const handleLike = useCallback(() => {
-		const fn = post.isLiked ? unlike : like;
+		const fn = post.data.status?.isLiked ? unlike : like;
 		fn(
-			{ postID: post.id },
+			{ postID: post.data.id },
 			{
-				onSuccess({ likes, isLiked }) {
-					setPost((p) => ({ ...p, likes, isLiked }));
+				onSuccess({ data }) {
+					const { likes, status } = data;
+					setPost((p) => ({
+						user: p.user,
+						data: { ...p.data, likes, status },
+					}));
 				},
 			}
 		);
@@ -72,11 +76,11 @@ export default function MainPost({ post: initialPost }: MainPostProps) {
 					</Text>
 				</ProfileHoverCard>
 			</Group>
-			<Text my="xs">{post.content}</Text>
+			<Text my="xs">{post.data.content}</Text>
 			<Divider />
 			<UnstyledButton my="md" onClick={() => setLikesOpened(true)}>
-				<b>{post.likes}</b>
-				{post.likes === 1 ? " Like" : " Likes"}
+				<b>{post.data.likes}</b>
+				{post.data.likes === 1 ? " Like" : " Likes"}
 			</UnstyledButton>
 			<Divider mb="xs" />
 			<Flex justify="space-around">
@@ -89,7 +93,7 @@ export default function MainPost({ post: initialPost }: MainPostProps) {
 					<ActionIcon onClick={handleLike}>
 						<IconHeart
 							size={18}
-							fill={post.isLiked ? "currentColor" : "none"}
+							fill={post.data.status?.isLiked ? "currentColor" : "none"}
 						/>
 					</ActionIcon>
 				</Group>
@@ -104,7 +108,7 @@ export default function MainPost({ post: initialPost }: MainPostProps) {
 			<PostLikes
 				opened={likesOpened}
 				setOpened={setLikesOpened}
-				postID={post.id}
+				postID={post.data.id}
 			/>
 		</Paper>
 	);

@@ -1,13 +1,13 @@
 import { Avatar, Text, Group, Paper } from "@mantine/core";
 import { forwardRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Post as PostData } from "../../models";
+import { PostResponse } from "../../models";
 import { stopPropagation } from "../../utils";
 import PostActions from "./PostActions";
 import ProfileHoverCard from "../ProfileHoverCard";
 
 interface PostProps {
-	post: PostData;
+	post: PostResponse;
 }
 
 const Post = forwardRef<HTMLDivElement, PostProps>(
@@ -22,7 +22,7 @@ const Post = forwardRef<HTMLDivElement, PostProps>(
 				withBorder
 				ref={ref}
 				onClick={() => {
-					navigate(`/${post.user!.handle}/${post.id}`);
+					navigate(`/${post.user!.handle}/${post.data.id}`);
 				}}
 				style={{ cursor: "pointer" }}
 			>
@@ -47,7 +47,7 @@ const Post = forwardRef<HTMLDivElement, PostProps>(
 						</Text>
 					</ProfileHoverCard>
 				</Group>
-				<Text my="xs">{post.content}</Text>
+				<Text my="xs">{post.data.content}</Text>
 				<PostActions post={post} setPost={setPost} />
 			</Paper>
 		);

@@ -7,7 +7,7 @@ import {
 	useCallback,
 	useState,
 } from "react";
-import { Post } from "../../models/post";
+import { PostResponse } from "../../models";
 import {
 	useDeletePostsPostIDLikes,
 	usePutPostsPostIDLikes,
@@ -15,8 +15,8 @@ import {
 import PostReply from "./PostReply";
 
 interface PostActionsProps {
-	post: Post;
-	setPost: Dispatch<SetStateAction<Post>>;
+	post: PostResponse;
+	setPost: Dispatch<SetStateAction<PostResponse>>;
 }
 
 export default function PostActions({ post, setPost }: PostActionsProps) {
@@ -27,12 +27,13 @@ export default function PostActions({ post, setPost }: PostActionsProps) {
 	const handleLike = useCallback(
 		(e: MouseEvent) => {
 			e.stopPropagation();
-			const fn = post.isLiked ? unlike : like;
+			const fn = post.data.status?.isLiked ? unlike : like;
 			fn(
-				{ postID: post.id },
+				{ postID: post.data.id },
 				{
-					onSuccess({ likes, isLiked }) {
-						setPost((p) => ({ ...p, likes, isLiked }));
+					onSuccess({ data }) {
+						const { likes, status } = data;
+						setPost((p) => ({ ...p, data: { ...p.data, likes, status } }));
 					},
 				}
 			);
@@ -53,13 +54,16 @@ export default function PostActions({ post, setPost }: PostActionsProps) {
 				<ActionIcon onClick={handleOpen}>
 					<IconMessageCircle2 size={18} />
 				</ActionIcon>
-				<Text size="sm">{post.replies}</Text>
+				<Text size="sm">{post.data.replies}</Text>
 			</Group>
 			<Group align="center" spacing="xs">
 				<ActionIcon onClick={handleLike}>
-					<IconHeart size={18} fill={post.isLiked ? "currentColor" : "none"} />
+					<IconHeart
+						size={18}
+						fill={post.data.status?.isLiked ? "currentColor" : "none"}
+					/>
 				</ActionIcon>
-				<Text size="sm">{post.likes}</Text>
+				<Text size="sm">{post.data.likes}</Text>
 			</Group>
 			<PostReply
 				opened={opened}

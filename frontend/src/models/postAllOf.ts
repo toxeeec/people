@@ -4,13 +4,7 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { User } from "./user";
 
 export type PostAllOf = {
-	id: number;
-	content: string;
-	createdAt: string;
-	repliesTo?: number;
-	replies: number;
-	user?: User;
+	userID: number;
 };

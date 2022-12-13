@@ -11,5 +11,3 @@ components:
     $ref: './requestBodies.yaml#/components/requestBodies'
   parameters:
     $ref: './parameters.yaml#/components/parameters'
-  responses:
-    $ref: './responses.yaml#/components/responses'

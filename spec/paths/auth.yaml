@@ -2,53 +2,73 @@ components:
   $ref: '../components/main.yaml#/components'
 
 register:
-      post:
-        tags:
-          - auth
-        requestBody:
-          $ref: '#/components/requestBodies/AuthUserBody'
-        responses:
-          200:
-            description: OK
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/AuthResponse'
-          400:
-            $ref: '#/components/responses/BadRequest'
+  post:
+    tags:
+      - auth
+    requestBody:
+      $ref: '#/components/requestBodies/AuthUserBody'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthResponse'
+      400:
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
 login:
-      post:
-        tags:
-          - auth
-        requestBody:
-          $ref: '#/components/requestBodies/AuthUserBody'
-        responses:
-          200:
-            description: OK
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/AuthResponse'
-          400:
-            $ref: '#/components/responses/BadRequest'
-          401:
-            $ref: '#/components/responses/Unauthorized'
+  post:
+    tags:
+      - auth
+    requestBody:
+      $ref: '#/components/requestBodies/AuthUserBody'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthResponse'
+      400:
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      401:
+        description: Invalid Credentials
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
 refresh:
-      post:
-        tags:
-          - auth
-        requestBody:
-          $ref: '#/components/requestBodies/TokensBody'
-        responses:
-          200:
-            description: OK
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Tokens'
-          400:
-            $ref: '#/components/responses/BadRequest'
-          403:
-            $ref: '#/components/responses/Forbidden'
+  post:
+    tags:
+      - auth
+    requestBody:
+      $ref: '#/components/requestBodies/RefreshTokenBody'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tokens'
+      400:
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      403:
+        description: Malformed Token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'

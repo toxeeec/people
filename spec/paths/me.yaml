@@ -2,48 +2,42 @@ components:
   $ref: ../components/main.yaml#/components
 
 feed:
-    get:
-      tags:
-        - me
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/beforeParam'
-        - $ref: '#/components/parameters/afterParam'
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Posts'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        403:
-          $ref: '#/components/responses/Forbidden'
-
-followingByHandle:
   get:
     tags:
       - me
-      - following
     security:
       - bearerAuth: []
     parameters:
-      - $ref: '#/components/parameters/handleParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/beforeParam'
+      - $ref: '#/components/parameters/afterParam'
     responses:
-      204: 
-        $ref: '#/components/responses/NoContent'
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostsResponse'
       400:
-        $ref: '#/components/responses/BadRequest'
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       401:
-        $ref: '#/components/responses/Unauthorized'
+        description: Access Token Required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       403:
-        $ref: '#/components/responses/Forbidden'
-      404:
-        $ref: '#/components/responses/NotFound'
+        description: Malformed Token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
+followingByHandle:
   put:
     tags:
       - me
@@ -58,15 +52,31 @@ followingByHandle:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Follows'
+              $ref: '#/components/schemas/User'
       400:
-        $ref: '#/components/responses/BadRequest'
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       401:
-        $ref: '#/components/responses/Unauthorized'
+        description: Access Token Required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       403:
-        $ref: '#/components/responses/Forbidden'
+        description: Malformed Token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       404:
-        $ref: '#/components/responses/NotFound'
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       409:
         description: User is already followed
         content:
@@ -88,15 +98,31 @@ followingByHandle:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Follows'
+              $ref: '#/components/schemas/User'
       400:
-        $ref: '#/components/responses/BadRequest'
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       401:
-        $ref: '#/components/responses/Unauthorized'
+        description: Access Token Required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       403:
-        $ref: '#/components/responses/Forbidden'
+        description: Malformed Token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       404:
-        $ref: '#/components/responses/NotFound'
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
 following:
   get:
@@ -116,31 +142,30 @@ following:
           application/json:
             schema:
               $ref: '#/components/schemas/Users'
-      401:
-        $ref: '#/components/responses/Unauthorized'
-      403:
-        $ref: '#/components/responses/Forbidden'
-
-followersByHandle:
-  get:
-    tags:
-      - me
-      - followers
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/handleParam'
-    responses:
-      204: 
-        $ref: '#/components/responses/NoContent'
       400:
-        $ref: '#/components/responses/BadRequest'
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       401:
-        $ref: '#/components/responses/Unauthorized'
+        description: Access Token Required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       403:
-        $ref: '#/components/responses/Forbidden'
+        description: Malformed Token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       404:
-        $ref: '#/components/responses/NotFound'
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
 followers:
   get:
@@ -160,7 +185,27 @@ followers:
           application/json:
             schema:
               $ref: '#/components/schemas/Users'
+      400:
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       401:
-        $ref: '#/components/responses/Unauthorized'
+        description: Access Token Required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       403:
-        $ref: '#/components/responses/Forbidden'
+        description: Malformed Token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      404:
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'

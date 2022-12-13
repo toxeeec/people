@@ -1,29 +1,122 @@
 package auth
 
 import (
-	"github.com/jmoiron/sqlx"
+	"errors"
+
+	"github.com/go-playground/validator/v10"
 	people "github.com/toxeeec/people/backend"
+	"github.com/toxeeec/people/backend/repository"
+	"github.com/toxeeec/people/backend/service"
+	"golang.org/x/crypto/bcrypt"
 )
 
-type service struct {
-	db *sqlx.DB
-	us people.UserService
+type Service interface {
+	Register(au people.AuthUser) (people.AuthResponse, error)
+	Login(au people.AuthUser) (people.AuthResponse, error)
+	Refresh(refreshToken string) (people.Tokens, error)
 }
 
-func NewService(db *sqlx.DB, us people.UserService) people.AuthService {
-	return &service{db, us}
+type authService struct {
+	v  *validator.Validate
+	ur repository.User
+	tr repository.Token
 }
 
-// VerifyCredentials returns id of the user.
-func (s *service) VerifyCredentials(u people.AuthUser) (uint, error) {
-	expected, err := s.us.GetAuthUser(u.Handle)
+func NewService(v *validator.Validate, ur repository.User, tr repository.Token) Service {
+	s := authService{}
+	s.v = v
+	s.ur = ur
+	s.tr = tr
+	return &s
+}
+
+func (s *authService) Register(au people.AuthUser) (people.AuthResponse, error) {
+	err := s.validate(au)
 	if err != nil {
-		return 0, err
+		return people.AuthResponse{}, err
 	}
 
-	if err := u.Password.Compare(*expected.Hash); err != nil {
-		return 0, err
+	bytes, err := bcrypt.GenerateFromPassword([]byte(au.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return people.AuthResponse{}, err
+	}
+	au.Password = string(bytes)
+	u, err := s.ur.Create(au)
+	if err != nil {
+		return people.AuthResponse{}, err
+	}
+	ts, err := s.newTokens(u.ID)
+	if err != nil {
+		go s.ur.Delete(u.ID)
+		return people.AuthResponse{}, err
+	}
+	return people.AuthResponse{User: u, Tokens: ts}, nil
+}
+
+func (s *authService) Login(au people.AuthUser) (people.AuthResponse, error) {
+	id, err := s.ur.GetID(au.Handle)
+	if err != nil {
+		return people.AuthResponse{}, service.NewError(people.ValidationError, "Invalid handle or password")
+	}
+	hash, err := s.ur.GetHash(id)
+	if err != nil {
+		return people.AuthResponse{}, err
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(hash), []byte(au.Password))
+	if err != nil {
+		return people.AuthResponse{}, service.NewError(people.ValidationError, "Invalid handle or password")
 	}
 
-	return *expected.ID, nil
+	ts, err := s.newTokens(id)
+	if err != nil {
+		return people.AuthResponse{}, err
+	}
+	u, err := s.ur.Get(id)
+	if err != nil {
+		return people.AuthResponse{}, err
+	}
+	return people.AuthResponse{User: u, Tokens: ts}, nil
+}
+
+func (s *authService) Refresh(rtString string) (people.Tokens, error) {
+	rt, err := parseRefreshToken(rtString)
+	if err != nil {
+		return people.Tokens{}, service.NewError(people.AuthError, "Malformed refresh token")
+	}
+	if _, err := s.tr.Get(rt.Value); err != nil {
+		// token doesn't exist
+		go s.tr.Delete(rt.ID)
+		return people.Tokens{}, service.NewError(people.AuthError, "Invalid refresh token")
+	}
+
+	at, err := NewAccessToken(rt.UserID)
+	if err != nil {
+		return people.Tokens{}, err
+	}
+	newRT, err := NewRefreshToken(rt.UserID, &rt.ID)
+	if err != nil {
+		return people.Tokens{}, err
+	}
+	err = s.tr.Update(newRT)
+	if err != nil {
+		go s.tr.Delete(rt.ID)
+		return people.Tokens{}, err
+	}
+	return people.Tokens{AccessToken: at, RefreshToken: newRT.Value}, nil
+}
+
+func (s *authService) validate(u people.AuthUser) error {
+	if err := s.v.Var(u.Handle, "alphanum"); err != nil {
+		err := err.(validator.ValidationErrors)
+		switch err[0].Tag() {
+		case "alphanum":
+			return service.NewError(people.ValidationError, "Handle cannot contain special characters")
+		default:
+			return errors.New("Unknown")
+		}
+	}
+	if _, err := s.ur.GetID(u.Handle); err == nil {
+		return service.NewError(people.ValidationError, "User already exists")
+	}
+	return nil
 }

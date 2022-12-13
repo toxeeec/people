@@ -22,9 +22,6 @@ paths:
   /me/following:
     $ref: './paths/me.yaml#/following'
 
-  /me/followers/{handle}:
-    $ref: './paths/me.yaml#/followersByHandle'
-
   /me/followers:
     $ref: './paths/me.yaml#/followers'
 

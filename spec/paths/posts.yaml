@@ -2,26 +2,38 @@ components:
   $ref: ../components/main.yaml#/components
 
 posts:
-    post:
-      tags:
-        - posts
-      security:
-        - bearerAuth: []
-      requestBody:
-        $ref: '#/components/requestBodies/PostBody'
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Post'
-        400:
-          $ref: '#/components/responses/BadRequest'
-        401:
-          $ref: '#/components/responses/Unauthorized'
-        403:
-          $ref: '#/components/responses/Forbidden'
+  post:
+    tags:
+      - posts
+    security:
+      - bearerAuth: []
+    requestBody:
+      $ref: '#/components/requestBodies/NewPostBody'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostResponse'
+      400:
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      401:
+        description: Access Token Required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      403:
+        description: Malformed Token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
 post:
   get:
@@ -38,11 +50,19 @@ post:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Post'
+              $ref: '#/components/schemas/PostResponse'
       400:
-        $ref: '#/components/responses/BadRequest'
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       404:
-        $ref: '#/components/responses/NotFound'
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
   delete:
     tags:
@@ -53,15 +73,25 @@ post:
       - $ref: '#/components/parameters/postIDParam'
     responses:
       204:
-        $ref: '#/components/responses/NoContent'
+        description: No Content
       400:
-        $ref: '#/components/responses/BadRequest'
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       401:
-        $ref: '#/components/responses/Unauthorized'
+        description: Access Token Required
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       403:
-        $ref: '#/components/responses/Forbidden'
-      404:
-        $ref: '#/components/responses/NotFound'
+        description: Malformed Token
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
 userPosts:
   get:
@@ -81,5 +111,16 @@ userPosts:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Posts'
-
+              $ref: '#/components/schemas/PostsResponse'
+      400:
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      404:
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'

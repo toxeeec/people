@@ -2,8 +2,8 @@ CREATE TABLE user_profile (
 	user_id SERIAL PRIMARY KEY,
 	handle VARCHAR(15) NOT NULL,
 	hash text NOT NULL,
-	followers integer NOT NULL DEFAULT 0,
-	following integer NOT NULL DEFAULT 0
+	following integer NOT NULL DEFAULT 0,
+	followers integer NOT NULL DEFAULT 0
 );
 
 CREATE TABLE token (

@@ -1,70 +1,134 @@
-package auth
+package auth_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/jmoiron/sqlx"
+	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	people "github.com/toxeeec/people/backend"
-	"github.com/toxeeec/people/backend/service/user"
+	"github.com/toxeeec/people/backend/repository"
+	"github.com/toxeeec/people/backend/repository/inmem"
+	"github.com/toxeeec/people/backend/service/auth"
 )
 
 type AuthSuite struct {
 	suite.Suite
-	db      *sqlx.DB
-	us      people.UserService
-	as      service
-	user1   people.AuthUser
-	user1ID uint
+	as auth.Service
+	ur repository.User
 }
 
-func (suite *AuthSuite) TestVerifyCredentials() {
-	var invalidPassword people.AuthUser
-	var unknownHandle people.AuthUser
-	gofakeit.Struct(&invalidPassword)
-	gofakeit.Struct(&unknownHandle)
-	invalidPassword.Handle = suite.user1.Handle
+func (s *AuthSuite) TestRegister() {
+	var taken people.AuthUser
+	var u people.AuthUser
+	gofakeit.Struct(&taken)
+	gofakeit.Struct(&u)
+	s.ur.Create(taken)
+
+	validationError := people.ValidationError
 
 	tests := map[string]struct {
-		user  people.AuthUser
+		au    people.AuthUser
 		valid bool
+		kind  *people.ErrorKind
 	}{
-		"unknown handle":   {unknownHandle, false},
-		"invalid password": {invalidPassword, false},
-		"valid":            {suite.user1, true},
+
+		"taken handle": {taken, false, &validationError},
+		"valid":        {u, true, nil},
 	}
+
 	for name, tc := range tests {
-		suite.Run(name, func() {
-			id, err := suite.as.VerifyCredentials(tc.user)
-			assert.Equal(suite.T(), tc.valid, err == nil)
+		s.Run(name, func() {
+			au, err := s.as.Register(tc.au)
 			if tc.valid {
-				assert.Equal(suite.T(), suite.user1ID, id)
+				assert.Equal(s.T(), tc.au.Handle, au.User.Handle)
+				assert.NoError(s.T(), err)
+			} else {
+				var e *people.Error
+				assert.ErrorAs(s.T(), err, &e)
+				assert.Equal(s.T(), *tc.kind, *e.Kind)
 			}
 		})
 	}
 }
 
-func (suite *AuthSuite) SetupSuite() {
-	db, err := people.PostgresConnect()
-	if err != nil {
-		suite.T().Fatal(err)
+func (s *AuthSuite) TestLogin() {
+	var invalidPassword people.AuthUser
+	var unknownHandle people.AuthUser
+	var u people.AuthUser
+	gofakeit.Struct(&invalidPassword)
+	gofakeit.Struct(&unknownHandle)
+	gofakeit.Struct(&u)
+	invalidPassword.Handle = u.Handle
+	s.as.Register(u)
+
+	validationError := people.ValidationError
+
+	tests := map[string]struct {
+		au    people.AuthUser
+		valid bool
+		kind  *people.ErrorKind
+	}{
+		"unknown handle":   {unknownHandle, false, &validationError},
+		"invalid password": {invalidPassword, false, &validationError},
+		"valid":            {u, true, nil},
 	}
-	suite.db = db
-	us := user.NewService(db)
-	suite.us = us
-	suite.as = service{db, us}
-	gofakeit.Struct(&suite.user1)
-	suite.user1ID, _ = suite.us.Create(suite.user1)
+	for name, tc := range tests {
+		s.Run(name, func() {
+			au, err := s.as.Login(tc.au)
+			if tc.valid {
+				assert.Equal(s.T(), tc.au.Handle, au.User.Handle)
+				assert.NoError(s.T(), err)
+			} else {
+				var e *people.Error
+				assert.ErrorAs(s.T(), err, &e)
+				assert.Equal(s.T(), *tc.kind, *e.Kind)
+			}
+		})
+	}
 }
 
-func (suite *AuthSuite) TearDownSuite() {
-	suite.db.Close()
+func (s *AuthSuite) TestRefresh() {
+	// sleep is used so every token is different
+	var u people.AuthUser
+	gofakeit.Struct(&u)
+	ar, _ := s.as.Register(u)
+	ts := ar.Tokens
+
+	time.Sleep(time.Second)
+	ts, err := s.as.Refresh(ts.RefreshToken)
+	assert.NoError(s.T(), err)
+
+	// create new token
+	time.Sleep(time.Second)
+	newTS, err := s.as.Refresh(ts.RefreshToken)
+	assert.NoError(s.T(), err)
+
+	authError := people.AuthError
+	var e *people.Error
+	// try using the previous token
+	time.Sleep(time.Second)
+	_, err = s.as.Refresh(ts.RefreshToken)
+	assert.ErrorAs(s.T(), err, &e)
+	assert.Equal(s.T(), authError, *e.Kind)
+
+	// new token is also invalidated now
+	time.Sleep(time.Second)
+	_, err = s.as.Refresh(newTS.RefreshToken)
+	assert.ErrorAs(s.T(), err, &e)
+	assert.Equal(s.T(), authError, *e.Kind)
 }
 
-func (suite *AuthSuite) SetupTest() {
-	suite.db.MustExec("TRUNCATE token CASCADE")
+func (s *AuthSuite) SetupTest() {
+	um := map[uint]people.User{}
+	tsm := map[uuid.UUID]people.RefreshToken{}
+	v := validator.New()
+	s.ur = inmem.NewUserRepository(um)
+	tr := inmem.NewTokenRepository(tsm)
+	s.as = auth.NewService(v, s.ur, tr)
 }
 
 func TestAuthSuite(t *testing.T) {

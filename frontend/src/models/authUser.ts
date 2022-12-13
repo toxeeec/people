@@ -6,8 +6,6 @@
  */
 
 export interface AuthUser {
-	id?: number;
 	handle: string;
 	password: string;
-	hash?: string;
 }

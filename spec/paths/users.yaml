@@ -17,8 +17,18 @@ user:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
+      400:
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       404:
-        $ref: '#/components/responses/NotFound'
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
 following:
   get:
@@ -41,9 +51,17 @@ following:
             schema:
               $ref: '#/components/schemas/Users'
       400:
-        $ref: '#/components/responses/BadRequest'
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       404:
-        $ref: '#/components/responses/NotFound'
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
 followers:
   get:
@@ -66,7 +84,15 @@ followers:
             schema:
               $ref: '#/components/schemas/Users'
       400:
-        $ref: '#/components/responses/BadRequest'
+        description: Bad Request
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
       404:
-        $ref: '#/components/responses/NotFound'
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
