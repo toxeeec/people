@@ -64,6 +64,7 @@ func (r *postRepo) ListFeed(followingIDs []uint, userID uint, p pagination.ID) (
 	}
 	q, args, err := NewQuery("SELECT * FROM post").
 		Where("post.user_id IN (?)", append(followingIDs, userID)).
+		Where("replies_to IS NULL").
 		Paginate(p, "post_id", "?").
 		Build()
 	if err != nil {

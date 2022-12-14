@@ -61,10 +61,10 @@ func (s *userService) Follow(ctx context.Context, handle string, userID uint) (p
 	err = s.fr.Create(id, userID)
 	if err != nil {
 		if errors.Is(err, repository.ErrAlreadyFollowed) {
-			return people.User{}, service.NewError(people.ConflictError, err.Error())
+			return people.User{}, service.NewError(people.ConflictError, errors.Unwrap(err).Error())
 		}
 		if errors.Is(err, repository.ErrSameUser) {
-			return people.User{}, service.NewError(people.NotFoundError, err.Error())
+			return people.User{}, service.NewError(people.NotFoundError, errors.Unwrap(err).Error())
 		}
 		return people.User{}, err
 	}

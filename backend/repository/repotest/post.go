@@ -84,7 +84,10 @@ func (s *PostSuite) TestListFeed() {
 	gofakeit.Struct(&np)
 	gofakeit.Struct(&au)
 	u, _ := s.ur.Create(au)
-	s.repo.Create(np, u.ID, nil)
+	p, _ := s.repo.Create(np, u.ID, nil)
+
+	// replies are excluded
+	s.repo.Create(np, u.ID, &p.ID)
 	var ids [5]uint
 	for i := range ids {
 		var au people.AuthUser

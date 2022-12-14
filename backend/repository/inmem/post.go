@@ -84,7 +84,7 @@ func (r *postRepo) ListFeed(followingIDs []uint, userID uint, p pagination.ID) (
 	followingIDs = append(followingIDs, userID)
 	var ps []people.Post
 	for k, v := range r.m {
-		if contains(followingIDs, v.UserID) && k < before && k > after {
+		if contains(followingIDs, v.UserID) && k < before && k > after && v.RepliesTo == nil {
 			ps = append(ps, v)
 		}
 		if len(ps) == int(p.Limit) {
