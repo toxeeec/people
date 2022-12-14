@@ -32,8 +32,8 @@ type Service interface {
 	ListUserPosts(ctx context.Context, handle string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error)
 	ListFeed(ctx context.Context, userID uint, params IDPaginationParams) (people.PostsResponse, error)
 	ListReplies(ctx context.Context, postID, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error)
-	Like(ctx context.Context, postID, userID uint) (people.PostResponse, error)
-	Unlike(ctx context.Context, postID, userID uint) (people.PostResponse, error)
+	Like(postID, userID uint) (people.PostResponse, error)
+	Unlike(postID, userID uint) (people.PostResponse, error)
 }
 
 type postService struct {
@@ -216,54 +216,34 @@ func (s *postService) ListReplies(ctx context.Context, postID uint, userID uint,
 	return pagination.NewResults[people.PostResponse, uint](prs), nil
 }
 
-func (s *postService) Like(ctx context.Context, postID uint, userID uint) (people.PostResponse, error) {
-	g, ctx := errgroup.WithContext(ctx)
-	var pr people.PostResponse
-	g.Go(func() error {
-		err := s.lr.Create(postID, userID)
-		if err != nil {
-			if errors.Is(err, repository.ErrPostNotFound) {
-				return service.NewError(people.NotFoundError, err.Error())
-			}
-			if errors.Is(err, repository.ErrAlreadyLiked) {
-				return service.NewError(people.ConflictError, err.Error())
-			}
+func (s *postService) Like(postID uint, userID uint) (people.PostResponse, error) {
+	err := s.lr.Create(postID, userID)
+	if err != nil {
+		if errors.Is(err, repository.ErrPostNotFound) {
+			return people.PostResponse{}, service.NewError(people.NotFoundError, err.Error())
 		}
-		return err
-	})
-	g.Go(func() error {
-		var err error
-		pr, err = s.getPostResponseWithStatuses(context.Background(), postID, userID, true)
-		return err
-	})
-	if err := g.Wait(); err != nil {
+		if errors.Is(err, repository.ErrAlreadyLiked) {
+			return people.PostResponse{}, service.NewError(people.ConflictError, err.Error())
+		}
+		return people.PostResponse{}, err
+	}
+	pr, err := s.getPostResponseWithStatuses(context.Background(), postID, userID, true)
+	if err != nil {
 		return people.PostResponse{}, err
 	}
 
-	pr.Data.Status.IsLiked = true
 	return pr, nil
 }
 
-func (s *postService) Unlike(ctx context.Context, postID uint, userID uint) (people.PostResponse, error) {
-	g, ctx := errgroup.WithContext(ctx)
-	var pr people.PostResponse
-	g.Go(func() error {
-		err := s.lr.Delete(postID, userID)
-		if err != nil {
-			return service.NewError(people.NotFoundError, "Post not found")
-		}
-		return nil
-	})
-	g.Go(func() error {
-		var err error
-		pr, err = s.getPostResponseWithStatuses(context.Background(), postID, userID, true)
-		return err
-	})
-	if err := g.Wait(); err != nil {
+func (s *postService) Unlike(postID uint, userID uint) (people.PostResponse, error) {
+	err := s.lr.Delete(postID, userID)
+	if err != nil {
+		return people.PostResponse{}, service.NewError(people.NotFoundError, "Post not found")
+	}
+	pr, err := s.getPostResponseWithStatuses(context.Background(), postID, userID, true)
+	if err != nil {
 		return people.PostResponse{}, err
 	}
-
-	pr.Data.Status.IsLiked = false
 	return pr, nil
 }
 

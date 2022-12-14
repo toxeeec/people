@@ -105,7 +105,7 @@ func (h *handler) GetPostsPostIDReplies(ctx context.Context, r people.GetPostsPo
 
 func (h *handler) PutPostsPostIDLikes(ctx context.Context, r people.PutPostsPostIDLikesRequestObject) (people.PutPostsPostIDLikesResponseObject, error) {
 	userID, _ := fromContext(ctx, userIDKey)
-	pr, err := h.ps.Like(ctx, r.PostID, userID)
+	pr, err := h.ps.Like(r.PostID, userID)
 	if err != nil {
 		var e *people.Error
 		if errors.As(err, &e) {
@@ -123,7 +123,7 @@ func (h *handler) PutPostsPostIDLikes(ctx context.Context, r people.PutPostsPost
 
 func (h *handler) DeletePostsPostIDLikes(ctx context.Context, r people.DeletePostsPostIDLikesRequestObject) (people.DeletePostsPostIDLikesResponseObject, error) {
 	userID, _ := fromContext(ctx, userIDKey)
-	pr, err := h.ps.Unlike(ctx, r.PostID, userID)
+	pr, err := h.ps.Unlike(r.PostID, userID)
 	if err != nil {
 		var e *people.Error
 		if errors.As(err, &e) {
