@@ -18,10 +18,26 @@ func NewPostRepository(db *sqlx.DB) repository.Post {
 }
 
 func (r *postRepo) Create(np people.NewPost, userID uint, repliesTo *uint) (people.Post, error) {
+	tx, err := r.db.Beginx()
+	if err != nil {
+		return people.Post{}, fmt.Errorf("Post.Create: %w", err)
+	}
+	defer tx.Rollback()
 	const query = "INSERT INTO post(user_id, content, replies_to) VALUES ($1, $2, $3) RETURNING *"
 	var p people.Post
-	if err := r.db.Get(&p, query, userID, np.Content, repliesTo); err != nil {
+	if err = r.db.Get(&p, query, userID, np.Content, repliesTo); err != nil {
 		return p, fmt.Errorf("Post.Create: %w", err)
+	}
+	if repliesTo != nil {
+		const incrementReplies = "UPDATE post SET replies = replies + 1 WHERE post_id = $1"
+		_, err = tx.Exec(incrementReplies, *repliesTo)
+		if err != nil {
+			return people.Post{}, fmt.Errorf("Post.Create: %w", err)
+		}
+	}
+	err = tx.Commit()
+	if err != nil {
+		return people.Post{}, fmt.Errorf("Post.Create: %w", err)
 	}
 	return p, nil
 }

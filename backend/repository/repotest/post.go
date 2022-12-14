@@ -32,6 +32,12 @@ func (s *PostSuite) TestCreate() {
 	assert.NoError(s.T(), err)
 	actual, _ := s.repo.Get(p.ID)
 	assert.Equal(s.T(), p, actual)
+
+	// reply
+	reply, err := s.repo.Create(np, u.ID, &p.ID)
+	assert.NoError(s.T(), err)
+	actual, _ = s.repo.Get(reply.ID)
+	assert.Equal(s.T(), reply, actual)
 }
 
 func (s *PostSuite) TestGet() {

@@ -26,9 +26,12 @@ func (r *postRepo) newID() uint {
 
 func (r *postRepo) Create(np people.NewPost, userID uint, repliesTo *uint) (people.Post, error) {
 	if repliesTo != nil {
-		if _, ok := r.m[*repliesTo]; !ok {
+		p, ok := r.m[*repliesTo]
+		if !ok {
 			return people.Post{}, fmt.Errorf("Post.Get: %w", errors.New("Post not found"))
 		}
+		p.Replies++
+		r.m[*repliesTo] = p
 	}
 	id := r.newID()
 	r.m[id] = people.Post{ID: id, Content: np.Content, UserID: userID, RepliesTo: repliesTo}
