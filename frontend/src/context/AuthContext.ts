@@ -14,9 +14,9 @@ export interface SetAuthProps {
 
 interface AuthContextType {
 	getAuth: () => AuthValues;
-	setAuth: (_props: SetAuthProps) => void;
+	setAuth: (props: SetAuthProps) => void;
 	clearAuth: () => void;
 	isAuthenticated: boolean;
 }
 
-export default createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType>(null!);

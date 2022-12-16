@@ -1,37 +1,36 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useContext, useEffect } from "react";
+import { useMemo } from "react";
 import {
 	createBrowserRouter,
 	redirect,
 	RouterProvider,
 } from "react-router-dom";
-import AuthContext from "./context/AuthContext";
-import UsersContext from "./context/UsersContext";
+import { CenterLoader } from "./components/CenterLoader";
+import { AuthContext } from "./context/AuthContext";
+import { PostsContextProvider } from "./context/PostsContext";
+import { Users, UsersContextProvider } from "./context/UsersContext";
 import {
 	createRequestInterceptor,
 	createResponseInterceptor,
 } from "./custom-instance";
-import useAuth from "./hooks/useAuth";
+import { useAuth } from "./hooks/useAuth";
 import Layout from "./layout";
 import Auth from "./pages/Auth";
-import Follows, { FollowsPage } from "./pages/Follows";
+import Follows from "./pages/Follows";
 import Home from "./pages/Home";
 import Post from "./pages/Post";
 import Profile from "./pages/Profile";
-import { getUsersHandle } from "./spec.gen";
+import { useGetUsersHandle } from "./spec.gen";
 
-export default function App() {
-	const usersCtx = useContext(UsersContext);
+const App = () => {
 	const { getAuth, setAuth, clearAuth, isAuthenticated } = useAuth();
-	const queryClient = useQueryClient();
-
-	useEffect(() => {
-		if (isAuthenticated) {
-			getUsersHandle(getAuth().handle!).then((user) =>
-				usersCtx?.setUser(user!.handle!, user!)
-			);
-		}
-	}, [isAuthenticated, getAuth, usersCtx]);
+	const users: Users = useMemo(() => ({}), []);
+	const { isLoading } = useGetUsersHandle(getAuth().handle!, {
+		query: {
+			enabled: isAuthenticated,
+			onSuccess: (u) => (users[u.handle] = u),
+			onError: () => clearAuth(),
+		},
+	});
 
 	createRequestInterceptor(getAuth);
 	createResponseInterceptor(getAuth, setAuth, clearAuth);
@@ -44,9 +43,9 @@ export default function App() {
 				if (isAuthenticated) {
 					return redirect("/home");
 				}
+				return null;
 			},
 		},
-
 		{
 			element: <Layout />,
 			children: [
@@ -57,45 +56,42 @@ export default function App() {
 						if (!isAuthenticated) {
 							return redirect("/");
 						}
+						return null;
 					},
 				},
-
 				{
 					path: "/:handle",
 					element: <Profile />,
-					loader: ({ params }) => {
-						return queryClient.fetchQuery({
-							queryKey: ["user", params.handle],
-							queryFn: () =>
-								getUsersHandle(params.handle!).then((u) => {
-									usersCtx?.setUser(u.handle, u);
-									return u;
-								}),
-						});
-					},
 				},
-
 				{
 					path: "/:handle/:postID",
 					element: <Post />,
 				},
 				{
 					path: "/:handle/following",
-					element: <Follows value={FollowsPage.Following} />,
+					element: <Follows value={"following"} />,
 				},
 				{
 					path: "/:handle/followers",
-					element: <Follows value={FollowsPage.Followers} />,
+					element: <Follows value={"followers"} />,
 				},
 			],
 		},
 	]);
 
-	return (
+	return isLoading && isAuthenticated ? (
+		<CenterLoader />
+	) : (
 		<AuthContext.Provider
 			value={{ getAuth, setAuth, clearAuth, isAuthenticated }}
 		>
-			<RouterProvider router={router} />
+			<UsersContextProvider initialUsers={users}>
+				<PostsContextProvider>
+					<RouterProvider router={router} />
+				</PostsContextProvider>
+			</UsersContextProvider>
 		</AuthContext.Provider>
 	);
-}
+};
+
+export default App;

@@ -1,11 +1,12 @@
 import { QueryKey, useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useContext, useEffect } from "react";
-import { PostsResponse, User } from "../models";
+import { PostsResponse } from "../models";
 import { Container } from "@mantine/core";
-import PostComponent from "../components/post/Post";
+import { Post } from "../components/Post";
 import { useInView } from "react-intersection-observer";
-import CenterLoader from "../components/CenterLoader";
-import UsersContext from "../context/UsersContext";
+import { CenterLoader } from "../components/CenterLoader";
+import { UsersContext } from "../context/UsersContext";
+import { PostsContext } from "../context/PostsContext";
 
 const queryLimit = 10;
 
@@ -15,26 +16,27 @@ interface PaginationParams {
 	after?: number;
 }
 
-export type Query = (_params: PaginationParams) => Promise<PostsResponse>;
+export type Query = (params: PaginationParams) => Promise<PostsResponse>;
 
 interface PostsProps {
 	query: Query;
 	queryKey: QueryKey;
-	user?: User;
 }
 
 interface QueryFunctionArgs {
 	pageParam?: PaginationParams;
 }
 
-function Posts({ query, user, queryKey }: PostsProps) {
-	const usersCtx = useContext(UsersContext);
+export const Posts = ({ query, queryKey }: PostsProps) => {
 	const { ref, inView } = useInView();
+	const { setUser } = useContext(UsersContext);
+	const { setPost } = useContext(PostsContext);
 
-	function queryFn({ pageParam }: QueryFunctionArgs) {
+	const queryFn = ({ pageParam }: QueryFunctionArgs) => {
 		pageParam = { ...pageParam, limit: queryLimit };
 		return query(pageParam);
-	}
+	};
+
 	const {
 		isLoading,
 		data,
@@ -46,8 +48,16 @@ function Posts({ query, user, queryKey }: PostsProps) {
 		queryKey,
 		queryFn,
 		getNextPageParam: (lastPage) => {
-			if (!lastPage.meta) return undefined;
+			if (!lastPage.meta || lastPage.data.length < queryLimit) return undefined;
 			return { before: lastPage.meta?.oldest };
+		},
+		onSuccess: (data) => {
+			data.pages.forEach((postsResponse) =>
+				postsResponse.data.forEach((postResponse) => {
+					setPost(postResponse.data);
+					setUser(postResponse.user);
+				})
+			);
 		},
 	});
 
@@ -67,21 +77,18 @@ function Posts({ query, user, queryKey }: PostsProps) {
 						<CenterLoader key={i} />
 					) : (
 						<Fragment key={i}>
-							{group.data?.map((postResponse) => {
-								return (
-									<PostComponent
-										post={postResponse}
-										key={postResponse.data.createdAt}
-										ref={ref}
-									/>
-								);
-							})}
+							{group.data?.map((postResponse) => (
+								<Post
+									key={postResponse.data.createdAt}
+									ref={ref}
+									id={postResponse.data.id}
+									handle={postResponse.user.handle}
+								/>
+							))}
 						</Fragment>
 					)
 				)
 			)}
 		</Container>
 	);
-}
-
-export default Posts;
+};

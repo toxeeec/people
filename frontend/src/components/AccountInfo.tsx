@@ -1,14 +1,17 @@
 import { Avatar, Badge, Group, Text, UnstyledButton } from "@mantine/core";
+import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { User } from "../models";
+import { UsersContext } from "../context/UsersContext";
 import { stopPropagation } from "../utils";
 
 interface AccountInfoProps {
-	user: Partial<User>;
+	handle: string;
 	children?: React.ReactNode;
 }
 
-export default function AccountInfo({ user, children }: AccountInfoProps) {
+export const AccountInfo = ({ handle, children }: AccountInfoProps) => {
+	const { users } = useContext(UsersContext);
+	const user = users[handle]!;
 	return (
 		<>
 			<Group align="start" position="apart">
@@ -28,26 +31,26 @@ export default function AccountInfo({ user, children }: AccountInfoProps) {
 				weight="bold"
 				onClick={stopPropagation}
 			>
-				@{user?.handle}
+				@{user.handle}
 			</Text>
-			{user.isFollowing ? <Badge ml="xs">follows you</Badge> : null}
+			{user.status?.isFollowing ? <Badge ml="xs">follows you</Badge> : null}
 			<Group mt="xs">
 				<UnstyledButton
 					component={Link}
 					to={`/${user.handle}/following`}
 					onClick={stopPropagation}
 				>
-					<b>{user?.following}</b> Following
+					<b>{user.following}</b> Following
 				</UnstyledButton>
 				<UnstyledButton
 					component={Link}
 					to={`/${user.handle}/followers`}
 					onClick={stopPropagation}
 				>
-					<b>{user?.followers}</b>
-					{user?.followers === 1 ? " Follower" : " Followers"}
+					<b>{user.followers}</b>
+					{user.followers === 1 ? " Follower" : " Followers"}
 				</UnstyledButton>
 			</Group>
 		</>
 	);
-}
+};

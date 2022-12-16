@@ -3,9 +3,9 @@ import { Fragment, useContext, useEffect } from "react";
 import { Users } from "../models";
 import { Container } from "@mantine/core";
 import { useInView } from "react-intersection-observer";
-import CenterLoader from "../components/CenterLoader";
-import UsersContext from "../context/UsersContext";
-import Profile from "./Profile";
+import { CenterLoader } from "../components/CenterLoader";
+import { UsersContext } from "../context/UsersContext";
+import { User } from "./User";
 
 const queryLimit = 10;
 
@@ -15,7 +15,7 @@ interface PaginationParams {
 	after?: string;
 }
 
-export type Query = (_params: PaginationParams) => Promise<Users>;
+export type Query = (params: PaginationParams) => Promise<Users>;
 
 interface PostsProps {
 	query: Query;
@@ -26,14 +26,14 @@ interface QueryFunctionArgs {
 	pageParam?: PaginationParams;
 }
 
-function Posts({ query, queryKey }: PostsProps) {
-	const usersCtx = useContext(UsersContext);
+export const Profiles = ({ query, queryKey }: PostsProps) => {
 	const { ref, inView } = useInView();
-
-	function queryFn({ pageParam }: QueryFunctionArgs) {
+	const { setUser } = useContext(UsersContext);
+	const queryFn = ({ pageParam }: QueryFunctionArgs) => {
 		pageParam = { ...pageParam, limit: queryLimit };
 		return query(pageParam);
-	}
+	};
+
 	const {
 		isLoading,
 		data,
@@ -47,6 +47,11 @@ function Posts({ query, queryKey }: PostsProps) {
 		getNextPageParam: (lastPage) => {
 			if (!lastPage.meta || lastPage.data.length < queryLimit) return undefined;
 			return { before: lastPage.meta?.oldest };
+		},
+		onSuccess: (data) => {
+			data.pages.forEach((users) =>
+				users.data.forEach((user) => setUser(user))
+			);
 		},
 	});
 
@@ -66,18 +71,13 @@ function Posts({ query, queryKey }: PostsProps) {
 						<CenterLoader key={i} />
 					) : (
 						<Fragment key={i}>
-							{group.data.map((user) => {
-								{
-									usersCtx?.setUser(user.handle, user);
-								}
-								return <Profile key={user.handle} user={user} ref={ref} />;
-							})}
+							{group.data.map((user) => (
+								<User key={user.handle} handle={user.handle} ref={ref} />
+							))}
 						</Fragment>
 					)
 				)
 			)}
 		</Container>
 	);
-}
-
-export default Posts;
+};

@@ -8,14 +8,14 @@ import {
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
-import LayoutDrawer from "./LayoutDrawer";
-import LayoutGoBack from "./LayoutGoBack";
+import { LayoutDrawer } from "./LayoutDrawer";
+import { LayoutGoBack } from "./LayoutGoBack";
 
-export default function LayoutHeader({
-	isAuthenticated,
-}: {
+interface LayoutHeaderProps {
 	isAuthenticated: boolean;
-}) {
+}
+
+export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 	const [opened, setOpened] = useState(false);
 	const params = useParams();
 	const location = useLocation();
@@ -36,7 +36,6 @@ export default function LayoutHeader({
 	}, [location]);
 
 	const isHome = route === "Home";
-
 	return (
 		<>
 			<Space h={60} />
@@ -54,7 +53,9 @@ export default function LayoutHeader({
 					</Text>
 				</Group>
 			</Header>
-			<LayoutDrawer isOpened={opened} setIsOpened={setOpened} />
+			{isAuthenticated ? (
+				<LayoutDrawer isOpened={opened} setIsOpened={setOpened} />
+			) : null}
 		</>
 	);
-}
+};

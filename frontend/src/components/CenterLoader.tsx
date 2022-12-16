@@ -1,9 +1,9 @@
 import { Center, Loader } from "@mantine/core";
 
-export default function CenterLoader() {
+export const CenterLoader = () => {
 	return (
-		<Center mt="xl">
+		<Center mt="xl" style={{ height: "100%" }}>
 			<Loader />
 		</Center>
 	);
-}
+};

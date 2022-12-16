@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tokens } from "../models";
 
-export default function useAuth() {
+export const useAuth = () => {
 	const getAuth = () => {
 		const accessToken = localStorage.getItem("accessToken");
 		const refreshToken = localStorage.getItem("refreshToken");
@@ -41,4 +41,4 @@ export default function useAuth() {
 		clearAuth,
 		isAuthenticated,
 	};
-}
+};

@@ -1,48 +1,53 @@
 import { ActionIcon, Group, Text } from "@mantine/core";
 import { IconHeart, IconMessageCircle2 } from "@tabler/icons";
-import {
-	Dispatch,
-	MouseEvent,
-	SetStateAction,
-	useCallback,
-	useState,
-} from "react";
-import { PostResponse } from "../../models";
+import { useQueryClient } from "@tanstack/react-query";
+import { MouseEvent, useCallback, useContext, useState } from "react";
+import { PostsContext } from "../../context/PostsContext";
+import { UsersContext } from "../../context/UsersContext";
+import { QueryKey } from "../../query-key";
 import {
 	useDeletePostsPostIDLikes,
 	usePutPostsPostIDLikes,
 } from "../../spec.gen";
-import PostReply from "./PostReply";
+import { PostReplyModal } from "./PostReplyModal";
 
 interface PostActionsProps {
-	post: PostResponse;
-	setPost: Dispatch<SetStateAction<PostResponse>>;
+	id: number;
+	handle: string;
 }
 
-export default function PostActions({ post, setPost }: PostActionsProps) {
-	const { mutate: like } = usePutPostsPostIDLikes({ mutation: { retry: 1 } });
+export const PostActions = ({ id, handle }: PostActionsProps) => {
+	const queryClient = useQueryClient();
+	const { setUser } = useContext(UsersContext);
+	const { posts, setPost } = useContext(PostsContext);
+	const { mutate: like } = usePutPostsPostIDLikes({
+		mutation: { retry: 1 },
+	});
 	const { mutate: unlike } = useDeletePostsPostIDLikes({
 		mutation: { retry: 1 },
 	});
+	const post = posts[id]!;
 	const handleLike = useCallback(
 		(e: MouseEvent) => {
 			e.stopPropagation();
-			const fn = post.data.status?.isLiked ? unlike : like;
+			const fn = post.status?.isLiked ? unlike : like;
 			fn(
-				{ postID: post.data.id },
+				{ postID: post.id },
 				{
-					onSuccess({ data }) {
-						const { likes, status } = data;
-						setPost((p) => ({ ...p, data: { ...p.data, likes, status } }));
+					onSuccess: (postResponse) => {
+						setPost(postResponse.data);
+						setUser(postResponse.user);
+						queryClient.resetQueries({
+							queryKey: [QueryKey.LIKES, id],
+						});
 					},
 				}
 			);
 		},
-		[post, setPost, like, unlike]
+		[post, setPost, setUser, like, unlike, queryClient, id]
 	);
 
 	const [opened, setOpened] = useState(false);
-
 	const handleOpen = (e: MouseEvent) => {
 		e.stopPropagation();
 		setOpened(true);
@@ -54,24 +59,24 @@ export default function PostActions({ post, setPost }: PostActionsProps) {
 				<ActionIcon onClick={handleOpen}>
 					<IconMessageCircle2 size={18} />
 				</ActionIcon>
-				<Text size="sm">{post.data.replies}</Text>
+				<Text size="sm">{post.replies}</Text>
 			</Group>
 			<Group align="center" spacing="xs">
 				<ActionIcon onClick={handleLike}>
 					<IconHeart
 						size={18}
-						fill={post.data.status?.isLiked ? "currentColor" : "none"}
+						fill={post.status?.isLiked ? "currentColor" : "none"}
 					/>
 				</ActionIcon>
-				<Text size="sm">{post.data.likes}</Text>
+				<Text size="sm">{post.likes}</Text>
 			</Group>
-			<PostReply
+			<PostReplyModal
 				opened={opened}
 				setOpened={setOpened}
 				isReply={true}
-				post={post}
-				setPost={setPost}
+				id={post.id}
+				handle={handle}
 			/>
 		</Group>
 	);
-}
+};

@@ -25,7 +25,7 @@ export const customInstance = <T>(
 	return promise;
 };
 
-export function createRequestInterceptor(getAuth: () => AuthValues) {
+export const createRequestInterceptor = (getAuth: () => AuthValues) => {
 	return AXIOS_INSTANCE.interceptors.request.use((config) => {
 		const { accessToken } = getAuth();
 		if (accessToken) {
@@ -36,13 +36,13 @@ export function createRequestInterceptor(getAuth: () => AuthValues) {
 		}
 		return config;
 	});
-}
+};
 
-export function createResponseInterceptor(
+export const createResponseInterceptor = (
 	getAuth: () => AuthValues,
-	setAuth: (_props: SetAuthProps) => void,
+	setAuth: (props: SetAuthProps) => void,
 	clearAuth: () => void
-) {
+) => {
 	return AXIOS_INSTANCE.interceptors.response.use(
 		(res) => {
 			return res;
@@ -65,6 +65,6 @@ export function createResponseInterceptor(
 			return Promise.reject(err);
 		}
 	);
-}
+};
 
 export type ErrorType<Error> = AxiosError<Error>;

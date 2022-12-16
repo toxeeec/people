@@ -1,5 +1,5 @@
 import { MouseEvent } from "react";
 
-export function stopPropagation(e: MouseEvent) {
+export const stopPropagation = (e: MouseEvent) => {
 	e.stopPropagation();
-}
+};

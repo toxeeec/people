@@ -1,17 +1,18 @@
 import { Button } from "@mantine/core";
-import { MouseEvent, useCallback } from "react";
-import { User } from "../models";
+import { MouseEvent, useCallback, useContext } from "react";
+import { UsersContext } from "../context/UsersContext";
 import {
 	useDeleteMeFollowingHandle,
 	usePutMeFollowingHandle,
 } from "../spec.gen";
 
 interface FollowButtonProps {
-	user: Partial<User>;
-	updateUser: (_user: Partial<User>) => void;
+	handle: string;
 }
 
-export default function FollowButton({ user, updateUser }: FollowButtonProps) {
+export const FollowButton = ({ handle }: FollowButtonProps) => {
+	const { users, setUser } = useContext(UsersContext);
+	const user = users[handle];
 	const { mutate: follow, isLoading: isFollowLoading } =
 		usePutMeFollowingHandle({
 			mutation: { retry: 1 },
@@ -26,17 +27,17 @@ export default function FollowButton({ user, updateUser }: FollowButtonProps) {
 	const handleFollow = useCallback(
 		(e: MouseEvent) => {
 			e.stopPropagation();
-			const fn = user?.isFollowed ? unfollow : follow;
+			const fn = user!.status?.isFollowed ? unfollow : follow;
 			fn(
-				{ handle: user.handle! },
+				{ handle: user!.handle! },
 				{
-					onSuccess(follows) {
-						updateUser(follows);
+					onSuccess: (user) => {
+						setUser(user);
 					},
 				}
 			);
 		},
-		[follow, unfollow, user, updateUser]
+		[follow, unfollow, user, setUser]
 	);
 
 	return (
@@ -44,10 +45,10 @@ export default function FollowButton({ user, updateUser }: FollowButtonProps) {
 			loading={isLoading}
 			loaderPosition="center"
 			onClick={handleFollow}
-			variant={user.isFollowed ? "outline" : "filled"}
+			variant={user?.status?.isFollowed ? "outline" : "filled"}
 			radius="xl"
 		>
-			{user.isFollowed ? "Unfollow" : "Follow"}
+			{user?.status?.isFollowed ? "Unfollow" : "Follow"}
 		</Button>
 	);
-}
+};

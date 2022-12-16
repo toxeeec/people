@@ -7,43 +7,48 @@ import {
 	Text,
 	UnstyledButton,
 } from "@mantine/core";
-import { useContext, useState } from "react";
-import { Link, useLoaderData } from "react-router-dom";
-import FollowButton from "../components/FollowButton";
-import Posts, { Query } from "../components/Posts";
-import AuthContext from "../context/AuthContext";
-import UsersContext from "../context/UsersContext";
-import { User } from "../models";
-import { getUsersHandlePosts } from "../spec.gen";
+import { useContext } from "react";
+import { Link, useParams } from "react-router-dom";
+import { CenterLoader } from "../components/CenterLoader";
+import { FollowButton } from "../components/FollowButton";
+import { Posts, Query } from "../components/Posts";
+import { AuthContext } from "../context/AuthContext";
+import { UsersContext } from "../context/UsersContext";
+import { QueryKey } from "../query-key";
+import { getUsersHandlePosts, useGetUsersHandle } from "../spec.gen";
 import { stopPropagation } from "../utils";
 
-export default function Profile() {
-	const data = useLoaderData();
-	const handle = (data as User).handle!;
-	const [user, setUser] = useState<Partial<User>>(data as User);
-	const usersCtx = useContext(UsersContext)!;
-	const { getAuth } = useContext(AuthContext)!;
-
-	const updateUser = (u: Partial<User>) => {
-		setUser(usersCtx.setUser(handle, u));
-	};
+const Profile = () => {
+	const params = useParams();
+	const { users, setUser } = useContext(UsersContext);
+	const { getAuth } = useContext(AuthContext);
 
 	const query: Query = (params) => {
-		return getUsersHandlePosts(handle, params);
+		return getUsersHandlePosts(user!.handle, params);
 	};
+	const { isLoading } = useGetUsersHandle(params.handle!, {
+		query: {
+			onSuccess: (u) => {
+				setUser(u);
+			},
+		},
+	});
+	const user = users[params.handle!];
 
-	return (
+	return isLoading || !user ? (
+		<CenterLoader />
+	) : (
 		<Paper withBorder radius="xs">
 			<Container p="xs">
 				<Group align="center" position="apart">
 					<Avatar size="xl" radius={999} mb="xs" />
 					{getAuth().handle === user.handle ? null : (
-						<FollowButton user={user} updateUser={updateUser} />
+						<FollowButton handle={user.handle} />
 					)}
 				</Group>
 				<Group>
-					<Text weight="bold">@{handle}</Text>
-					{user.isFollowing ? <Badge>follows you</Badge> : null}
+					<Text weight="bold">@{user.handle}</Text>
+					{user.status?.isFollowing ? <Badge>follows you</Badge> : null}
 				</Group>
 				<Group mt="xs">
 					<UnstyledButton
@@ -63,7 +68,9 @@ export default function Profile() {
 					</UnstyledButton>
 				</Group>
 			</Container>
-			<Posts query={query} user={user as User} queryKey={["posts", handle]} />
+			<Posts query={query} queryKey={[QueryKey.POSTS, user.handle]} />
 		</Paper>
 	);
-}
+};
+
+export default Profile;

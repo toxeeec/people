@@ -1,9 +1,9 @@
 import { Button, Center, Group } from "@mantine/core";
 import { useState } from "react";
-import Login from "../components/Login";
-import Signup from "../components/Signup";
+import { Login } from "../components/auth/Login";
+import { Signup } from "../components/auth/Signup";
 
-export default function Auth() {
+const Auth = () => {
 	const [loginOpened, setLoginOpened] = useState(false);
 	const [signupOpened, setSignupOpened] = useState(false);
 	return (
@@ -33,4 +33,6 @@ export default function Auth() {
 			/>
 		</Center>
 	);
-}
+};
+
+export default Auth;

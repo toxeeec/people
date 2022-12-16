@@ -1,12 +1,4 @@
-import {
-	Avatar,
-	Button,
-	Flex,
-	Group,
-	Modal,
-	Text,
-	Textarea,
-} from "@mantine/core";
+import { Button, Flex, Paper, Text, Textarea } from "@mantine/core";
 import { useFocusTrap } from "@mantine/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -14,74 +6,63 @@ import {
 	MouseEvent,
 	SetStateAction,
 	useCallback,
+	useContext,
 	useState,
 } from "react";
-import { PostResponse } from "../../models";
+import { PostsContext } from "../../context/PostsContext";
+import { UsersContext } from "../../context/UsersContext";
+import { QueryKey } from "../../query-key";
 import { getPostsPostID, usePostPostsPostIDReplies } from "../../spec.gen";
 
 interface PostReplyProps {
-	isReply: boolean;
-	opened: boolean;
-	setOpened: Dispatch<SetStateAction<boolean>>;
-	post: PostResponse;
-	setPost: Dispatch<SetStateAction<PostResponse>>;
+	id: number;
+	setOpened?: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function PostReply({
-	opened,
-	setOpened,
-	post,
-	setPost,
-}: PostReplyProps) {
+export const PostReply = ({ id, setOpened }: PostReplyProps) => {
 	const [content, setContent] = useState("");
 	const [error, setError] = useState("");
 	const focusTrapRef = useFocusTrap();
 	const queryClient = useQueryClient();
+	const { posts, setPost } = useContext(PostsContext);
+	const { setUser } = useContext(UsersContext);
 	const { mutate } = usePostPostsPostIDReplies({
-		mutation: { retry: 1 },
+		mutation: {
+			retry: 1,
+			onSuccess: (postResponse) => {
+				setPost(postResponse.data);
+				setUser(postResponse.user);
+				setContent("");
+				queryClient.invalidateQueries({
+					queryKey: [QueryKey.REPLIES, id],
+				});
+				getPostsPostID(postResponse.data.repliesTo!).then((postResponse) => {
+					setPost(postResponse.data);
+					setUser(postResponse.user);
+				});
+			},
+			onError: (error) => {
+				const err = error.response?.data.message;
+				setError(err!);
+			},
+		},
 	});
 
 	const handleSubmit = useCallback(
 		(e: MouseEvent) => {
 			e.stopPropagation();
-			mutate(
-				{ postID: post.data.id, data: { content: content.trim() } },
-				{
-					onSuccess: () => {
-						setContent("");
-						getPostsPostID(post.data.id).then((p) => setPost(p));
-						queryClient.invalidateQueries({
-							queryKey: ["replies", post.data.id],
-						});
-						setOpened(false);
-					},
-					onError: (error) => {
-						const err = error.response?.data.message;
-						setError(err!);
-					},
-				}
-			);
+			mutate({ postID: id, data: { content: content.trim() } });
+			if (setOpened) {
+				setOpened(false);
+			}
 		},
-		[content, post, setPost, setOpened, mutate, queryClient]
+		[mutate, content, id, setOpened]
 	);
 
+	const post = posts[id]!;
 	return (
-		<Modal
-			opened={opened}
-			onClose={() => {
-				setContent("");
-				setOpened(false);
-			}}
-			onClick={(e: MouseEvent) => e.stopPropagation()}
-			centered
-			title={
-				<Group align="center">
-					<Avatar radius="xl" size="md" />
-					<Text weight="bold">{post.user?.handle}</Text>
-				</Group>
-			}
-		>
-			<Text my="xs">{post.data.content}</Text>
+		<Paper>
+			<Text my="xs">{post.content}</Text>
 			<Textarea
 				ref={focusTrapRef}
 				data-autofocus
@@ -102,6 +83,6 @@ export default function PostReply({
 					Reply
 				</Button>
 			</Flex>
-		</Modal>
+		</Paper>
 	);
-}
+};

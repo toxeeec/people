@@ -2,7 +2,7 @@ import { ActionIcon } from "@mantine/core";
 import { IconArrowLeft } from "@tabler/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 
-export default function LayoutGoBack() {
+export const LayoutGoBack = () => {
 	const navigate = useNavigate();
 	const { key } = useLocation();
 	const handleClick = () => {
@@ -13,4 +13,4 @@ export default function LayoutGoBack() {
 			<IconArrowLeft size={20} />
 		</ActionIcon>
 	);
-}
+};
