@@ -41,8 +41,8 @@ func (q *QueryBuilder) Where(cond string, args ...any) *QueryBuilder {
 	return q
 }
 
-func (q *QueryBuilder) Join(field string, cond string) *QueryBuilder {
-	q.join = " JOIN " + field + " ON " + cond
+func (q *QueryBuilder) Join(table string, cond string) *QueryBuilder {
+	q.join = " JOIN " + table + " ON " + cond
 	return q
 }
 

@@ -34,14 +34,17 @@ paths:
   /users/{handle}/followers:
     $ref: './paths/users.yaml#/followers'
 
+  /users/{handle}/posts:
+    $ref: './paths/posts.yaml#/userPosts'
+
+  /users/{handle}/likes:
+    $ref: './paths/posts.yaml#/userLikes'
+
   /posts:
     $ref: './paths/posts.yaml#/posts'
 
   /posts/{postID}:
     $ref: './paths/posts.yaml#/post'
-
-  /users/{handle}/posts:
-    $ref: './paths/posts.yaml#/userPosts'
 
   /posts/{postID}/replies:
     $ref: './paths/replies.yaml#/replies'

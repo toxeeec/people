@@ -60,7 +60,7 @@ func (r *postRepo) ListUserPosts(userID uint, p pagination.Pagination[uint]) ([]
 		before = *p.Before
 	}
 	after := uint(0)
-	if p.Before != nil {
+	if p.After != nil {
 		after = *p.After
 	}
 	var ps []people.Post
@@ -81,7 +81,7 @@ func (r *postRepo) ListFeed(followingIDs []uint, userID uint, p pagination.ID) (
 		before = *p.Before
 	}
 	after := uint(0)
-	if p.Before != nil {
+	if p.After != nil {
 		after = *p.After
 	}
 	followingIDs = append(followingIDs, userID)
@@ -103,7 +103,7 @@ func (r *postRepo) ListReplies(postID uint, p pagination.ID) ([]people.Post, err
 		before = *p.Before
 	}
 	after := uint(0)
-	if p.Before != nil {
+	if p.After != nil {
 		after = *p.After
 	}
 	ps := make([]people.Post, 0, p.Limit)

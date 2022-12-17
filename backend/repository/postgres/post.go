@@ -17,6 +17,10 @@ func NewPostRepository(db *sqlx.DB) repository.Post {
 	return &postRepo{db}
 }
 
+const (
+	SelectPost = "SELECT post.post_id, post.user_id, content, replies_to, replies, likes, created_at FROM post"
+)
+
 func (r *postRepo) Create(np people.NewPost, userID uint, repliesTo *uint) (people.Post, error) {
 	tx, err := r.db.Beginx()
 	if err != nil {
@@ -60,7 +64,7 @@ func (r *postRepo) Delete(postID, userID uint) error {
 }
 
 func (r *postRepo) ListUserPosts(userID uint, p pagination.ID) ([]people.Post, error) {
-	q, args, err := NewQuery("SELECT * FROM post").
+	q, args, err := NewQuery(SelectPost).
 		Where("user_id = ?", userID).
 		Paginate(p, "post_id", "?").
 		Build()
@@ -78,7 +82,7 @@ func (r *postRepo) ListFeed(followingIDs []uint, userID uint, p pagination.ID) (
 	if len(followingIDs) == 0 {
 		return []people.Post{}, nil
 	}
-	q, args, err := NewQuery("SELECT * FROM post").
+	q, args, err := NewQuery(SelectPost).
 		Where("post.user_id IN (?)", append(followingIDs, userID)).
 		Where("replies_to IS NULL").
 		Paginate(p, "post_id", "?").
@@ -94,7 +98,7 @@ func (r *postRepo) ListFeed(followingIDs []uint, userID uint, p pagination.ID) (
 }
 
 func (r *postRepo) ListReplies(postID uint, p pagination.ID) ([]people.Post, error) {
-	q, args, err := NewQuery("SELECT * FROM post").
+	q, args, err := NewQuery(SelectPost).
 		Where("replies_to = ?", postID).
 		Paginate(p, "post_id", "?").
 		Build()

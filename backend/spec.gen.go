@@ -80,6 +80,9 @@ type ServerInterface interface {
 	// (GET /users/{handle}/following)
 	GetUsersHandleFollowing(ctx echo.Context, handle HandleParam, params GetUsersHandleFollowingParams) error
 
+	// (GET /users/{handle}/likes)
+	GetUsersHandleLikes(ctx echo.Context, handle HandleParam, params GetUsersHandleLikesParams) error
+
 	// (GET /users/{handle}/posts)
 	GetUsersHandlePosts(ctx echo.Context, handle HandleParam, params GetUsersHandlePostsParams) error
 }
@@ -537,6 +540,47 @@ func (w *ServerInterfaceWrapper) GetUsersHandleFollowing(ctx echo.Context) error
 	return err
 }
 
+// GetUsersHandleLikes converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUsersHandleLikes(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "handle" -------------
+	var handle HandleParam
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "handle", runtime.ParamLocationPath, ctx.Param("handle"), &handle)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter handle: %s", err))
+	}
+
+	ctx.Set(BearerAuthScopes, []string{""})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetUsersHandleLikesParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "before" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "before", ctx.QueryParams(), &params.Before)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter before: %s", err))
+	}
+
+	// ------------- Optional query parameter "after" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "after", ctx.QueryParams(), &params.After)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter after: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetUsersHandleLikes(ctx, handle, params)
+	return err
+}
+
 // GetUsersHandlePosts converts echo context to params.
 func (w *ServerInterfaceWrapper) GetUsersHandlePosts(ctx echo.Context) error {
 	var err error
@@ -625,6 +669,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/users/:handle", wrapper.GetUsersHandle)
 	router.GET(baseURL+"/users/:handle/followers", wrapper.GetUsersHandleFollowers)
 	router.GET(baseURL+"/users/:handle/following", wrapper.GetUsersHandleFollowing)
+	router.GET(baseURL+"/users/:handle/likes", wrapper.GetUsersHandleLikes)
 	router.GET(baseURL+"/users/:handle/posts", wrapper.GetUsersHandlePosts)
 
 }
@@ -1442,6 +1487,42 @@ func (response GetUsersHandleFollowing404JSONResponse) VisitGetUsersHandleFollow
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetUsersHandleLikesRequestObject struct {
+	Handle HandleParam `json:"handle"`
+	Params GetUsersHandleLikesParams
+}
+
+type GetUsersHandleLikesResponseObject interface {
+	VisitGetUsersHandleLikesResponse(w http.ResponseWriter) error
+}
+
+type GetUsersHandleLikes200JSONResponse PostsResponse
+
+func (response GetUsersHandleLikes200JSONResponse) VisitGetUsersHandleLikesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetUsersHandleLikes400JSONResponse Error
+
+func (response GetUsersHandleLikes400JSONResponse) VisitGetUsersHandleLikesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetUsersHandleLikes404JSONResponse Error
+
+func (response GetUsersHandleLikes404JSONResponse) VisitGetUsersHandleLikesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetUsersHandlePostsRequestObject struct {
 	Handle HandleParam `json:"handle"`
 	Params GetUsersHandlePostsParams
@@ -1537,6 +1618,9 @@ type StrictServerInterface interface {
 
 	// (GET /users/{handle}/following)
 	GetUsersHandleFollowing(ctx context.Context, request GetUsersHandleFollowingRequestObject) (GetUsersHandleFollowingResponseObject, error)
+
+	// (GET /users/{handle}/likes)
+	GetUsersHandleLikes(ctx context.Context, request GetUsersHandleLikesRequestObject) (GetUsersHandleLikesResponseObject, error)
 
 	// (GET /users/{handle}/posts)
 	GetUsersHandlePosts(ctx context.Context, request GetUsersHandlePostsRequestObject) (GetUsersHandlePostsResponseObject, error)
@@ -2056,6 +2140,32 @@ func (sh *strictHandler) GetUsersHandleFollowing(ctx echo.Context, handle Handle
 	return nil
 }
 
+// GetUsersHandleLikes operation middleware
+func (sh *strictHandler) GetUsersHandleLikes(ctx echo.Context, handle HandleParam, params GetUsersHandleLikesParams) error {
+	var request GetUsersHandleLikesRequestObject
+
+	request.Handle = handle
+	request.Params = params
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetUsersHandleLikes(ctx.Request().Context(), request.(GetUsersHandleLikesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetUsersHandleLikes")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetUsersHandleLikesResponseObject); ok {
+		return validResponse.VisitGetUsersHandleLikesResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("Unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // GetUsersHandlePosts operation middleware
 func (sh *strictHandler) GetUsersHandlePosts(ctx echo.Context, handle HandleParam, params GetUsersHandlePostsParams) error {
 	var request GetUsersHandlePostsRequestObject
@@ -2085,36 +2195,36 @@ func (sh *strictHandler) GetUsersHandlePosts(ctx echo.Context, handle HandlePara
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"/77NdelrSAAA",
+	"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",
+	"A6IW11QCUQNRD/yeOcv+DwAA///XwDKJFEsAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

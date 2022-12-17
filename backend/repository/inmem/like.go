@@ -65,13 +65,13 @@ func (r *likeRepo) Delete(postID, userID uint) error {
 	return nil
 }
 
-func (r *likeRepo) ListUsers(postID uint, p pagination.ID) (people.Users, error) {
+func (r *likeRepo) ListPostLikes(postID uint, p pagination.ID) (people.Users, error) {
 	before := uint(math.MaxUint)
 	if p.Before != nil {
 		before = *p.Before
 	}
 	after := uint(0)
-	if p.Before != nil {
+	if p.After != nil {
 		after = *p.After
 	}
 	us := make([]people.User, 0, p.Limit)
@@ -92,4 +92,25 @@ func (r *likeRepo) ListStatusLiked(ids []uint, userID uint) (map[uint]struct{}, 
 		}
 	}
 	return lss, nil
+}
+
+func (r *likeRepo) ListUserLikes(userID uint, p pagination.Pagination[uint]) ([]people.Post, error) {
+	before := uint(math.MaxUint)
+	if p.Before != nil {
+		before = *p.Before
+	}
+	after := uint(0)
+	if p.After != nil {
+		after = *p.After
+	}
+	var ps []people.Post
+	for k := range r.m {
+		if k.userID == userID && k.postID < before && k.postID > after {
+			ps = append(ps, r.pm[k.postID])
+			if len(ps) == int(p.Limit) {
+				break
+			}
+		}
+	}
+	return ps, nil
 }

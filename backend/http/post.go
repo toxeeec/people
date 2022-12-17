@@ -56,8 +56,6 @@ func (h *handler) GetUsersHandlePosts(ctx context.Context, r people.GetUsersHand
 		var e *people.Error
 		if errors.As(err, &e) {
 			switch *e.Kind {
-			case people.ValidationError:
-				return people.GetUsersHandlePosts404JSONResponse(*e), nil
 			case people.NotFoundError:
 				return people.GetUsersHandlePosts404JSONResponse(*e), nil
 			}
@@ -135,4 +133,20 @@ func (h *handler) DeletePostsPostIDLikes(ctx context.Context, r people.DeletePos
 		return nil, err
 	}
 	return people.DeletePostsPostIDLikes200JSONResponse(pr), nil
+}
+
+func (h *handler) GetUsersHandleLikes(ctx context.Context, r people.GetUsersHandleLikesRequestObject) (people.GetUsersHandleLikesResponseObject, error) {
+	userID, ok := fromContext(ctx, userIDKey)
+	prs, err := h.ps.ListUserLikes(ctx, r.Handle, userID, ok, post.IDPaginationParams(r.Params))
+	if err != nil {
+		var e *people.Error
+		if errors.As(err, &e) {
+			switch *e.Kind {
+			case people.NotFoundError:
+				return people.GetUsersHandleLikes404JSONResponse(*e), nil
+			}
+		}
+		return nil, err
+	}
+	return people.GetUsersHandleLikes200JSONResponse(prs), nil
 }

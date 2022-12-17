@@ -176,6 +176,13 @@ type GetUsersHandleFollowingParams struct {
 	After  *AfterHandleParam  `form:"after,omitempty" json:"after,omitempty"`
 }
 
+// GetUsersHandleLikesParams defines parameters for GetUsersHandleLikes.
+type GetUsersHandleLikesParams struct {
+	Limit  *LimitParam  `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterParam  `form:"after,omitempty" json:"after,omitempty"`
+}
+
 // GetUsersHandlePostsParams defines parameters for GetUsersHandlePosts.
 type GetUsersHandlePostsParams struct {
 	Limit  *LimitParam  `form:"limit,omitempty" json:"limit,omitempty"`

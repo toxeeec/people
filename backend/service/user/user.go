@@ -192,7 +192,7 @@ func (s *userService) ListPostLikes(ctx context.Context, postID, userID uint, au
 		return people.Users{}, service.NewError(people.NotFoundError, "User not found")
 	}
 
-	us, err := s.lr.ListUsers(postID, p)
+	us, err := s.lr.ListPostLikes(postID, p)
 	if err != nil {
 		return people.Users{}, err
 	}

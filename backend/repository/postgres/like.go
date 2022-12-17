@@ -80,7 +80,7 @@ func (r *likeRepo) Delete(postID, userID uint) error {
 	return nil
 }
 
-func (r *likeRepo) ListUsers(postID uint, p pagination.ID) (people.Users, error) {
+func (r *likeRepo) ListPostLikes(postID uint, p pagination.ID) (people.Users, error) {
 	const paginationValue = "(SELECT liked_at FROM post_like WHERE user_id = ? AND post_id = ?)"
 	q, args, err := NewQuery(SelectUser).
 		Join("post_like", "user_profile.user_id = post_like.user_id").
@@ -97,6 +97,23 @@ func (r *likeRepo) ListUsers(postID uint, p pagination.ID) (people.Users, error)
 	return pagination.NewResults[people.User, string](us), nil
 }
 
+func (r *likeRepo) ListUserLikes(userID uint, p pagination.ID) ([]people.Post, error) {
+	const paginationValue = "(SELECT liked_at FROM post_like WHERE user_id = ? AND post_id = ?)"
+	q, args, err := NewQuery(SelectPost).
+		Join("post_like", "post_like.post_id = post.post_id").
+		Where("post_like.user_id = ?", userID).
+		Paginate(p, "liked_at", paginationValue, userID).
+		Build()
+	if err != nil {
+		return nil, fmt.Errorf("Post.ListUserLikes: %w", err)
+	}
+	ps := make([]people.Post, p.Limit)
+	if err := r.db.Select(&ps, q, args...); err != nil {
+		return nil, fmt.Errorf("Post.ListUserLikes: %w", err)
+	}
+	return ps, nil
+}
+
 func (r *likeRepo) ListStatusLiked(ids []uint, userID uint) (map[uint]struct{}, error) {
 	if len(ids) == 0 {
 		return make(map[uint]struct{}), nil
@@ -104,12 +121,12 @@ func (r *likeRepo) ListStatusLiked(ids []uint, userID uint) (map[uint]struct{}, 
 	const query = "SELECT post_id FROM post_like"
 	q, args, err := NewQuery(query).Where("post_id IN (?)", ids).Where("user_id = ?", userID).Build()
 	if err != nil {
-		return nil, fmt.Errorf("Like.ListStatus: %w", err)
+		return nil, fmt.Errorf("Like.ListStatusLiked: %w", err)
 	}
 	postIDs := make([]uint, len(ids))
 	err = r.db.Select(&postIDs, q, args...)
 	if err != nil {
-		return nil, fmt.Errorf("Like.ListStatus: %w", err)
+		return nil, fmt.Errorf("Like.ListStatusLiked: %w", err)
 	}
 	lss := make(map[uint]struct{}, len(ids))
 	for _, id := range postIDs {

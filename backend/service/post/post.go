@@ -34,6 +34,7 @@ type Service interface {
 	ListReplies(ctx context.Context, postID, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error)
 	Like(postID, userID uint) (people.PostResponse, error)
 	Unlike(postID, userID uint) (people.PostResponse, error)
+	ListUserLikes(ctx context.Context, handle string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error)
 }
 
 type postService struct {
@@ -258,6 +259,48 @@ func (s *postService) listStatus(ids []uint, userID uint) (map[uint]people.LikeS
 		lss[id] = people.LikeStatus{IsLiked: likedOk}
 	}
 	return lss, nil
+}
+
+func (s *postService) ListUserLikes(ctx context.Context, handle string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error) {
+	p := pagination.New(params.Before, params.After, params.Limit)
+	id, err := s.ur.GetID(handle)
+	if err != nil {
+		return people.PostsResponse{}, service.NewError(people.NotFoundError, "User not found")
+	}
+	ps, err := s.lr.ListUserLikes(id, p)
+	if err != nil {
+		return people.PostsResponse{}, err
+	}
+
+	var us []people.User
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		var err error
+		us, err = s.us.ListUsersWithStatus(context.Background(), Slice(ps).UserIDs(), userID, auth)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if auth {
+		g.Go(func() error {
+			lss, err := s.listStatus(Slice(ps).IDs(), userID)
+			if err != nil {
+				return err
+			}
+			Slice(ps).AddStatus(lss)
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return people.PostsResponse{}, nil
+	}
+	um := user.Slice(us).ToMap()
+	prs := make([]people.PostResponse, len(ps))
+	for i, p := range ps {
+		prs[i] = people.PostResponse{Data: p, User: um[p.UserID]}
+	}
+	return pagination.NewResults[people.PostResponse, uint](prs), nil
 }
 
 func (s *postService) getPostResponseWithStatuses(ctx context.Context, postID uint, userID uint, auth bool) (people.PostResponse, error) {

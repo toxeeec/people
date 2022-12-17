@@ -130,7 +130,7 @@ func (s *LikeSuite) TestListUsers() {
 		s.repo.Create(p.ID, users[i].ID)
 	}
 
-	us, _ := s.repo.ListUsers(p.ID, pagination.ID{Limit: 10})
+	us, _ := s.repo.ListPostLikes(p.ID, pagination.ID{Limit: 10})
 	assert.Len(s.T(), us.Data, len(users))
 }
 
@@ -153,6 +153,23 @@ func (s *LikeSuite) TestListStatusLiked() {
 	assert.False(s.T(), u2ok)
 	_, u3ok := fs[posts[2].ID]
 	assert.False(s.T(), u3ok)
+}
+
+func (s *LikeSuite) TestListUserLikes() {
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	u, _ := s.ur.Create(au)
+	var posts [3]people.Post
+	for i := range posts {
+		var np people.NewPost
+		gofakeit.Struct(&np)
+		posts[i], _ = s.pr.Create(np, u.ID, nil)
+		s.repo.Create(posts[i].ID, u.ID)
+	}
+
+	ps, err := s.repo.ListUserLikes(u.ID, pagination.ID{Limit: 10})
+	assert.NoError(s.T(), err)
+	assert.Len(s.T(), ps, len(posts))
 }
 
 func (s *LikeSuite) SetupTest() {

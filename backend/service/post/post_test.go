@@ -104,7 +104,7 @@ func (s *PostSuite) TestLike() {
 	u, _ := s.ur.Create(au)
 	p1, _ := s.pr.Create(np, u.ID, nil)
 	p2, _ := s.pr.Create(np, u.ID, nil)
-	s.ps.Like(context.Background(), p1.ID, u.ID)
+	s.ps.Like(p1.ID, u.ID)
 
 	conflictError := people.ConflictError
 
@@ -118,7 +118,7 @@ func (s *PostSuite) TestLike() {
 	}
 	for name, tc := range tests {
 		s.Run(name, func() {
-			pr, err := s.ps.Like(context.Background(), tc.id, u.ID)
+			pr, err := s.ps.Like(tc.id, u.ID)
 			assert.Equal(s.T(), tc.valid, err == nil)
 			if tc.valid {
 				assert.True(s.T(), pr.Data.Status.IsLiked)
@@ -139,7 +139,7 @@ func (s *PostSuite) TestUnlike() {
 	u, _ := s.ur.Create(au)
 	p1, _ := s.pr.Create(np, u.ID, nil)
 	p2, _ := s.pr.Create(np, u.ID, nil)
-	s.ps.Like(context.Background(), p2.ID, u.ID)
+	s.ps.Like(p2.ID, u.ID)
 
 	notFoundError := people.NotFoundError
 
@@ -153,7 +153,7 @@ func (s *PostSuite) TestUnlike() {
 	}
 	for name, tc := range tests {
 		s.Run(name, func() {
-			pr, err := s.ps.Unlike(context.Background(), tc.id, u.ID)
+			pr, err := s.ps.Unlike(tc.id, u.ID)
 			assert.Equal(s.T(), tc.valid, err == nil)
 			if tc.valid {
 				assert.False(s.T(), pr.Data.Status.IsLiked)
