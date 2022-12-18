@@ -40,11 +40,14 @@ export const PostActions = ({ id, handle }: PostActionsProps) => {
 						queryClient.resetQueries({
 							queryKey: [QueryKey.LIKES, id],
 						});
+						queryClient.invalidateQueries({
+							queryKey: [QueryKey.LIKES, handle],
+						});
 					},
 				}
 			);
 		},
-		[post, setPost, setUser, like, unlike, queryClient, id]
+		[post, setPost, setUser, like, unlike, queryClient, id, handle]
 	);
 
 	const [opened, setOpened] = useState(false);

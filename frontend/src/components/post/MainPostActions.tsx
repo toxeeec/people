@@ -50,10 +50,13 @@ export const MainPostActions = ({ id, handle }: MainPostActionsProps) => {
 					setPost(postResponse.data);
 					setUser(postResponse.user);
 					queryClient.resetQueries({ queryKey: [QueryKey.LIKES, id] });
+					queryClient.resetQueries({
+						queryKey: [QueryKey.LIKES, handle],
+					});
 				},
 			}
 		);
-	}, [like, unlike, post, id, queryClient, setPost, setUser]);
+	}, [like, unlike, post, id, queryClient, setPost, setUser, handle]);
 
 	return (
 		<>

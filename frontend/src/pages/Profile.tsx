@@ -4,27 +4,42 @@ import {
 	Container,
 	Group,
 	Paper,
+	Tabs,
 	Text,
 	UnstyledButton,
 } from "@mantine/core";
 import { useContext } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { CenterLoader } from "../components/CenterLoader";
 import { FollowButton } from "../components/FollowButton";
 import { Posts, Query } from "../components/Posts";
 import { AuthContext } from "../context/AuthContext";
 import { UsersContext } from "../context/UsersContext";
 import { QueryKey } from "../query-key";
-import { getUsersHandlePosts, useGetUsersHandle } from "../spec.gen";
+import {
+	getUsersHandleLikes,
+	getUsersHandlePosts,
+	useGetUsersHandle,
+} from "../spec.gen";
 import { stopPropagation } from "../utils";
 
-const Profile = () => {
+export type ProfilePage = "posts" | "likes";
+
+interface ProfileProps {
+	value: ProfilePage;
+}
+
+const Profile = ({ value }: ProfileProps) => {
 	const params = useParams();
 	const { users, setUser } = useContext(UsersContext);
-	const { getAuth } = useContext(AuthContext);
+	const { isAuthenticated, getAuth } = useContext(AuthContext);
+	const navigate = useNavigate();
 
-	const query: Query = (params) => {
+	const postsQuery: Query = (params) => {
 		return getUsersHandlePosts(user!.handle, params);
+	};
+	const likesQuery: Query = (params) => {
+		return getUsersHandleLikes(user!.handle, params);
 	};
 	const { isLoading } = useGetUsersHandle(params.handle!, {
 		query: {
@@ -42,7 +57,7 @@ const Profile = () => {
 			<Container p="xs">
 				<Group align="center" position="apart">
 					<Avatar size="xl" radius={999} mb="xs" />
-					{getAuth().handle === user.handle ? null : (
+					{!isAuthenticated || getAuth().handle === user.handle ? null : (
 						<FollowButton handle={user.handle} />
 					)}
 				</Group>
@@ -68,7 +83,28 @@ const Profile = () => {
 					</UnstyledButton>
 				</Group>
 			</Container>
-			<Posts query={query} queryKey={[QueryKey.POSTS, user.handle]} />
+			<Tabs
+				value={value}
+				onTabChange={(value) => {
+					const url =
+						value === "likes"
+							? `/${params.handle}/${value}`
+							: `/${params.handle}`;
+					navigate(url, { replace: true });
+				}}
+			>
+				<Tabs.List grow position="center">
+					<Tabs.Tab value="posts">Posts</Tabs.Tab>
+					<Tabs.Tab value="likes">Likes</Tabs.Tab>
+				</Tabs.List>
+
+				<Tabs.Panel value="posts">
+					<Posts query={postsQuery} queryKey={[QueryKey.POSTS, user.handle]} />
+				</Tabs.Panel>
+				<Tabs.Panel value="likes">
+					<Posts query={likesQuery} queryKey={[QueryKey.LIKES, user.handle]} />
+				</Tabs.Panel>
+			</Tabs>
 		</Paper>
 	);
 };

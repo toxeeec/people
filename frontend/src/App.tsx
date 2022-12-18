@@ -61,7 +61,11 @@ const App = () => {
 				},
 				{
 					path: "/:handle",
-					element: <Profile />,
+					element: <Profile value={"posts"} />,
+				},
+				{
+					path: "/:handle/likes",
+					element: <Profile value={"likes"} />,
 				},
 				{
 					path: "/:handle/:postID",

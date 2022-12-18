@@ -27,9 +27,10 @@ import type {
 	GetMeFollowersParams,
 	GetUsersHandleFollowingParams,
 	GetUsersHandleFollowersParams,
+	GetUsersHandlePostsParams,
+	GetUsersHandleLikesParams,
 	PostResponse,
 	NewPostBodyBody,
-	GetUsersHandlePostsParams,
 	GetPostsPostIDRepliesParams,
 	GetPostsPostIDLikesParams,
 } from "./models";
@@ -666,6 +667,136 @@ export const useGetUsersHandleFollowers = <
 	return query;
 };
 
+export const getUsersHandlePosts = (
+	handle: string,
+	params?: GetUsersHandlePostsParams,
+	options?: SecondParameter<typeof customInstance>,
+	signal?: AbortSignal
+) => {
+	return customInstance<PostsResponse>(
+		{ url: `/users/${handle}/posts`, method: "get", params, signal },
+		options
+	);
+};
+
+export const getGetUsersHandlePostsQueryKey = (
+	handle: string,
+	params?: GetUsersHandlePostsParams
+) => [`/users/${handle}/posts`, ...(params ? [params] : [])];
+
+export type GetUsersHandlePostsQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getUsersHandlePosts>>
+>;
+export type GetUsersHandlePostsQueryError = ErrorType<Error>;
+
+export const useGetUsersHandlePosts = <
+	TData = Awaited<ReturnType<typeof getUsersHandlePosts>>,
+	TError = ErrorType<Error>
+>(
+	handle: string,
+	params?: GetUsersHandlePostsParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getUsersHandlePosts>>,
+			TError,
+			TData
+		>;
+		request?: SecondParameter<typeof customInstance>;
+	}
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey =
+		queryOptions?.queryKey ?? getGetUsersHandlePostsQueryKey(handle, params);
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getUsersHandlePosts>>
+	> = ({ signal }) =>
+		getUsersHandlePosts(handle, params, requestOptions, signal);
+
+	const query = useQuery<
+		Awaited<ReturnType<typeof getUsersHandlePosts>>,
+		TError,
+		TData
+	>(queryKey, queryFn, {
+		enabled: !!handle,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+	query.queryKey = queryKey;
+
+	return query;
+};
+
+export const getUsersHandleLikes = (
+	handle: string,
+	params?: GetUsersHandleLikesParams,
+	options?: SecondParameter<typeof customInstance>,
+	signal?: AbortSignal
+) => {
+	return customInstance<PostsResponse>(
+		{ url: `/users/${handle}/likes`, method: "get", params, signal },
+		options
+	);
+};
+
+export const getGetUsersHandleLikesQueryKey = (
+	handle: string,
+	params?: GetUsersHandleLikesParams
+) => [`/users/${handle}/likes`, ...(params ? [params] : [])];
+
+export type GetUsersHandleLikesQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getUsersHandleLikes>>
+>;
+export type GetUsersHandleLikesQueryError = ErrorType<Error>;
+
+export const useGetUsersHandleLikes = <
+	TData = Awaited<ReturnType<typeof getUsersHandleLikes>>,
+	TError = ErrorType<Error>
+>(
+	handle: string,
+	params?: GetUsersHandleLikesParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getUsersHandleLikes>>,
+			TError,
+			TData
+		>;
+		request?: SecondParameter<typeof customInstance>;
+	}
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey =
+		queryOptions?.queryKey ?? getGetUsersHandleLikesQueryKey(handle, params);
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getUsersHandleLikes>>
+	> = ({ signal }) =>
+		getUsersHandleLikes(handle, params, requestOptions, signal);
+
+	const query = useQuery<
+		Awaited<ReturnType<typeof getUsersHandleLikes>>,
+		TError,
+		TData
+	>(queryKey, queryFn, {
+		enabled: !!handle,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+	query.queryKey = queryKey;
+
+	return query;
+};
+
 export const postPosts = (
 	newPostBodyBody: NewPostBodyBody,
 	options?: SecondParameter<typeof customInstance>
@@ -823,71 +954,6 @@ export const useDeletePostsPostID = <
 		{ postID: number },
 		TContext
 	>(mutationFn, mutationOptions);
-};
-
-export const getUsersHandlePosts = (
-	handle: string,
-	params?: GetUsersHandlePostsParams,
-	options?: SecondParameter<typeof customInstance>,
-	signal?: AbortSignal
-) => {
-	return customInstance<PostsResponse>(
-		{ url: `/users/${handle}/posts`, method: "get", params, signal },
-		options
-	);
-};
-
-export const getGetUsersHandlePostsQueryKey = (
-	handle: string,
-	params?: GetUsersHandlePostsParams
-) => [`/users/${handle}/posts`, ...(params ? [params] : [])];
-
-export type GetUsersHandlePostsQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getUsersHandlePosts>>
->;
-export type GetUsersHandlePostsQueryError = ErrorType<Error>;
-
-export const useGetUsersHandlePosts = <
-	TData = Awaited<ReturnType<typeof getUsersHandlePosts>>,
-	TError = ErrorType<Error>
->(
-	handle: string,
-	params?: GetUsersHandlePostsParams,
-	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getUsersHandlePosts>>,
-			TError,
-			TData
-		>;
-		request?: SecondParameter<typeof customInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-	const { query: queryOptions, request: requestOptions } = options ?? {};
-
-	const queryKey =
-		queryOptions?.queryKey ?? getGetUsersHandlePostsQueryKey(handle, params);
-
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getUsersHandlePosts>>
-	> = ({ signal }) =>
-		getUsersHandlePosts(handle, params, requestOptions, signal);
-
-	const query = useQuery<
-		Awaited<ReturnType<typeof getUsersHandlePosts>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!handle,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-	query.queryKey = queryKey;
-
-	return query;
 };
 
 export const getPostsPostIDReplies = (

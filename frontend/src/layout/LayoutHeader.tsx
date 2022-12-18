@@ -6,6 +6,7 @@ import {
 	Text,
 	UnstyledButton,
 } from "@mantine/core";
+import { useWindowScroll } from "@mantine/hooks";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
 import { LayoutDrawer } from "./LayoutDrawer";
@@ -20,6 +21,7 @@ export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 	const params = useParams();
 	const location = useLocation();
 	const [route, setRoute] = useState("");
+	const [_, scrollTo] = useWindowScroll();
 
 	useEffect(() => {
 		if (location.pathname === "/home") {
@@ -48,9 +50,11 @@ export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 					) : (
 						<LayoutGoBack />
 					)}
-					<Text fz="xl" fw={700}>
-						{route}
-					</Text>
+					<UnstyledButton onClick={() => scrollTo({ y: 0 })}>
+						<Text fz="xl" fw={700}>
+							{route}
+						</Text>
+					</UnstyledButton>
 				</Group>
 			</Header>
 			{isAuthenticated ? (

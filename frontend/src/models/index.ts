@@ -21,6 +21,7 @@ export * from "./getPostsPostIDLikesParams";
 export * from "./getPostsPostIDRepliesParams";
 export * from "./getUsersHandleFollowersParams";
 export * from "./getUsersHandleFollowingParams";
+export * from "./getUsersHandleLikesParams";
 export * from "./getUsersHandlePostsParams";
 export * from "./handlePaginationMeta";
 export * from "./iDPaginationMeta";
