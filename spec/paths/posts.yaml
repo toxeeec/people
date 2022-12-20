@@ -22,18 +22,6 @@ posts:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
-      401:
-        description: Access Token Required
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      403:
-        description: Malformed Token
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
 
 post:
   get:
@@ -51,12 +39,6 @@ post:
           application/json:
             schema:
               $ref: '#/components/schemas/PostResponse'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
       404:
         description: Not Found
         content:
@@ -74,24 +56,6 @@ post:
     responses:
       204:
         description: No Content
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      401:
-        description: Access Token Required
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      403:
-        description: Malformed Token
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
 
 userPosts:
   get:
@@ -112,12 +76,6 @@ userPosts:
           application/json:
             schema:
               $ref: '#/components/schemas/PostsResponse'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
       404:
         description: Not Found
         content:
@@ -144,12 +102,6 @@ userLikes:
           application/json:
             schema:
               $ref: '#/components/schemas/PostsResponse'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
       404:
         description: Not Found
         content:

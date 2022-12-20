@@ -52,5 +52,8 @@ paths:
   /posts/{postID}/likes:
     $ref: './paths/likes.yaml#/likes'
 
+  /images:
+    $ref: './paths/images.yaml#/images'
+
 components: 
   $ref: './components/main.yaml#/components'

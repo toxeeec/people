@@ -18,24 +18,6 @@ feed:
           application/json:
             schema:
               $ref: '#/components/schemas/PostsResponse'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      401:
-        description: Access Token Required
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      403:
-        description: Malformed Token
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
 
 followingByHandle:
   put:
@@ -53,24 +35,6 @@ followingByHandle:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      401:
-        description: Access Token Required
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      403:
-        description: Malformed Token
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
       404:
         description: Not Found
         content:
@@ -99,24 +63,6 @@ followingByHandle:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      401:
-        description: Access Token Required
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      403:
-        description: Malformed Token
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
       404:
         description: Not Found
         content:
@@ -142,24 +88,6 @@ following:
           application/json:
             schema:
               $ref: '#/components/schemas/Users'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      401:
-        description: Access Token Required
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      403:
-        description: Malformed Token
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
       404:
         description: Not Found
         content:
@@ -185,24 +113,6 @@ followers:
           application/json:
             schema:
               $ref: '#/components/schemas/Users'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      401:
-        description: Access Token Required
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      403:
-        description: Malformed Token
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
       404:
         description: Not Found
         content:

@@ -17,12 +17,6 @@ user:
           application/json:
             schema:
               $ref: '#/components/schemas/User'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
       404:
         description: Not Found
         content:
@@ -50,12 +44,6 @@ following:
           application/json:
             schema:
               $ref: '#/components/schemas/Users'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
       404:
         description: Not Found
         content:
@@ -83,12 +71,6 @@ followers:
           application/json:
             schema:
               $ref: '#/components/schemas/Users'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
       404:
         description: Not Found
         content:

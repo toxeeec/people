@@ -3,6 +3,7 @@ package people
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -39,4 +40,12 @@ type RefreshToken struct {
 	ID     uuid.UUID `db:"token_id"`
 	Value  string    `db:"value"`
 	UserID uint      `db:"user_id"`
+}
+
+type Image struct {
+	ID        uint      `db:"image_id"`
+	Path      string    `db:"path"`
+	CreatedAt time.Time `db:"created_at"`
+	UserID    uint      `db:"user_id"`
+	InUse     bool      `db:"in_use"`
 }

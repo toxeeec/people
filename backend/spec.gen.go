@@ -10,6 +10,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"path"
@@ -22,6 +23,9 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+
+	// (POST /images)
+	PostImages(ctx echo.Context) error
 
 	// (POST /login)
 	PostLogin(ctx echo.Context) error
@@ -90,6 +94,17 @@ type ServerInterface interface {
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
 	Handler ServerInterface
+}
+
+// PostImages converts echo context to params.
+func (w *ServerInterfaceWrapper) PostImages(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BearerAuthScopes, []string{""})
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.PostImages(ctx)
+	return err
 }
 
 // PostLogin converts echo context to params.
@@ -650,6 +665,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
+	router.POST(baseURL+"/images", wrapper.PostImages)
 	router.POST(baseURL+"/login", wrapper.PostLogin)
 	router.GET(baseURL+"/me/feed", wrapper.GetMeFeed)
 	router.GET(baseURL+"/me/followers", wrapper.GetMeFollowers)
@@ -672,6 +688,32 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/users/:handle/likes", wrapper.GetUsersHandleLikes)
 	router.GET(baseURL+"/users/:handle/posts", wrapper.GetUsersHandlePosts)
 
+}
+
+type PostImagesRequestObject struct {
+	Body *multipart.Reader
+}
+
+type PostImagesResponseObject interface {
+	VisitPostImagesResponse(w http.ResponseWriter) error
+}
+
+type PostImages200JSONResponse ImageResponse
+
+func (response PostImages200JSONResponse) VisitPostImagesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostImages400JSONResponse Error
+
+func (response PostImages400JSONResponse) VisitPostImagesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
 }
 
 type PostLoginRequestObject struct {
@@ -726,33 +768,6 @@ func (response GetMeFeed200JSONResponse) VisitGetMeFeedResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetMeFeed400JSONResponse Error
-
-func (response GetMeFeed400JSONResponse) VisitGetMeFeedResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetMeFeed401JSONResponse Error
-
-func (response GetMeFeed401JSONResponse) VisitGetMeFeedResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetMeFeed403JSONResponse Error
-
-func (response GetMeFeed403JSONResponse) VisitGetMeFeedResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type GetMeFollowersRequestObject struct {
 	Params GetMeFollowersParams
 }
@@ -766,33 +781,6 @@ type GetMeFollowers200JSONResponse Users
 func (response GetMeFollowers200JSONResponse) VisitGetMeFollowersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetMeFollowers400JSONResponse Error
-
-func (response GetMeFollowers400JSONResponse) VisitGetMeFollowersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetMeFollowers401JSONResponse Error
-
-func (response GetMeFollowers401JSONResponse) VisitGetMeFollowersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetMeFollowers403JSONResponse Error
-
-func (response GetMeFollowers403JSONResponse) VisitGetMeFollowersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -823,33 +811,6 @@ func (response GetMeFollowing200JSONResponse) VisitGetMeFollowingResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetMeFollowing400JSONResponse Error
-
-func (response GetMeFollowing400JSONResponse) VisitGetMeFollowingResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetMeFollowing401JSONResponse Error
-
-func (response GetMeFollowing401JSONResponse) VisitGetMeFollowingResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetMeFollowing403JSONResponse Error
-
-func (response GetMeFollowing403JSONResponse) VisitGetMeFollowingResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type GetMeFollowing404JSONResponse Error
 
 func (response GetMeFollowing404JSONResponse) VisitGetMeFollowingResponse(w http.ResponseWriter) error {
@@ -876,33 +837,6 @@ func (response DeleteMeFollowingHandle200JSONResponse) VisitDeleteMeFollowingHan
 	return json.NewEncoder(w).Encode(response)
 }
 
-type DeleteMeFollowingHandle400JSONResponse Error
-
-func (response DeleteMeFollowingHandle400JSONResponse) VisitDeleteMeFollowingHandleResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteMeFollowingHandle401JSONResponse Error
-
-func (response DeleteMeFollowingHandle401JSONResponse) VisitDeleteMeFollowingHandleResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeleteMeFollowingHandle403JSONResponse Error
-
-func (response DeleteMeFollowingHandle403JSONResponse) VisitDeleteMeFollowingHandleResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type DeleteMeFollowingHandle404JSONResponse Error
 
 func (response DeleteMeFollowingHandle404JSONResponse) VisitDeleteMeFollowingHandleResponse(w http.ResponseWriter) error {
@@ -925,33 +859,6 @@ type PutMeFollowingHandle200JSONResponse User
 func (response PutMeFollowingHandle200JSONResponse) VisitPutMeFollowingHandleResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PutMeFollowingHandle400JSONResponse Error
-
-func (response PutMeFollowingHandle400JSONResponse) VisitPutMeFollowingHandleResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PutMeFollowingHandle401JSONResponse Error
-
-func (response PutMeFollowingHandle401JSONResponse) VisitPutMeFollowingHandleResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PutMeFollowingHandle403JSONResponse Error
-
-func (response PutMeFollowingHandle403JSONResponse) VisitPutMeFollowingHandleResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1000,24 +907,6 @@ func (response PostPosts400JSONResponse) VisitPostPostsResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostPosts401JSONResponse Error
-
-func (response PostPosts401JSONResponse) VisitPostPostsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostPosts403JSONResponse Error
-
-func (response PostPosts403JSONResponse) VisitPostPostsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type DeletePostsPostIDRequestObject struct {
 	PostID PostIDParam `json:"postID"`
 }
@@ -1034,33 +923,6 @@ func (response DeletePostsPostID204Response) VisitDeletePostsPostIDResponse(w ht
 	return nil
 }
 
-type DeletePostsPostID400JSONResponse Error
-
-func (response DeletePostsPostID400JSONResponse) VisitDeletePostsPostIDResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeletePostsPostID401JSONResponse Error
-
-func (response DeletePostsPostID401JSONResponse) VisitDeletePostsPostIDResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeletePostsPostID403JSONResponse Error
-
-func (response DeletePostsPostID403JSONResponse) VisitDeletePostsPostIDResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type GetPostsPostIDRequestObject struct {
 	PostID PostIDParam `json:"postID"`
 }
@@ -1074,15 +936,6 @@ type GetPostsPostID200JSONResponse PostResponse
 func (response GetPostsPostID200JSONResponse) VisitGetPostsPostIDResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetPostsPostID400JSONResponse Error
-
-func (response GetPostsPostID400JSONResponse) VisitGetPostsPostIDResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1109,33 +962,6 @@ type DeletePostsPostIDLikes200JSONResponse PostResponse
 func (response DeletePostsPostIDLikes200JSONResponse) VisitDeletePostsPostIDLikesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeletePostsPostIDLikes400JSONResponse Error
-
-func (response DeletePostsPostIDLikes400JSONResponse) VisitDeletePostsPostIDLikesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeletePostsPostIDLikes401JSONResponse Error
-
-func (response DeletePostsPostIDLikes401JSONResponse) VisitDeletePostsPostIDLikesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type DeletePostsPostIDLikes403JSONResponse Error
-
-func (response DeletePostsPostIDLikes403JSONResponse) VisitDeletePostsPostIDLikesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1167,15 +993,6 @@ func (response GetPostsPostIDLikes200JSONResponse) VisitGetPostsPostIDLikesRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetPostsPostIDLikes400JSONResponse Error
-
-func (response GetPostsPostIDLikes400JSONResponse) VisitGetPostsPostIDLikesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type PutPostsPostIDLikesRequestObject struct {
 	PostID PostIDParam `json:"postID"`
 }
@@ -1189,33 +1006,6 @@ type PutPostsPostIDLikes200JSONResponse PostResponse
 func (response PutPostsPostIDLikes200JSONResponse) VisitPutPostsPostIDLikesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PutPostsPostIDLikes400JSONResponse Error
-
-func (response PutPostsPostIDLikes400JSONResponse) VisitPutPostsPostIDLikesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PutPostsPostIDLikes401JSONResponse Error
-
-func (response PutPostsPostIDLikes401JSONResponse) VisitPutPostsPostIDLikesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PutPostsPostIDLikes403JSONResponse Error
-
-func (response PutPostsPostIDLikes403JSONResponse) VisitPutPostsPostIDLikesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1256,15 +1046,6 @@ func (response GetPostsPostIDReplies200JSONResponse) VisitGetPostsPostIDRepliesR
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetPostsPostIDReplies400JSONResponse Error
-
-func (response GetPostsPostIDReplies400JSONResponse) VisitGetPostsPostIDRepliesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type PostPostsPostIDRepliesRequestObject struct {
 	PostID PostIDParam `json:"postID"`
 	Body   *PostPostsPostIDRepliesJSONRequestBody
@@ -1288,24 +1069,6 @@ type PostPostsPostIDReplies400JSONResponse Error
 func (response PostPostsPostIDReplies400JSONResponse) VisitPostPostsPostIDRepliesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostPostsPostIDReplies401JSONResponse Error
-
-func (response PostPostsPostIDReplies401JSONResponse) VisitPostPostsPostIDRepliesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(401)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type PostPostsPostIDReplies403JSONResponse Error
-
-func (response PostPostsPostIDReplies403JSONResponse) VisitPostPostsPostIDRepliesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1397,15 +1160,6 @@ func (response GetUsersHandle200JSONResponse) VisitGetUsersHandleResponse(w http
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersHandle400JSONResponse Error
-
-func (response GetUsersHandle400JSONResponse) VisitGetUsersHandleResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type GetUsersHandle404JSONResponse Error
 
 func (response GetUsersHandle404JSONResponse) VisitGetUsersHandleResponse(w http.ResponseWriter) error {
@@ -1429,15 +1183,6 @@ type GetUsersHandleFollowers200JSONResponse Users
 func (response GetUsersHandleFollowers200JSONResponse) VisitGetUsersHandleFollowersResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetUsersHandleFollowers400JSONResponse Error
-
-func (response GetUsersHandleFollowers400JSONResponse) VisitGetUsersHandleFollowersResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1469,15 +1214,6 @@ func (response GetUsersHandleFollowing200JSONResponse) VisitGetUsersHandleFollow
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersHandleFollowing400JSONResponse Error
-
-func (response GetUsersHandleFollowing400JSONResponse) VisitGetUsersHandleFollowingResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type GetUsersHandleFollowing404JSONResponse Error
 
 func (response GetUsersHandleFollowing404JSONResponse) VisitGetUsersHandleFollowingResponse(w http.ResponseWriter) error {
@@ -1501,15 +1237,6 @@ type GetUsersHandleLikes200JSONResponse PostsResponse
 func (response GetUsersHandleLikes200JSONResponse) VisitGetUsersHandleLikesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type GetUsersHandleLikes400JSONResponse Error
-
-func (response GetUsersHandleLikes400JSONResponse) VisitGetUsersHandleLikesResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1541,15 +1268,6 @@ func (response GetUsersHandlePosts200JSONResponse) VisitGetUsersHandlePostsRespo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUsersHandlePosts400JSONResponse Error
-
-func (response GetUsersHandlePosts400JSONResponse) VisitGetUsersHandlePostsResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type GetUsersHandlePosts404JSONResponse Error
 
 func (response GetUsersHandlePosts404JSONResponse) VisitGetUsersHandlePostsResponse(w http.ResponseWriter) error {
@@ -1561,6 +1279,9 @@ func (response GetUsersHandlePosts404JSONResponse) VisitGetUsersHandlePostsRespo
 
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
+
+	// (POST /images)
+	PostImages(ctx context.Context, request PostImagesRequestObject) (PostImagesResponseObject, error)
 
 	// (POST /login)
 	PostLogin(ctx context.Context, request PostLoginRequestObject) (PostLoginResponseObject, error)
@@ -1637,6 +1358,35 @@ func NewStrictHandler(ssi StrictServerInterface, middlewares []StrictMiddlewareF
 type strictHandler struct {
 	ssi         StrictServerInterface
 	middlewares []StrictMiddlewareFunc
+}
+
+// PostImages operation middleware
+func (sh *strictHandler) PostImages(ctx echo.Context) error {
+	var request PostImagesRequestObject
+
+	if reader, err := ctx.Request().MultipartReader(); err != nil {
+		return err
+	} else {
+		request.Body = reader
+	}
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.PostImages(ctx.Request().Context(), request.(PostImagesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostImages")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(PostImagesResponseObject); ok {
+		return validResponse.VisitPostImagesResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("Unexpected response type: %T", response)
+	}
+	return nil
 }
 
 // PostLogin operation middleware
@@ -2195,36 +1945,37 @@ func (sh *strictHandler) GetUsersHandlePosts(ctx echo.Context, handle HandlePara
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"A6IW11QCUQNRD/yeOcv+DwAA///XwDKJFEsAAA==",
+	"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",
+	"+TeApjhxT9N/AgAA//8ffDsZWD0AAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -20,12 +20,6 @@ likes:
           application/json:
             schema:
               $ref: '#/components/schemas/Users'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
   put:
     tags:
       - likes
@@ -40,24 +34,6 @@ likes:
           application/json:
             schema:
               $ref: '#/components/schemas/PostResponse'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      401:
-        description: Access Token Required
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      403:
-        description: Malformed Token
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
       409:
         description: Post is already liked
         content:
@@ -85,24 +61,6 @@ likes:
           application/json:
             schema:
               $ref: '#/components/schemas/PostResponse'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      401:
-        description: Access Token Required
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      403:
-        description: Malformed Token
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
       404:
         description: Not Found
         content:

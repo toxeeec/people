@@ -219,6 +219,27 @@ components:
       required:
         - data
 
+    NewImage:
+      type: object
+      properties:
+        image:
+          type: string
+          format: binary
+      required:
+        - image
+          
+    ImageResponse:
+      properties:
+        id:
+          type: integer
+          x-go-type: uint
+          x-go-name: ID
+          x-oapi-codegen-extra-tags:
+            db: image_id
+            fake: skip
+      required:
+        - id
+
     Error:
       properties:
         message:

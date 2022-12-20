@@ -5,6 +5,8 @@ package people
 
 import (
 	"time"
+
+	openapi_types "github.com/deepmap/oapi-codegen/pkg/types"
 )
 
 const (
@@ -41,9 +43,19 @@ type HandlePaginationMeta = PaginationMeta[string]
 // IDPaginationMeta defines model for IDPaginationMeta.
 type IDPaginationMeta = PaginationMeta[uint]
 
+// ImageResponse defines model for ImageResponse.
+type ImageResponse struct {
+	ID uint `db:"image_id" fake:"skip" json:"id"`
+}
+
 // LikeStatus defines model for LikeStatus.
 type LikeStatus struct {
 	IsLiked bool `db:"is_liked" json:"isLiked"`
+}
+
+// NewImage defines model for NewImage.
+type NewImage struct {
+	Image openapi_types.File `json:"image"`
 }
 
 // NewPost defines model for NewPost.
@@ -189,6 +201,9 @@ type GetUsersHandlePostsParams struct {
 	Before *BeforeParam `form:"before,omitempty" json:"before,omitempty"`
 	After  *AfterParam  `form:"after,omitempty" json:"after,omitempty"`
 }
+
+// PostImagesMultipartRequestBody defines body for PostImages for multipart/form-data ContentType.
+type PostImagesMultipartRequestBody = NewImage
 
 // PostLoginJSONRequestBody defines body for PostLogin for application/json ContentType.
 type PostLoginJSONRequestBody = AuthUser

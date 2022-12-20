@@ -35,3 +35,11 @@ CREATE TABLE post_like (
 	liked_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (user_id, post_id)
 );
+
+CREATE TABLE image (
+	image_id SERIAL PRIMARY KEY,
+	path VARCHAR(40) NOT NULL, -- 36 characters for UUID + 4 for file extension
+	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	user_id integer REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
+	in_use boolean NOT NULL DEFAULT false
+);
