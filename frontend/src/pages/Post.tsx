@@ -11,7 +11,7 @@ import {
 import { QueryKey } from "../query-key";
 import { PostsContext } from "../context/PostsContext";
 import { CenterLoader } from "../components/CenterLoader";
-import { MutationFn, PostCreate } from "../components/post/PostCreate";
+import { MutationFn, CreatePost } from "../components/post/CreatePost";
 
 const Post = () => {
 	const params = useParams();
@@ -41,7 +41,7 @@ const Post = () => {
 	) : (
 		<>
 			<MainPost id={postID} handle={data.user.handle} />
-			<PostCreate
+			<CreatePost
 				mutationFn={mutationFn}
 				queryKey={[QueryKey.REPLIES, postID]}
 			/>

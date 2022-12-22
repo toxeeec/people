@@ -33,6 +33,8 @@ import type {
 	NewPostBodyBody,
 	GetPostsPostIDRepliesParams,
 	GetPostsPostIDLikesParams,
+	ImageResponse,
+	ImageBodyBody,
 } from "./models";
 import { customInstance } from "./custom-instance";
 import type { ErrorType } from "./custom-instance";
@@ -220,11 +222,11 @@ export const getGetMeFeedQueryKey = (params?: GetMeFeedParams) => [
 export type GetMeFeedQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getMeFeed>>
 >;
-export type GetMeFeedQueryError = ErrorType<Error>;
+export type GetMeFeedQueryError = ErrorType<unknown>;
 
 export const useGetMeFeed = <
 	TData = Awaited<ReturnType<typeof getMeFeed>>,
-	TError = ErrorType<Error>
+	TError = ErrorType<unknown>
 >(
 	params?: GetMeFeedParams,
 	options?: {
@@ -923,10 +925,10 @@ export type DeletePostsPostIDMutationResult = NonNullable<
 	Awaited<ReturnType<typeof deletePostsPostID>>
 >;
 
-export type DeletePostsPostIDMutationError = ErrorType<Error>;
+export type DeletePostsPostIDMutationError = ErrorType<unknown>;
 
 export const useDeletePostsPostID = <
-	TError = ErrorType<Error>,
+	TError = ErrorType<unknown>,
 	TContext = unknown
 >(options?: {
 	mutation?: UseMutationOptions<
@@ -976,11 +978,11 @@ export const getGetPostsPostIDRepliesQueryKey = (
 export type GetPostsPostIDRepliesQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getPostsPostIDReplies>>
 >;
-export type GetPostsPostIDRepliesQueryError = ErrorType<Error>;
+export type GetPostsPostIDRepliesQueryError = ErrorType<unknown>;
 
 export const useGetPostsPostIDReplies = <
 	TData = Awaited<ReturnType<typeof getPostsPostIDReplies>>,
-	TError = ErrorType<Error>
+	TError = ErrorType<unknown>
 >(
 	postID: number,
 	params?: GetPostsPostIDRepliesParams,
@@ -1094,11 +1096,11 @@ export const getGetPostsPostIDLikesQueryKey = (
 export type GetPostsPostIDLikesQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getPostsPostIDLikes>>
 >;
-export type GetPostsPostIDLikesQueryError = ErrorType<Error>;
+export type GetPostsPostIDLikesQueryError = ErrorType<unknown>;
 
 export const useGetPostsPostIDLikes = <
 	TData = Awaited<ReturnType<typeof getPostsPostIDLikes>>,
-	TError = ErrorType<Error>
+	TError = ErrorType<unknown>
 >(
 	postID: number,
 	params?: GetPostsPostIDLikesParams,
@@ -1229,6 +1231,61 @@ export const useDeletePostsPostIDLikes = <
 		Awaited<ReturnType<typeof deletePostsPostIDLikes>>,
 		TError,
 		{ postID: number },
+		TContext
+	>(mutationFn, mutationOptions);
+};
+
+export const postImages = (
+	imageBodyBody: ImageBodyBody,
+	options?: SecondParameter<typeof customInstance>
+) => {
+	const formData = new FormData();
+	formData.append("image", imageBodyBody.image);
+
+	return customInstance<ImageResponse>(
+		{
+			url: `/images`,
+			method: "post",
+			headers: { "Content-Type": "multipart/form-data" },
+			data: formData,
+		},
+		options
+	);
+};
+
+export type PostImagesMutationResult = NonNullable<
+	Awaited<ReturnType<typeof postImages>>
+>;
+export type PostImagesMutationBody = ImageBodyBody;
+export type PostImagesMutationError = ErrorType<Error>;
+
+export const usePostImages = <
+	TError = ErrorType<Error>,
+	TContext = unknown
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof postImages>>,
+		TError,
+		{ data: ImageBodyBody },
+		TContext
+	>;
+	request?: SecondParameter<typeof customInstance>;
+}) => {
+	const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof postImages>>,
+		{ data: ImageBodyBody }
+	> = (props) => {
+		const { data } = props ?? {};
+
+		return postImages(data, requestOptions);
+	};
+
+	return useMutation<
+		Awaited<ReturnType<typeof postImages>>,
+		TError,
+		{ data: ImageBodyBody },
 		TContext
 	>(mutationFn, mutationOptions);
 };

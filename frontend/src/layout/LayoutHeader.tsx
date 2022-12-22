@@ -21,7 +21,7 @@ export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 	const params = useParams();
 	const location = useLocation();
 	const [route, setRoute] = useState("");
-	const [_, scrollTo] = useWindowScroll();
+	const [, scrollTo] = useWindowScroll();
 
 	useEffect(() => {
 		if (location.pathname === "/home") {

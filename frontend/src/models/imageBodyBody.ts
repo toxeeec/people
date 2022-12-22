@@ -4,8 +4,6 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
+import type { NewImage } from "./newImage";
 
-export interface NewPost {
-	content: string;
-	images?: number[];
-}
+export type ImageBodyBody = NewImage;

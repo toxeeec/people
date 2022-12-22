@@ -83,6 +83,7 @@ export const Posts = ({ query, queryKey }: PostsProps) => {
 									ref={ref}
 									id={postResponse.data.id}
 									handle={postResponse.user.handle}
+									queryKey={queryKey}
 								/>
 							))}
 						</Fragment>

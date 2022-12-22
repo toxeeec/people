@@ -1,13 +1,16 @@
 import { Avatar, Group, Modal, Text } from "@mantine/core";
-import { Dispatch, MouseEvent, SetStateAction } from "react";
-import { PostReply } from "./PostReply";
+import { Dispatch, SetStateAction, useContext } from "react";
+import { PostsContext } from "../../context/PostsContext";
+import { postPostsPostIDReplies } from "../../spec.gen";
+import { stopPropagation } from "../../utils";
+import { MutationFn, CreatePost } from "./CreatePost";
 
-interface PostReplyProps {
-	isReply: boolean;
+interface PostReplyModalProps {
 	opened: boolean;
 	setOpened: Dispatch<SetStateAction<boolean>>;
 	id: number;
 	handle: string;
+	queryKey: readonly unknown[];
 }
 
 export const PostReplyModal = ({
@@ -15,14 +18,20 @@ export const PostReplyModal = ({
 	setOpened,
 	id,
 	handle,
-}: PostReplyProps) => {
+	queryKey,
+}: PostReplyModalProps) => {
+	const { posts } = useContext(PostsContext);
+	const post = posts[id];
+	const mutationFn: MutationFn = (newPost) => {
+		return postPostsPostIDReplies(id, newPost);
+	};
 	return (
 		<Modal
 			opened={opened}
 			onClose={() => {
 				setOpened(false);
 			}}
-			onClick={(e: MouseEvent) => e.stopPropagation()}
+			onClick={stopPropagation}
 			centered
 			title={
 				<Group align="center">
@@ -31,7 +40,8 @@ export const PostReplyModal = ({
 				</Group>
 			}
 		>
-			<PostReply id={id} setOpened={setOpened} />
+			<Text my="xs">{post?.content}</Text>
+			<CreatePost mutationFn={mutationFn} queryKey={queryKey} />
 		</Modal>
 	);
 };

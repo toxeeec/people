@@ -85,9 +85,9 @@ export const MainPostActions = ({ id, handle }: MainPostActionsProps) => {
 			<PostReplyModal
 				opened={replyOpened}
 				setOpened={setReplyOpened}
-				isReply={true}
 				id={id}
 				handle={handle}
+				queryKey={[QueryKey.REPLIES, id]}
 			/>
 		</>
 	);

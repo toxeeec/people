@@ -14,5 +14,6 @@ export interface Post {
 	replies: number;
 	createdAt: string;
 	repliesTo?: number;
+	images?: string[];
 	status?: LikeStatus;
 }

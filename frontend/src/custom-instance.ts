@@ -2,8 +2,10 @@ import Axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { AuthValues, SetAuthProps } from "./context/AuthContext";
 import { postRefresh } from "./spec.gen";
 
+export const baseURL = "http://localhost:8000";
+
 export const AXIOS_INSTANCE = Axios.create({
-	baseURL: "http://localhost:8000",
+	baseURL,
 });
 
 export const customInstance = <T>(

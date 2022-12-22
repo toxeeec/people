@@ -1,6 +1,9 @@
 import { ActionIcon, Group, Text } from "@mantine/core";
 import { IconHeart, IconMessageCircle2 } from "@tabler/icons";
-import { useQueryClient } from "@tanstack/react-query";
+import {
+	QueryKey as QueryKeyType,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { MouseEvent, useCallback, useContext, useState } from "react";
 import { PostsContext } from "../../context/PostsContext";
 import { UsersContext } from "../../context/UsersContext";
@@ -14,9 +17,10 @@ import { PostReplyModal } from "./PostReplyModal";
 interface PostActionsProps {
 	id: number;
 	handle: string;
+	queryKey: QueryKeyType;
 }
 
-export const PostActions = ({ id, handle }: PostActionsProps) => {
+export const PostActions = ({ id, handle, queryKey }: PostActionsProps) => {
 	const queryClient = useQueryClient();
 	const { setUser } = useContext(UsersContext);
 	const { posts, setPost } = useContext(PostsContext);
@@ -76,9 +80,9 @@ export const PostActions = ({ id, handle }: PostActionsProps) => {
 			<PostReplyModal
 				opened={opened}
 				setOpened={setOpened}
-				isReply={true}
 				id={post.id}
 				handle={handle}
+				queryKey={queryKey}
 			/>
 		</Group>
 	);

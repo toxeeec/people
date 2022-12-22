@@ -3,6 +3,7 @@ import { useContext } from "react";
 import { PostAuthor } from "./post/PostAuthor";
 import { PostsContext } from "../context/PostsContext";
 import { MainPostActions } from "./post/MainPostActions";
+import { Images } from "./images/Images";
 
 interface MainPostProps {
 	id: number;
@@ -18,6 +19,7 @@ export const MainPost = ({ id, handle }: MainPostProps) => {
 			<Paper p="xs" radius="xs" withBorder>
 				<PostAuthor handle={handle} />
 				<Text my="xs">{post.content}</Text>
+				<Images images={post.images} />
 				<MainPostActions id={id} handle={handle} />
 			</Paper>
 		)

@@ -42,11 +42,7 @@ const Profile = ({ value }: ProfileProps) => {
 		return getUsersHandleLikes(user!.handle, params);
 	};
 	const { isLoading } = useGetUsersHandle(params.handle!, {
-		query: {
-			onSuccess: (u) => {
-				setUser(u);
-			},
-		},
+		query: { onSuccess: (u) => setUser(u) },
 	});
 	const user = users[params.handle!];
 

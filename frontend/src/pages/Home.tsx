@@ -1,4 +1,4 @@
-import { PostCreate } from "../components/post/PostCreate";
+import { CreatePost } from "../components/post/CreatePost";
 import { Posts } from "../components/Posts";
 import { QueryKey } from "../query-key";
 import { getMeFeed, postPosts } from "../spec.gen";
@@ -6,7 +6,7 @@ import { getMeFeed, postPosts } from "../spec.gen";
 const Home = () => {
 	return (
 		<>
-			<PostCreate mutationFn={postPosts} queryKey={[QueryKey.FEED]} />
+			<CreatePost mutationFn={postPosts} queryKey={[QueryKey.FEED]} />
 			<Posts query={getMeFeed} queryKey={[QueryKey.FEED]} />
 		</>
 	);
