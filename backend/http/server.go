@@ -37,8 +37,8 @@ func NewServer(db *sqlx.DB, v *validator.Validate) *echo.Echo {
 	var h handler
 	h.as = auth.NewService(v, ur, tr)
 	h.us = user.NewService(ur, fr, lr)
-	h.ps = post.NewService(v, pr, ur, fr, lr, h.us)
 	h.is = image.NewService(ir)
+	h.ps = post.NewService(v, pr, ur, fr, lr, h.us, h.is)
 
 	e := echo.New()
 	e.Use(echomiddleware.CORSWithConfig(echomiddleware.CORSConfig{

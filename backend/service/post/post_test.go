@@ -12,6 +12,7 @@ import (
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/repository"
 	"github.com/toxeeec/people/backend/repository/inmem"
+	"github.com/toxeeec/people/backend/service/image"
 	"github.com/toxeeec/people/backend/service/post"
 	"github.com/toxeeec/people/backend/service/user"
 )
@@ -171,13 +172,16 @@ func (s *PostSuite) SetupTest() {
 	fm := map[inmem.FollowKey]time.Time{}
 	pm := map[uint]people.Post{}
 	lm := map[inmem.LikeKey]struct{}{}
+	im := map[uint]people.Image{}
 	v := validator.New()
 	s.pr = inmem.NewPostRepository(pm)
 	s.ur = inmem.NewUserRepository(um)
 	fr := inmem.NewFollowRepository(fm, um)
 	lr := inmem.NewLikeRepository(lm, pm, um)
+	ir := inmem.NewImageRepository(im)
 	us := user.NewService(s.ur, fr, lr)
-	s.ps = post.NewService(v, s.pr, s.ur, fr, lr, us)
+	is := image.NewService(ir)
+	s.ps = post.NewService(v, s.pr, s.ur, fr, lr, us, is)
 }
 
 func TestPostSuite(t *testing.T) {

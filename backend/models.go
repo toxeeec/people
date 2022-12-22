@@ -26,6 +26,7 @@ const (
 	AuthError
 	NotFoundError
 	ConflictError
+	ResourceError
 )
 
 func (e *Error) Error() string {
@@ -44,7 +45,7 @@ type RefreshToken struct {
 
 type Image struct {
 	ID        uint      `db:"image_id"`
-	Path      string    `db:"path"`
+	Name      string    `db:"name"`
 	CreatedAt time.Time `db:"created_at"`
 	UserID    uint      `db:"user_id"`
 	InUse     bool      `db:"in_use"`

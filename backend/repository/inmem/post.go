@@ -28,7 +28,7 @@ func (r *postRepo) Create(np people.NewPost, userID uint, repliesTo *uint) (peop
 	if repliesTo != nil {
 		p, ok := r.m[*repliesTo]
 		if !ok {
-			return people.Post{}, fmt.Errorf("Post.Get: %w", errors.New("Post not found"))
+			return people.Post{}, fmt.Errorf("Post.Create: %w", errors.New("Post not found"))
 		}
 		p.Replies++
 		r.m[*repliesTo] = p

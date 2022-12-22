@@ -152,6 +152,12 @@ components:
           x-oapi-codegen-extra-tags:
             db: replies_to
             fake: skip
+        images:
+          type: array
+          items: 
+            type: string
+          x-oapi-codegen-extra-tags:
+            fake: skip
         status:
           $ref: '#/components/schemas/LikeStatus'
       required:
@@ -176,10 +182,17 @@ components:
       properties:
         content:
           type: string
-          minLength: 1
           maxLength: 280
           x-oapi-codegen-extra-tags:
             fake: '{sentence}'
+        images:
+          type: array
+          items:
+            type: integer
+            x-go-type: uint
+          maxItems: 4
+          x-oapi-codegen-extra-tags:
+            fake: skip
       required:
         - content
 

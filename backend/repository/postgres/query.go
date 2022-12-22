@@ -11,8 +11,9 @@ import (
 type QueryBuilder struct {
 	base  string
 	join  string
-	conds []string
 	args  []any
+	conds []string
+	vals  []string
 	end   string
 	err   error
 }
@@ -24,6 +25,7 @@ func NewQuery(base string) *QueryBuilder {
 	q.args = make([]any, 0, 5)
 	// required if no conditions
 	q.conds[0] = "1 = 1"
+	q.vals = make([]string, 0, 5)
 	return &q
 }
 
@@ -77,9 +79,18 @@ func (q *QueryBuilder) Paginate(p pagination.ID, field string, val string, args 
 	return q
 }
 
+func (q *QueryBuilder) Values(vals ...string) *QueryBuilder {
+	q.vals = append(q.vals, vals...)
+	return q
+}
+
 func (q *QueryBuilder) Build() (string, []any, error) {
 	if q.err != nil {
 		return "", nil, fmt.Errorf("Query.Build %w", q.err)
+	}
+	if len(q.vals) > 0 {
+		q.base += " VALUES " + strings.Join(q.vals, ", ")
+		return sqlx.Rebind(bindType, q.base), q.args, nil
 	}
 	q.base += q.join
 	q.base += " WHERE " + strings.Join(q.conds, " AND ") + q.end

@@ -32,7 +32,7 @@ func (r *likeRepo) Create(postID, userID uint) error {
 		return fmt.Errorf("Like.Create: %w", err)
 	}
 	defer tx.Rollback()
-	const query = "INSERT INTO post_like(post_id, user_id) VALUES($1, $2) RETURNING post_id"
+	const query = "INSERT INTO post_like(post_id, user_id) VALUES ($1, $2) RETURNING post_id"
 	err = tx.Get(new(uint), query, postID, userID)
 	if err != nil {
 		var e *pq.Error

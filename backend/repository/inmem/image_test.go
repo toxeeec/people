@@ -12,8 +12,10 @@ import (
 func TestInmemImageSuite(t *testing.T) {
 	im := map[uint]people.Image{}
 	um := map[uint]people.User{}
+	pm := map[uint]people.Post{}
 	ir := inmem.NewImageRepository(im)
 	ur := inmem.NewUserRepository(um)
+	pr := inmem.NewPostRepository(pm)
 	fns := repotest.TestFns{SetupTest: func() {
 		for k := range im {
 			delete(im, k)
@@ -22,5 +24,5 @@ func TestInmemImageSuite(t *testing.T) {
 			delete(um, k)
 		}
 	}}
-	suite.Run(t, repotest.NewImageSuite(ir, ur, fns))
+	suite.Run(t, repotest.NewImageSuite(ir, ur, pr, fns))
 }

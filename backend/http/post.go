@@ -17,6 +17,12 @@ func (h *handler) PostPosts(ctx context.Context, r people.PostPostsRequestObject
 			switch *e.Kind {
 			case people.ValidationError:
 				return people.PostPosts400JSONResponse(*e), nil
+			case people.ResourceError:
+				return people.PostPosts400JSONResponse(*e), nil
+			case people.AuthError:
+				return people.PostPosts403JSONResponse(*e), nil
+			case people.NotFoundError:
+				return people.PostPosts404JSONResponse(*e), nil
 			}
 		}
 		return nil, err

@@ -14,8 +14,9 @@ func TestPostgresImageSuite(t *testing.T) {
 	defer db.Close()
 	ir := postgres.NewImageRepository(db)
 	ur := postgres.NewUserRepository(db)
+	pr := postgres.NewPostRepository(db)
 	fns := repotest.TestFns{SetupTest: func() {
 		db.MustExec("TRUNCATE image CASCADE")
 	}}
-	suite.Run(t, repotest.NewImageSuite(ir, ur, fns))
+	suite.Run(t, repotest.NewImageSuite(ir, ur, pr, fns))
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
 	"github.com/toxeeec/people/backend/service"
+	"github.com/toxeeec/people/backend/service/image"
 	"github.com/toxeeec/people/backend/service/user"
 	"golang.org/x/sync/errgroup"
 )
@@ -38,15 +39,16 @@ type Service interface {
 }
 
 type postService struct {
+	v  *validator.Validate
 	pr repository.Post
 	ur repository.User
 	fr repository.Follow
 	lr repository.Like
 	us user.Service
-	v  *validator.Validate
+	is image.Service
 }
 
-func NewService(v *validator.Validate, pr repository.Post, ur repository.User, fr repository.Follow, lr repository.Like, us user.Service) Service {
+func NewService(v *validator.Validate, pr repository.Post, ur repository.User, fr repository.Follow, lr repository.Like, us user.Service, is image.Service) Service {
 	s := postService{}
 	s.v = v
 	s.pr = pr
@@ -54,15 +56,21 @@ func NewService(v *validator.Validate, pr repository.Post, ur repository.User, f
 	s.fr = fr
 	s.lr = lr
 	s.us = us
+	s.is = is
 	return &s
 }
 
-func (s *postService) validate(p people.NewPost) error {
-	if err := s.v.Var(p.Content, "min=1"); err != nil {
+func (s *postService) validate(np people.NewPost) error {
+	if err := s.v.Var(np.Content, "min=1"); err != nil {
 		err := err.(validator.ValidationErrors)
 		switch err[0].Tag() {
 		case "min":
-			return service.NewError(people.ValidationError, "Content cannot be empty")
+			{
+				if np.Images != nil && len(*np.Images) > 0 {
+					return nil
+				}
+				return service.NewError(people.ValidationError, "Content cannot be empty")
+			}
 		default:
 			return errors.New("Unknown")
 		}
@@ -75,30 +83,36 @@ func (s *postService) Create(ctx context.Context, np people.NewPost, userID uint
 	if err := s.validate(np); err != nil {
 		return people.PostResponse{}, err
 	}
-	var p people.Post
+	p, err := s.pr.Create(np, userID, repliesTo)
+	if err != nil {
+		return people.PostResponse{}, service.NewError(people.NotFoundError, "Post not found")
+	}
 	var u people.User
 	g, ctx := errgroup.WithContext(ctx)
-	g.Go(func() error {
-		var err error
-		p, err = s.pr.Create(np, userID, repliesTo)
-		if err != nil {
-			return service.NewError(people.NotFoundError, "Post not found")
-		}
-		return nil
-	})
 	g.Go(func() error {
 		var err error
 		u, err = s.us.GetUserWithStatus(context.Background(), userID, userID, true)
 		return err
 	})
+	if np.Images != nil && len(*np.Images) > 0 {
+		g.Go(func() error {
+			imgs, err := s.is.AddToPost(*np.Images, p.ID, userID)
+			if err != nil {
+				return err
+			}
+			p.Images = &imgs
+			return nil
+		})
+	}
 	if err := g.Wait(); err != nil {
+		println(err.Error())
 		return people.PostResponse{}, err
 	}
 	return people.PostResponse{Data: p, User: u}, nil
 }
 
 func (s *postService) Get(ctx context.Context, postID uint, userID uint, auth bool) (people.PostResponse, error) {
-	return s.getPostResponseWithStatuses(ctx, postID, userID, auth)
+	return s.getPostResponse(ctx, postID, userID, auth)
 }
 
 func (s *postService) Delete(postID, userID uint) error {
@@ -121,7 +135,10 @@ func (s *postService) ListUserPosts(ctx context.Context, handle string, userID u
 	g.Go(func() error {
 		var err error
 		ps, err = s.pr.ListUserPosts(id, p)
-		return err
+		if err != nil {
+			return err
+		}
+		return s.addData(context.Background(), ps, userID, true)
 	})
 	g.Go(func() error {
 		var err error
@@ -130,14 +147,6 @@ func (s *postService) ListUserPosts(ctx context.Context, handle string, userID u
 	})
 	if err := g.Wait(); err != nil {
 		return people.PostsResponse{}, err
-	}
-
-	if auth {
-		lss, err := s.listStatus(Slice(ps).IDs(), userID)
-		if err != nil {
-			return people.PostsResponse{}, nil
-		}
-		Slice(ps).AddStatus(lss)
 	}
 	prs := make([]people.PostResponse, len(ps))
 	for i, p := range ps {
@@ -152,43 +161,37 @@ func (s *postService) ListFeed(ctx context.Context, userID uint, params IDPagina
 	if err != nil {
 		return people.PostsResponse{}, err
 	}
-	ids := user.Slice(us).IDs()
-	ids = append(ids, userID)
+	ids := append(user.Slice(us).IDs(), userID)
 	var ps []people.Post
-	var fss map[uint]people.FollowStatus
-	var u people.User
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		var err error
 		ps, err = s.pr.ListFeed(ids, userID, p)
-		return err
+		if err != nil {
+			return err
+		}
+		return s.addData(context.Background(), ps, userID, true)
 	})
 	g.Go(func() error {
-		var err error
-		fss, err = s.us.ListStatus(context.Background(), ids, userID)
-		return err
+		fss, err := s.us.ListStatus(context.Background(), ids, userID)
+		if err != nil {
+			return err
+		}
+		user.Slice(us).AddStatus(fss)
+		return nil
 	})
 	g.Go(func() error {
-		var err error
-		u, err = s.us.GetUserWithStatus(context.Background(), userID, 0, false)
-		return err
+		u, err := s.us.GetUserWithStatus(context.Background(), userID, 0, false)
+		if err != nil {
+			return err
+		}
+		us = append(us, u)
+		return nil
 	})
 	if err := g.Wait(); err != nil {
 		return people.PostsResponse{}, err
 	}
-
-	lss, err := s.listStatus(Slice(ps).IDs(), userID)
-	if err != nil {
-		return people.PostsResponse{}, nil
-	}
-	Slice(ps).AddStatus(lss)
-	user.Slice(us).AddStatus(fss)
-	um := user.Slice(append(us, u)).ToMap()
-	prs := make([]people.PostResponse, len(ps))
-	for i, p := range ps {
-		prs[i] = people.PostResponse{Data: p, User: um[p.UserID]}
-	}
-	return pagination.NewResults[people.PostResponse, uint](prs), nil
+	return s.postResponseResults(ps, us), nil
 }
 
 func (s *postService) ListReplies(ctx context.Context, postID uint, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error) {
@@ -197,24 +200,22 @@ func (s *postService) ListReplies(ctx context.Context, postID uint, userID uint,
 	if err != nil {
 		return people.PostsResponse{}, service.NewError(people.NotFoundError, "Post not found")
 	}
-	ids := Slice(ps).UserIDs()
-	us, err := s.us.ListUsersWithStatus(context.Background(), ids, userID, auth)
-	if err != nil {
+	var us []people.User
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		ids := Slice(ps).UserIDs()
+		var err error
+		us, err = s.us.ListUsersWithStatus(context.Background(), ids, userID, auth)
+		return err
+	})
+	g.Go(func() error {
+		return s.addData(context.Background(), ps, userID, true)
+	})
+	if err := g.Wait(); err != nil {
+		println(err.Error())
 		return people.PostsResponse{}, err
 	}
-	if auth {
-		lss, err := s.listStatus(Slice(ps).IDs(), userID)
-		if err != nil {
-			return people.PostsResponse{}, nil
-		}
-		Slice(ps).AddStatus(lss)
-	}
-	um := user.Slice(us).ToMap()
-	prs := make([]people.PostResponse, len(ps))
-	for i, p := range ps {
-		prs[i] = people.PostResponse{Data: p, User: um[p.UserID]}
-	}
-	return pagination.NewResults[people.PostResponse, uint](prs), nil
+	return s.postResponseResults(ps, us), nil
 }
 
 func (s *postService) Like(postID uint, userID uint) (people.PostResponse, error) {
@@ -228,11 +229,10 @@ func (s *postService) Like(postID uint, userID uint) (people.PostResponse, error
 		}
 		return people.PostResponse{}, err
 	}
-	pr, err := s.getPostResponseWithStatuses(context.Background(), postID, userID, true)
+	pr, err := s.getPostResponse(context.Background(), postID, userID, true)
 	if err != nil {
 		return people.PostResponse{}, err
 	}
-
 	return pr, nil
 }
 
@@ -241,11 +241,40 @@ func (s *postService) Unlike(postID uint, userID uint) (people.PostResponse, err
 	if err != nil {
 		return people.PostResponse{}, service.NewError(people.NotFoundError, "Post not found")
 	}
-	pr, err := s.getPostResponseWithStatuses(context.Background(), postID, userID, true)
+	pr, err := s.getPostResponse(context.Background(), postID, userID, true)
 	if err != nil {
 		return people.PostResponse{}, err
 	}
 	return pr, nil
+}
+
+func (s *postService) ListUserLikes(ctx context.Context, handle string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error) {
+	p := pagination.New(params.Before, params.After, params.Limit)
+	id, err := s.ur.GetID(handle)
+	if err != nil {
+		return people.PostsResponse{}, service.NewError(people.NotFoundError, "User not found")
+	}
+	ps, err := s.lr.ListUserLikes(id, p)
+	if err != nil {
+		return people.PostsResponse{}, err
+	}
+	var us []people.User
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		var err error
+		us, err = s.us.ListUsersWithStatus(ctx, Slice(ps).UserIDs(), userID, auth)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return s.addData(ctx, ps, userID, auth)
+	})
+	if err := g.Wait(); err != nil {
+		return people.PostsResponse{}, err
+	}
+	return s.postResponseResults(ps, us), nil
 }
 
 func (s *postService) listStatus(ids []uint, userID uint) (map[uint]people.LikeStatus, error) {
@@ -261,51 +290,8 @@ func (s *postService) listStatus(ids []uint, userID uint) (map[uint]people.LikeS
 	return lss, nil
 }
 
-func (s *postService) ListUserLikes(ctx context.Context, handle string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error) {
-	p := pagination.New(params.Before, params.After, params.Limit)
-	id, err := s.ur.GetID(handle)
-	if err != nil {
-		return people.PostsResponse{}, service.NewError(people.NotFoundError, "User not found")
-	}
-	ps, err := s.lr.ListUserLikes(id, p)
-	if err != nil {
-		return people.PostsResponse{}, err
-	}
-
-	var us []people.User
-	g, ctx := errgroup.WithContext(ctx)
-	g.Go(func() error {
-		var err error
-		us, err = s.us.ListUsersWithStatus(context.Background(), Slice(ps).UserIDs(), userID, auth)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	if auth {
-		g.Go(func() error {
-			lss, err := s.listStatus(Slice(ps).IDs(), userID)
-			if err != nil {
-				return err
-			}
-			Slice(ps).AddStatus(lss)
-			return nil
-		})
-	}
-	if err := g.Wait(); err != nil {
-		return people.PostsResponse{}, nil
-	}
-	um := user.Slice(us).ToMap()
-	prs := make([]people.PostResponse, len(ps))
-	for i, p := range ps {
-		prs[i] = people.PostResponse{Data: p, User: um[p.UserID]}
-	}
-	return pagination.NewResults[people.PostResponse, uint](prs), nil
-}
-
-func (s *postService) getPostResponseWithStatuses(ctx context.Context, postID uint, userID uint, auth bool) (people.PostResponse, error) {
+func (s *postService) getPostResponse(ctx context.Context, postID uint, userID uint, auth bool) (people.PostResponse, error) {
 	pc := make(chan people.Post, 1)
-	var u people.User
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		p, err := s.pr.Get(postID)
@@ -314,6 +300,23 @@ func (s *postService) getPostResponseWithStatuses(ctx context.Context, postID ui
 		}
 		select {
 		case pc <- p:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+		return nil
+	})
+	g.Go(func() error {
+		imgs, err := s.is.ListPostImages(postID)
+		if err != nil {
+			return err
+		}
+		if imgs == nil {
+			return nil
+		}
+		select {
+		case p := <-pc:
+			p.Images = &imgs
+			pc <- p
 		case <-ctx.Done():
 			return ctx.Err()
 		}
@@ -342,4 +345,44 @@ func (s *postService) getPostResponseWithStatuses(ctx context.Context, postID ui
 		return people.PostResponse{}, err
 	}
 	return people.PostResponse{Data: p, User: u}, nil
+}
+
+func (s *postService) postResponseResults(ps []people.Post, us []people.User) people.PaginatedResults[people.PostResponse, uint] {
+	um := user.Slice(us).ToMap()
+	prs := make([]people.PostResponse, len(ps))
+	for i, p := range ps {
+		prs[i] = people.PostResponse{Data: p, User: um[p.UserID]}
+	}
+	return pagination.NewResults[people.PostResponse, uint](prs)
+}
+
+func (s *postService) addData(ctx context.Context, ps []people.Post, userID uint, auth bool) error {
+	g, ctx := errgroup.WithContext(ctx)
+	var imgs map[uint][]string
+	var lss map[uint]people.LikeStatus
+	g.Go(func() error {
+		var err error
+		imgs, err = s.is.ListPostsImages(Slice(ps).IDs())
+		return err
+	})
+	if auth {
+		g.Go(func() error {
+			var err error
+			lss, err = s.listStatus(Slice(ps).IDs(), userID)
+			return err
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return err
+	}
+	for i, p := range ps {
+		postID := p.ID
+		ls, ok := lss[postID]
+		if ok {
+			ps[i].Status = &ls
+		}
+		img := imgs[postID]
+		ps[i].Images = &img
+	}
+	return nil
 }

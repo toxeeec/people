@@ -18,7 +18,7 @@ func NewTokenRepository(db *sqlx.DB) repository.Token {
 }
 
 func (r *tokenRepo) Create(rt people.RefreshToken) error {
-	const query = "INSERT INTO token VALUES(:token_id, :value, :user_id)"
+	const query = "INSERT INTO token VALUES (:token_id, :value, :user_id)"
 	if _, err := r.db.NamedExec(query, rt); err != nil {
 		return fmt.Errorf("Token.Create: %w", err)
 	}

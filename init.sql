@@ -38,8 +38,14 @@ CREATE TABLE post_like (
 
 CREATE TABLE image (
 	image_id SERIAL PRIMARY KEY,
-	path VARCHAR(40) NOT NULL, -- 36 characters for UUID + 4 for file extension
+	name VARCHAR(41) NOT NULL, -- / + 36 characters for UUID + 4 for file extension
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	user_id integer REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
 	in_use boolean NOT NULL DEFAULT false
+);
+
+CREATE TABLE post_image (
+	post_id integer REFERENCES post(post_id) ON DELETE CASCADE NOT NULL,
+	image_id integer REFERENCES image(image_id) ON DELETE CASCADE NOT NULL,
+	PRIMARY KEY (post_id, image_id)
 );

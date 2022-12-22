@@ -60,7 +60,8 @@ type NewImage struct {
 
 // NewPost defines model for NewPost.
 type NewPost struct {
-	Content string `fake:"{sentence}" json:"content"`
+	Content string  `fake:"{sentence}" json:"content"`
+	Images  *[]uint `fake:"skip" json:"images,omitempty"`
 }
 
 // Post defines model for Post.
@@ -68,6 +69,7 @@ type Post struct {
 	Content   string      `db:"content" fake:"{sentence}" json:"content"`
 	CreatedAt time.Time   `db:"created_at" fake:"skip" json:"createdAt"`
 	ID        uint        `db:"post_id" fake:"skip" json:"id"`
+	Images    *[]string   `fake:"skip" json:"images,omitempty"`
 	Likes     uint        `db:"likes" fake:"skip" json:"likes"`
 	Replies   uint        `db:"replies" fake:"skip" json:"replies"`
 	RepliesTo *uint       `db:"replies_to" fake:"skip" json:"repliesTo,omitempty"`
