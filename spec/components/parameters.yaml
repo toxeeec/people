@@ -27,6 +27,13 @@ components:
         minimum: 0
         x-go-type: uint
 
+    queryParam:
+      name: query
+      in: query
+      required: true
+      schema:
+        type: string
+
     beforeParam:
       name: before
       in: query

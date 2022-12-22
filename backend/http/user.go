@@ -130,3 +130,12 @@ func (h *handler) GetPostsPostIDLikes(ctx context.Context, r people.GetPostsPost
 	}
 	return people.GetPostsPostIDLikes200JSONResponse(ur), nil
 }
+
+func (h *handler) GetUsersSearch(ctx context.Context, r people.GetUsersSearchRequestObject) (people.GetUsersSearchResponseObject, error) {
+	userID, ok := fromContext(ctx, userIDKey)
+	ur, err := h.us.ListMatches(ctx, r.Params.Query, userID, ok, user.HandlePaginationParams{Limit: r.Params.Limit, Before: r.Params.Before, After: r.Params.After})
+	if err != nil {
+		return nil, err
+	}
+	return people.GetUsersSearch200JSONResponse(ur), nil
+}

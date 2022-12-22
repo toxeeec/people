@@ -36,6 +36,7 @@ type Service interface {
 	Like(postID, userID uint) (people.PostResponse, error)
 	Unlike(postID, userID uint) (people.PostResponse, error)
 	ListUserLikes(ctx context.Context, handle string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error)
+	ListMatches(ctx context.Context, query string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error)
 }
 
 type postService struct {
@@ -105,7 +106,6 @@ func (s *postService) Create(ctx context.Context, np people.NewPost, userID uint
 		})
 	}
 	if err := g.Wait(); err != nil {
-		println(err.Error())
 		return people.PostResponse{}, err
 	}
 	return people.PostResponse{Data: p, User: u}, nil
@@ -212,7 +212,6 @@ func (s *postService) ListReplies(ctx context.Context, postID uint, userID uint,
 		return s.addData(context.Background(), ps, userID, true)
 	})
 	if err := g.Wait(); err != nil {
-		println(err.Error())
 		return people.PostsResponse{}, err
 	}
 	return s.postResponseResults(ps, us), nil
@@ -255,6 +254,31 @@ func (s *postService) ListUserLikes(ctx context.Context, handle string, userID u
 		return people.PostsResponse{}, service.NewError(people.NotFoundError, "User not found")
 	}
 	ps, err := s.lr.ListUserLikes(id, p)
+	if err != nil {
+		return people.PostsResponse{}, err
+	}
+	var us []people.User
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		var err error
+		us, err = s.us.ListUsersWithStatus(ctx, Slice(ps).UserIDs(), userID, auth)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	g.Go(func() error {
+		return s.addData(ctx, ps, userID, auth)
+	})
+	if err := g.Wait(); err != nil {
+		return people.PostsResponse{}, err
+	}
+	return s.postResponseResults(ps, us), nil
+}
+
+func (s *postService) ListMatches(ctx context.Context, query string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error) {
+	p := pagination.New(params.Before, params.After, params.Limit)
+	ps, err := s.pr.ListMatches(query, p)
 	if err != nil {
 		return people.PostsResponse{}, err
 	}
@@ -381,8 +405,10 @@ func (s *postService) addData(ctx context.Context, ps []people.Post, userID uint
 		if ok {
 			ps[i].Status = &ls
 		}
-		img := imgs[postID]
-		ps[i].Images = &img
+		img, ok := imgs[postID]
+		if ok {
+			ps[i].Images = &img
+		}
 	}
 	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/pagination"
@@ -110,6 +111,19 @@ func (r *postRepo) ListReplies(postID uint, p pagination.ID) ([]people.Post, err
 	for k, v := range r.m {
 		if v.RepliesTo != nil && *v.RepliesTo == postID && k < before && k > after {
 			ps = append(ps, v)
+		}
+	}
+	return ps, nil
+}
+
+func (r *postRepo) ListMatches(query string, p pagination.ID) ([]people.Post, error) {
+	ps := make([]people.Post, 0, p.Limit)
+	for _, v := range r.m {
+		if strings.Contains(strings.ToLower(v.Content), strings.ToLower(query)) {
+			ps = append(ps, v)
+			if len(ps) == int(p.Limit) {
+				break
+			}
 		}
 	}
 	return ps, nil

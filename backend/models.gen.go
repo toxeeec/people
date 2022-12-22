@@ -125,6 +125,9 @@ type LimitParam = uint
 // PostIDParam defines model for postIDParam.
 type PostIDParam = uint
 
+// QueryParam defines model for queryParam.
+type QueryParam = string
+
 // AuthUserBody defines model for AuthUserBody.
 type AuthUserBody = AuthUser
 
@@ -157,6 +160,14 @@ type GetMeFollowingParams struct {
 	After  *AfterHandleParam  `form:"after,omitempty" json:"after,omitempty"`
 }
 
+// GetPostsSearchParams defines parameters for GetPostsSearch.
+type GetPostsSearchParams struct {
+	Query  QueryParam   `form:"query" json:"query"`
+	Limit  *LimitParam  `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterParam  `form:"after,omitempty" json:"after,omitempty"`
+}
+
 // GetPostsPostIDLikesParams defines parameters for GetPostsPostIDLikes.
 type GetPostsPostIDLikesParams struct {
 	Limit  *LimitParam        `form:"limit,omitempty" json:"limit,omitempty"`
@@ -174,6 +185,14 @@ type GetPostsPostIDRepliesParams struct {
 // PostRefreshJSONBody defines parameters for PostRefresh.
 type PostRefreshJSONBody struct {
 	RefreshToken string `json:"refreshToken"`
+}
+
+// GetUsersSearchParams defines parameters for GetUsersSearch.
+type GetUsersSearchParams struct {
+	Query  QueryParam         `form:"query" json:"query"`
+	Limit  *LimitParam        `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeHandleParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterHandleParam  `form:"after,omitempty" json:"after,omitempty"`
 }
 
 // GetUsersHandleFollowersParams defines parameters for GetUsersHandleFollowers.

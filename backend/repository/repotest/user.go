@@ -1,10 +1,13 @@
 package repotest
 
 import (
+	"fmt"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	people "github.com/toxeeec/people/backend"
+	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
 )
 
@@ -68,6 +71,18 @@ func (s *UserSuite) TestGet() {
 	actual, err := s.repo.Get(u.ID)
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), u, actual)
+}
+
+func (s *UserSuite) TestListMatches() {
+	s.repo.Create(people.AuthUser{Handle: "abc", Password: gofakeit.Password(true, true, true, true, true, 12)})
+	s.repo.Create(people.AuthUser{Handle: "ABCDEF", Password: gofakeit.Password(true, true, true, true, true, 12)})
+	// not matching
+	s.repo.Create(people.AuthUser{Handle: "defghi", Password: gofakeit.Password(true, true, true, true, true, 12)})
+
+	ps, err := s.repo.ListMatches("abc", pagination.ID{Limit: 10})
+	fmt.Printf("%+v\n", ps)
+	assert.NoError(s.T(), err)
+	assert.Len(s.T(), ps, 2)
 }
 
 func (s *UserSuite) SetupTest() {

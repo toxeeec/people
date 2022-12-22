@@ -1,6 +1,9 @@
 package repository
 
-import people "github.com/toxeeec/people/backend"
+import (
+	people "github.com/toxeeec/people/backend"
+	"github.com/toxeeec/people/backend/pagination"
+)
 
 type User interface {
 	GetID(handle string) (uint, error)
@@ -9,4 +12,5 @@ type User interface {
 	GetHash(id uint) (string, error)
 	Get(id uint) (people.User, error)
 	List(ids []uint) ([]people.User, error)
+	ListMatches(query string, p pagination.ID) ([]people.User, error)
 }

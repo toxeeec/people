@@ -48,6 +48,9 @@ type ServerInterface interface {
 	// (POST /posts)
 	PostPosts(ctx echo.Context) error
 
+	// (GET /posts/search)
+	GetPostsSearch(ctx echo.Context, params GetPostsSearchParams) error
+
 	// (DELETE /posts/{postID})
 	DeletePostsPostID(ctx echo.Context, postID PostIDParam) error
 
@@ -74,6 +77,9 @@ type ServerInterface interface {
 
 	// (POST /register)
 	PostRegister(ctx echo.Context) error
+
+	// (GET /users/search)
+	GetUsersSearch(ctx echo.Context, params GetUsersSearchParams) error
 
 	// (GET /users/{handle})
 	GetUsersHandle(ctx echo.Context, handle HandleParam) error
@@ -265,6 +271,47 @@ func (w *ServerInterfaceWrapper) PostPosts(ctx echo.Context) error {
 	return err
 }
 
+// GetPostsSearch converts echo context to params.
+func (w *ServerInterfaceWrapper) GetPostsSearch(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BearerAuthScopes, []string{""})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetPostsSearchParams
+	// ------------- Required query parameter "query" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "query", ctx.QueryParams(), &params.Query)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter query: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "before" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "before", ctx.QueryParams(), &params.Before)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter before: %s", err))
+	}
+
+	// ------------- Optional query parameter "after" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "after", ctx.QueryParams(), &params.After)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter after: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetPostsSearch(ctx, params)
+	return err
+}
+
 // DeletePostsPostID converts echo context to params.
 func (w *ServerInterfaceWrapper) DeletePostsPostID(ctx echo.Context) error {
 	var err error
@@ -452,6 +499,47 @@ func (w *ServerInterfaceWrapper) PostRegister(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.PostRegister(ctx)
+	return err
+}
+
+// GetUsersSearch converts echo context to params.
+func (w *ServerInterfaceWrapper) GetUsersSearch(ctx echo.Context) error {
+	var err error
+
+	ctx.Set(BearerAuthScopes, []string{""})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetUsersSearchParams
+	// ------------- Required query parameter "query" -------------
+
+	err = runtime.BindQueryParameter("form", true, true, "query", ctx.QueryParams(), &params.Query)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter query: %s", err))
+	}
+
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "before" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "before", ctx.QueryParams(), &params.Before)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter before: %s", err))
+	}
+
+	// ------------- Optional query parameter "after" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "after", ctx.QueryParams(), &params.After)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter after: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetUsersSearch(ctx, params)
 	return err
 }
 
@@ -673,6 +761,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.DELETE(baseURL+"/me/following/:handle", wrapper.DeleteMeFollowingHandle)
 	router.PUT(baseURL+"/me/following/:handle", wrapper.PutMeFollowingHandle)
 	router.POST(baseURL+"/posts", wrapper.PostPosts)
+	router.GET(baseURL+"/posts/search", wrapper.GetPostsSearch)
 	router.DELETE(baseURL+"/posts/:postID", wrapper.DeletePostsPostID)
 	router.GET(baseURL+"/posts/:postID", wrapper.GetPostsPostID)
 	router.DELETE(baseURL+"/posts/:postID/likes", wrapper.DeletePostsPostIDLikes)
@@ -682,6 +771,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/posts/:postID/replies", wrapper.PostPostsPostIDReplies)
 	router.POST(baseURL+"/refresh", wrapper.PostRefresh)
 	router.POST(baseURL+"/register", wrapper.PostRegister)
+	router.GET(baseURL+"/users/search", wrapper.GetUsersSearch)
 	router.GET(baseURL+"/users/:handle", wrapper.GetUsersHandle)
 	router.GET(baseURL+"/users/:handle/followers", wrapper.GetUsersHandleFollowers)
 	router.GET(baseURL+"/users/:handle/following", wrapper.GetUsersHandleFollowing)
@@ -925,6 +1015,23 @@ func (response PostPosts404JSONResponse) VisitPostPostsResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetPostsSearchRequestObject struct {
+	Params GetPostsSearchParams
+}
+
+type GetPostsSearchResponseObject interface {
+	VisitGetPostsSearchResponse(w http.ResponseWriter) error
+}
+
+type GetPostsSearch200JSONResponse PostsResponse
+
+func (response GetPostsSearch200JSONResponse) VisitGetPostsSearchResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type DeletePostsPostIDRequestObject struct {
 	PostID PostIDParam `json:"postID"`
 }
@@ -1161,6 +1268,23 @@ func (response PostRegister400JSONResponse) VisitPostRegisterResponse(w http.Res
 	return json.NewEncoder(w).Encode(response)
 }
 
+type GetUsersSearchRequestObject struct {
+	Params GetUsersSearchParams
+}
+
+type GetUsersSearchResponseObject interface {
+	VisitGetUsersSearchResponse(w http.ResponseWriter) error
+}
+
+type GetUsersSearch200JSONResponse Users
+
+func (response GetUsersSearch200JSONResponse) VisitGetUsersSearchResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 type GetUsersHandleRequestObject struct {
 	Handle HandleParam `json:"handle"`
 }
@@ -1322,6 +1446,9 @@ type StrictServerInterface interface {
 	// (POST /posts)
 	PostPosts(ctx context.Context, request PostPostsRequestObject) (PostPostsResponseObject, error)
 
+	// (GET /posts/search)
+	GetPostsSearch(ctx context.Context, request GetPostsSearchRequestObject) (GetPostsSearchResponseObject, error)
+
 	// (DELETE /posts/{postID})
 	DeletePostsPostID(ctx context.Context, request DeletePostsPostIDRequestObject) (DeletePostsPostIDResponseObject, error)
 
@@ -1348,6 +1475,9 @@ type StrictServerInterface interface {
 
 	// (POST /register)
 	PostRegister(ctx context.Context, request PostRegisterRequestObject) (PostRegisterResponseObject, error)
+
+	// (GET /users/search)
+	GetUsersSearch(ctx context.Context, request GetUsersSearchRequestObject) (GetUsersSearchResponseObject, error)
 
 	// (GET /users/{handle})
 	GetUsersHandle(ctx context.Context, request GetUsersHandleRequestObject) (GetUsersHandleResponseObject, error)
@@ -1584,6 +1714,31 @@ func (sh *strictHandler) PostPosts(ctx echo.Context) error {
 		return err
 	} else if validResponse, ok := response.(PostPostsResponseObject); ok {
 		return validResponse.VisitPostPostsResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("Unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// GetPostsSearch operation middleware
+func (sh *strictHandler) GetPostsSearch(ctx echo.Context, params GetPostsSearchParams) error {
+	var request GetPostsSearchRequestObject
+
+	request.Params = params
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetPostsSearch(ctx.Request().Context(), request.(GetPostsSearchRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetPostsSearch")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetPostsSearchResponseObject); ok {
+		return validResponse.VisitGetPostsSearchResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("Unexpected response type: %T", response)
 	}
@@ -1831,6 +1986,31 @@ func (sh *strictHandler) PostRegister(ctx echo.Context) error {
 	return nil
 }
 
+// GetUsersSearch operation middleware
+func (sh *strictHandler) GetUsersSearch(ctx echo.Context, params GetUsersSearchParams) error {
+	var request GetUsersSearchRequestObject
+
+	request.Params = params
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetUsersSearch(ctx.Request().Context(), request.(GetUsersSearchRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetUsersSearch")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetUsersSearchResponseObject); ok {
+		return validResponse.VisitGetUsersSearchResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("Unexpected response type: %T", response)
+	}
+	return nil
+}
+
 // GetUsersHandle operation middleware
 func (sh *strictHandler) GetUsersHandle(ctx echo.Context, handle HandleParam) error {
 	var request GetUsersHandleRequestObject
@@ -1963,37 +2143,38 @@ func (sh *strictHandler) GetUsersHandlePosts(ctx echo.Context, handle HandlePara
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

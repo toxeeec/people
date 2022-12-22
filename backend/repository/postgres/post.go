@@ -18,7 +18,8 @@ func NewPostRepository(db *sqlx.DB) repository.Post {
 }
 
 const (
-	SelectPost = "SELECT post.post_id, post.user_id, content, replies_to, replies, likes, created_at FROM post"
+	PostFields = "post.post_id, post.user_id, content, replies_to, replies, likes, created_at"
+	SelectPost = "SELECT " + PostFields + " FROM post"
 )
 
 func (r *postRepo) Create(np people.NewPost, userID uint, repliesTo *uint) (people.Post, error) {
@@ -27,7 +28,7 @@ func (r *postRepo) Create(np people.NewPost, userID uint, repliesTo *uint) (peop
 		return people.Post{}, fmt.Errorf("Post.Create: %w", err)
 	}
 	defer tx.Rollback()
-	const query = "INSERT INTO post(user_id, content, replies_to) VALUES ($1, $2, $3) RETURNING *"
+	const query = "INSERT INTO post(user_id, content, replies_to) VALUES ($1, $2, $3) RETURNING " + PostFields
 	var p people.Post
 	if err = r.db.Get(&p, query, userID, np.Content, repliesTo); err != nil {
 		return p, fmt.Errorf("Post.Create: %w", err)
@@ -47,7 +48,7 @@ func (r *postRepo) Create(np people.NewPost, userID uint, repliesTo *uint) (peop
 }
 
 func (r *postRepo) Get(postID uint) (people.Post, error) {
-	const query = "SELECT * FROM post WHERE post_id = $1"
+	const query = SelectPost + " WHERE post_id = $1"
 	var p people.Post
 	if err := r.db.Get(&p, query, postID); err != nil {
 		return p, fmt.Errorf("Post.Get: %w", err)
@@ -108,6 +109,21 @@ func (r *postRepo) ListReplies(postID uint, p pagination.ID) ([]people.Post, err
 	ps := make([]people.Post, p.Limit)
 	if err := r.db.Select(&ps, q, args...); err != nil {
 		return nil, fmt.Errorf("Post.ListReplies: %w", err)
+	}
+	return ps, nil
+}
+
+func (r *postRepo) ListMatches(query string, p pagination.ID) ([]people.Post, error) {
+	q, args, err := NewQuery(SelectPost).
+		Where("ts @@ to_tsquery('english', websearch_to_tsquery('english', ?)::text || ':*')", query).
+		Paginate(p, "post_id", "?").
+		Build()
+	if err != nil {
+		return nil, fmt.Errorf("Post.ListMatches: %w", err)
+	}
+	ps := make([]people.Post, p.Limit)
+	if err := r.db.Select(&ps, q, args...); err != nil {
+		return nil, fmt.Errorf("Post.ListMatches: %w", err)
 	}
 	return ps, nil
 }

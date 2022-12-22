@@ -34,6 +34,9 @@ paths:
   /users/{handle}/followers:
     $ref: './paths/users.yaml#/followers'
 
+  /users/search:
+    $ref: './paths/users.yaml#/search'
+
   /users/{handle}/posts:
     $ref: './paths/posts.yaml#/userPosts'
 
@@ -45,6 +48,9 @@ paths:
 
   /posts/{postID}:
     $ref: './paths/posts.yaml#/post'
+
+  /posts/search:
+    $ref: './paths/posts.yaml#/search'
 
   /posts/{postID}/replies:
     $ref: './paths/replies.yaml#/replies'

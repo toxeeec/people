@@ -5,6 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	people "github.com/toxeeec/people/backend"
+	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
 )
 
@@ -73,6 +74,21 @@ func (r *userRepo) List(ids []uint) ([]people.User, error) {
 	us := make([]people.User, len(ids))
 	if err := r.db.Select(&us, q, args...); err != nil {
 		return nil, fmt.Errorf("User.List: %w", err)
+	}
+	return us, nil
+}
+
+func (r *userRepo) ListMatches(query string, p pagination.ID) ([]people.User, error) {
+	q, args, err := NewQuery(SelectUser).
+		Where("ts @@ to_tsquery('english', websearch_to_tsquery('english', ?)::text || ':*')", query).
+		Paginate(p, "user_id", "?").
+		Build()
+	if err != nil {
+		return nil, fmt.Errorf("User.ListMatches: %w", err)
+	}
+	us := make([]people.User, p.Limit)
+	if err := r.db.Select(&us, q, args...); err != nil {
+		return nil, fmt.Errorf("User.ListMatches: %w", err)
 	}
 	return us, nil
 }

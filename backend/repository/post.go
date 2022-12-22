@@ -12,4 +12,5 @@ type Post interface {
 	ListUserPosts(userID uint, p pagination.ID) ([]people.Post, error)
 	ListFeed(followingIDs []uint, userID uint, p pagination.ID) ([]people.Post, error)
 	ListReplies(postID uint, p pagination.ID) ([]people.Post, error)
+	ListMatches(query string, p pagination.ID) ([]people.Post, error)
 }

@@ -3,8 +3,10 @@ package inmem
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	people "github.com/toxeeec/people/backend"
+	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
 )
 
@@ -65,6 +67,19 @@ func (r *userRepo) List(ids []uint) ([]people.User, error) {
 	for i, u := range r.m {
 		if contains(ids, i) {
 			us = append(us, u)
+		}
+	}
+	return us, nil
+}
+
+func (r *userRepo) ListMatches(query string, p pagination.ID) ([]people.User, error) {
+	us := make([]people.User, 0, p.Limit)
+	for _, v := range r.m {
+		if strings.Contains(strings.ToLower(v.Handle), strings.ToLower(query)) {
+			us = append(us, v)
+			if len(us) == int(p.Limit) {
+				break
+			}
 		}
 	}
 	return us, nil

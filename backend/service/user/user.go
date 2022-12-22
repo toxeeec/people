@@ -29,6 +29,7 @@ type Service interface {
 	ListPostLikes(ctx context.Context, postID, userID uint, auth bool, params HandlePaginationParams) (people.Users, error)
 	ListStatus(ctx context.Context, srcIDs []uint, userID uint) (map[uint]people.FollowStatus, error)
 	ListUsersWithStatus(ctx context.Context, srcIDs []uint, userID uint, auth bool) ([]people.User, error)
+	ListMatches(ctx context.Context, query string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error)
 }
 
 type userService struct {
@@ -191,7 +192,6 @@ func (s *userService) ListPostLikes(ctx context.Context, postID, userID uint, au
 	if err != nil {
 		return people.Users{}, service.NewError(people.NotFoundError, "User not found")
 	}
-
 	us, err := s.lr.ListPostLikes(postID, p)
 	if err != nil {
 		return people.Users{}, err
@@ -204,4 +204,24 @@ func (s *userService) ListPostLikes(ctx context.Context, postID, userID uint, au
 		Slice(us.Data).AddStatus(fss)
 	}
 	return us, nil
+}
+
+func (s *userService) ListMatches(ctx context.Context, query string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error) {
+	hp := pagination.New(params.Before, params.After, params.Limit)
+	p, err := pagination.Handle(hp).IDPagination(ctx, s.ur.GetID)
+	if err != nil {
+		return people.Users{}, service.NewError(people.NotFoundError, "User not found")
+	}
+	us, err := s.ur.ListMatches(query, p)
+	if err != nil {
+		return people.Users{}, err
+	}
+	if auth {
+		fss, err := s.ListStatus(context.Background(), Slice(us).IDs(), userID)
+		if err != nil {
+			return people.Users{}, err
+		}
+		Slice(us).AddStatus(fss)
+	}
+	return pagination.NewResults[people.User, string](us), nil
 }

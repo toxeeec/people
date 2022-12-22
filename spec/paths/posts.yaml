@@ -120,3 +120,23 @@ userLikes:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+
+search:
+  get:
+    tags:
+      - posts
+    security:
+      - bearerAuth: []
+      - {}
+    parameters:
+      - $ref: '#/components/parameters/queryParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/beforeParam'
+      - $ref: '#/components/parameters/afterParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostsResponse'

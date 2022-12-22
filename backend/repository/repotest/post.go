@@ -134,6 +134,20 @@ func (s *PostSuite) TestListReplies() {
 	assert.Len(s.T(), res, len(users))
 }
 
+func (s *PostSuite) TestListMatches() {
+	var au people.AuthUser
+	u, _ := s.ur.Create(au)
+	s.repo.Create(people.NewPost{Content: "abc"}, u.ID, nil)
+	s.repo.Create(people.NewPost{Content: "abcdef"}, u.ID, nil)
+	s.repo.Create(people.NewPost{Content: "def abc"}, u.ID, nil)
+	// not matching
+	s.repo.Create(people.NewPost{Content: "foo"}, u.ID, nil)
+
+	ps, err := s.repo.ListMatches("abc", pagination.ID{Limit: 10})
+	assert.NoError(s.T(), err)
+	assert.Len(s.T(), ps, 3)
+}
+
 func (s *PostSuite) SetupTest() {
 	if s.fns.SetupTest != nil {
 		s.fns.SetupTest()

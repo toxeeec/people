@@ -78,3 +78,23 @@ followers:
             schema:
               $ref: '#/components/schemas/Error'
 
+search:
+  get:
+    tags:
+      - posts
+      - users
+    security:
+      - bearerAuth: []
+      - {}
+    parameters:
+      - $ref: '#/components/parameters/queryParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/beforeHandleParam'
+      - $ref: '#/components/parameters/afterHandleParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Users'
