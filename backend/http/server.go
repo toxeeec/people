@@ -41,9 +41,7 @@ func NewServer(db *sqlx.DB, v *validator.Validate) *echo.Echo {
 	h.ps = post.NewService(v, pr, ur, fr, lr, h.us, h.is)
 
 	e := echo.New()
-	e.Use(echomiddleware.CORSWithConfig(echomiddleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:5173"},
-	}))
+	e.Use(echomiddleware.CORS())
 
 	swagger, err := people.GetSwagger()
 	if err != nil {
