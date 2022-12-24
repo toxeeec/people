@@ -115,7 +115,7 @@ func (r *postRepo) ListReplies(postID uint, p pagination.ID) ([]people.Post, err
 
 func (r *postRepo) ListMatches(query string, p pagination.ID) ([]people.Post, error) {
 	q, args, err := NewQuery(SelectPost).
-		Where("ts @@ to_tsquery('english', websearch_to_tsquery('english', ?)::text || ':*')", query).
+		Where("ts @@ websearch_to_tsquery('english', ?)", query).
 		Paginate(p, "post_id", "?").
 		Build()
 	if err != nil {

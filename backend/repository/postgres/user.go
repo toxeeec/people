@@ -80,7 +80,7 @@ func (r *userRepo) List(ids []uint) ([]people.User, error) {
 
 func (r *userRepo) ListMatches(query string, p pagination.ID) ([]people.User, error) {
 	q, args, err := NewQuery(SelectUser).
-		Where("ts @@ to_tsquery('english', websearch_to_tsquery('english', ?)::text || ':*')", query).
+		Where("handle ILIKE ?", "%"+query+"%").
 		Paginate(p, "user_id", "?").
 		Build()
 	if err != nil {

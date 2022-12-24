@@ -1,13 +1,14 @@
+CREATE EXTENSION pg_trgm;
+
 CREATE TABLE user_profile (
 	user_id SERIAL PRIMARY KEY,
 	handle VARCHAR(15) NOT NULL,
 	hash TEXT NOT NULL,
 	following INTEGER NOT NULL DEFAULT 0,
-	followers INTEGER NOT NULL DEFAULT 0,
-	ts TSVECTOR GENERATED ALWAYS AS (TO_TSVECTOR('english', handle)) STORED
+	followers INTEGER NOT NULL DEFAULT 0
 );
 
-CREATE INDEX user_profile_ts_idx ON user_profile USING GIN(ts);
+CREATE INDEX user_profile_handle_idx ON user_profile USING GIN(handle gin_trgm_ops);
 
 CREATE TABLE token (
 	token_id uuid PRIMARY KEY,
