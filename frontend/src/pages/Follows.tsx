@@ -1,6 +1,6 @@
 import { Tabs } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
-import { Profiles, Query } from "../components/Profiles";
+import { Users, Query } from "../components/Users";
 import { QueryKey } from "../query-key";
 import { getUsersHandleFollowers, getUsersHandleFollowing } from "../spec.gen";
 
@@ -31,13 +31,13 @@ const Follows = ({ value }: { value: FollowsPage }) => {
 			</Tabs.List>
 
 			<Tabs.Panel value="following">
-				<Profiles
+				<Users
 					query={queryFollowing}
 					queryKey={[QueryKey.FOLLOWING, params.handle!]}
 				/>
 			</Tabs.Panel>
 			<Tabs.Panel value="followers">
-				<Profiles
+				<Users
 					query={queryFollowers}
 					queryKey={[QueryKey.FOLLOWERS, params.handle!]}
 				/>

@@ -27,10 +27,12 @@ import type {
 	GetMeFollowersParams,
 	GetUsersHandleFollowingParams,
 	GetUsersHandleFollowersParams,
+	GetUsersSearchParams,
 	GetUsersHandlePostsParams,
 	GetUsersHandleLikesParams,
 	PostResponse,
 	NewPostBodyBody,
+	GetPostsSearchParams,
 	GetPostsPostIDRepliesParams,
 	GetPostsPostIDLikesParams,
 	ImageResponse,
@@ -669,6 +671,66 @@ export const useGetUsersHandleFollowers = <
 	return query;
 };
 
+export const getUsersSearch = (
+	params: GetUsersSearchParams,
+	options?: SecondParameter<typeof customInstance>,
+	signal?: AbortSignal
+) => {
+	return customInstance<Users>(
+		{ url: `/users/search`, method: "get", params, signal },
+		options
+	);
+};
+
+export const getGetUsersSearchQueryKey = (params: GetUsersSearchParams) => [
+	`/users/search`,
+	...(params ? [params] : []),
+];
+
+export type GetUsersSearchQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getUsersSearch>>
+>;
+export type GetUsersSearchQueryError = ErrorType<unknown>;
+
+export const useGetUsersSearch = <
+	TData = Awaited<ReturnType<typeof getUsersSearch>>,
+	TError = ErrorType<unknown>
+>(
+	params: GetUsersSearchParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getUsersSearch>>,
+			TError,
+			TData
+		>;
+		request?: SecondParameter<typeof customInstance>;
+	}
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetUsersSearchQueryKey(params);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersSearch>>> = ({
+		signal,
+	}) => getUsersSearch(params, requestOptions, signal);
+
+	const query = useQuery<
+		Awaited<ReturnType<typeof getUsersSearch>>,
+		TError,
+		TData
+	>(queryKey, queryFn, {
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+	query.queryKey = queryKey;
+
+	return query;
+};
+
 export const getUsersHandlePosts = (
 	handle: string,
 	params?: GetUsersHandlePostsParams,
@@ -956,6 +1018,66 @@ export const useDeletePostsPostID = <
 		{ postID: number },
 		TContext
 	>(mutationFn, mutationOptions);
+};
+
+export const getPostsSearch = (
+	params: GetPostsSearchParams,
+	options?: SecondParameter<typeof customInstance>,
+	signal?: AbortSignal
+) => {
+	return customInstance<PostsResponse>(
+		{ url: `/posts/search`, method: "get", params, signal },
+		options
+	);
+};
+
+export const getGetPostsSearchQueryKey = (params: GetPostsSearchParams) => [
+	`/posts/search`,
+	...(params ? [params] : []),
+];
+
+export type GetPostsSearchQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getPostsSearch>>
+>;
+export type GetPostsSearchQueryError = ErrorType<unknown>;
+
+export const useGetPostsSearch = <
+	TData = Awaited<ReturnType<typeof getPostsSearch>>,
+	TError = ErrorType<unknown>
+>(
+	params: GetPostsSearchParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getPostsSearch>>,
+			TError,
+			TData
+		>;
+		request?: SecondParameter<typeof customInstance>;
+	}
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetPostsSearchQueryKey(params);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getPostsSearch>>> = ({
+		signal,
+	}) => getPostsSearch(params, requestOptions, signal);
+
+	const query = useQuery<
+		Awaited<ReturnType<typeof getPostsSearch>>,
+		TError,
+		TData
+	>(queryKey, queryFn, {
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+	query.queryKey = queryKey;
+
+	return query;
 };
 
 export const getPostsPostIDReplies = (

@@ -5,10 +5,13 @@ import {
 	Group,
 	Text,
 	UnstyledButton,
+	ActionIcon,
 } from "@mantine/core";
 import { useWindowScroll } from "@mantine/hooks";
+import { IconSearch } from "@tabler/icons";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
+import { Link } from "react-router-dom";
 import { LayoutDrawer } from "./LayoutDrawer";
 import { LayoutGoBack } from "./LayoutGoBack";
 
@@ -30,6 +33,8 @@ export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 			setRoute("Post");
 		} else if (params.handle) {
 			setRoute(params.handle);
+		} else {
+			setRoute("");
 		}
 	}, [params, location]);
 
@@ -38,23 +43,33 @@ export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 	}, [location]);
 
 	const isHome = route === "Home";
+	const isSearch = location.pathname.includes("search");
 	return (
 		<>
 			<Space h={60} />
 			<Header height={60} fixed>
-				<Group h={60} align="center" px="xs">
-					{isHome && isAuthenticated ? (
-						<UnstyledButton onClick={() => setOpened(true)}>
-							<Avatar radius="xl" onClick={() => setOpened(true)} />
+				<Group h={60} align="center" px="xs" position="apart">
+					<Group>
+						{isHome && isAuthenticated ? (
+							<UnstyledButton onClick={() => setOpened(true)}>
+								<Avatar radius="xl" onClick={() => setOpened(true)} />
+							</UnstyledButton>
+						) : (
+							<LayoutGoBack />
+						)}
+						<UnstyledButton onClick={() => scrollTo({ y: 0 })}>
+							<Text fz="xl" fw={700}>
+								{route}
+							</Text>
 						</UnstyledButton>
-					) : (
-						<LayoutGoBack />
-					)}
-					<UnstyledButton onClick={() => scrollTo({ y: 0 })}>
-						<Text fz="xl" fw={700}>
-							{route}
-						</Text>
-					</UnstyledButton>
+					</Group>
+					<ActionIcon
+						component={Link}
+						to={`/search/posts`}
+						display={isSearch ? "none" : "unset"}
+					>
+						<IconSearch />
+					</ActionIcon>
 				</Group>
 			</Header>
 			{isAuthenticated ? (

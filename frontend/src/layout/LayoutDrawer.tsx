@@ -1,6 +1,6 @@
 import { Drawer, Button } from "@mantine/core";
 import { Dispatch, SetStateAction, useContext } from "react";
-import { AccountInfo } from "../components/AccountInfo";
+import { UserInfo } from "../components/UserInfo";
 import { AuthContext } from "../context/AuthContext";
 import { UsersContext } from "../context/UsersContext";
 
@@ -20,8 +20,9 @@ export const LayoutDrawer = ({ isOpened, setIsOpened }: LayoutDrawerProps) => {
 			title="Account info"
 			padding="md"
 			size="md"
+			zIndex={9999}
 		>
-			<AccountInfo handle={user!.handle} />
+			<UserInfo handle={user!.handle} />
 			<Button onClick={clearAuth} fullWidth radius="xl" mt="xl">
 				Logout
 			</Button>

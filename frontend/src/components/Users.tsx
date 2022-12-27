@@ -1,6 +1,6 @@
 import { QueryKey, useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useContext, useEffect } from "react";
-import { Users } from "../models";
+import { Users as UsersType } from "../models";
 import { Container } from "@mantine/core";
 import { useInView } from "react-intersection-observer";
 import { CenterLoader } from "../components/CenterLoader";
@@ -15,9 +15,10 @@ interface PaginationParams {
 	after?: string;
 }
 
-export type Query = (params: PaginationParams) => Promise<Users>;
+export type Query = (params: PaginationParams) => Promise<UsersType>;
 
 interface PostsProps {
+	enabled?: boolean;
 	query: Query;
 	queryKey: QueryKey;
 }
@@ -26,7 +27,7 @@ interface QueryFunctionArgs {
 	pageParam?: PaginationParams;
 }
 
-export const Profiles = ({ query, queryKey }: PostsProps) => {
+export const Users = ({ query, queryKey, enabled = true }: PostsProps) => {
 	const { ref, inView } = useInView();
 	const { setUser } = useContext(UsersContext);
 	const queryFn = ({ pageParam }: QueryFunctionArgs) => {
@@ -34,16 +35,10 @@ export const Profiles = ({ query, queryKey }: PostsProps) => {
 		return query(pageParam);
 	};
 
-	const {
-		isLoading,
-		data,
-		hasNextPage,
-		isFetching,
-		fetchNextPage,
-		isRefetching,
-	} = useInfiniteQuery({
+	const { status, data, isFetchingNextPage, fetchNextPage } = useInfiniteQuery({
 		queryKey,
 		queryFn,
+		enabled,
 		getNextPageParam: (lastPage) => {
 			if (!lastPage.meta || lastPage.data.length < queryLimit) return undefined;
 			return { before: lastPage.meta?.oldest };
@@ -56,28 +51,25 @@ export const Profiles = ({ query, queryKey }: PostsProps) => {
 	});
 
 	useEffect(() => {
-		if (inView && hasNextPage) {
+		if (inView) {
 			fetchNextPage();
 		}
-	}, [fetchNextPage, inView, hasNextPage]);
+	}, [fetchNextPage, inView]);
 
 	return (
 		<Container px={0}>
-			{isLoading || isRefetching ? (
+			{enabled && status === "loading" ? (
 				<CenterLoader />
 			) : (
-				data?.pages.map((group, i) =>
-					i > 0 && i === data.pages.length - 1 && isFetching ? (
-						<CenterLoader key={i} />
-					) : (
-						<Fragment key={i}>
-							{group.data.map((user) => (
-								<User key={user.handle} handle={user.handle} ref={ref} />
-							))}
-						</Fragment>
-					)
-				)
+				data?.pages.map((page, i) => (
+					<Fragment key={i}>
+						{page.data.map((user) => (
+							<User key={user.handle} handle={user.handle} ref={ref} />
+						))}
+					</Fragment>
+				))
 			)}
+			{isFetchingNextPage && <CenterLoader />}
 		</Container>
 	);
 };

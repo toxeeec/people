@@ -1,4 +1,5 @@
 import { Avatar, Group, Modal, Text } from "@mantine/core";
+import { useFocusTrap } from "@mantine/hooks";
 import { Dispatch, SetStateAction, useContext } from "react";
 import { PostsContext } from "../../context/PostsContext";
 import { postPostsPostIDReplies } from "../../spec.gen";
@@ -25,6 +26,7 @@ export const PostReplyModal = ({
 	const mutationFn: MutationFn = (newPost) => {
 		return postPostsPostIDReplies(id, newPost);
 	};
+	const focusTrapRef = useFocusTrap(opened);
 	return (
 		<Modal
 			opened={opened}
@@ -33,6 +35,7 @@ export const PostReplyModal = ({
 			}}
 			onClick={stopPropagation}
 			centered
+			padding="md"
 			title={
 				<Group align="center">
 					<Avatar radius="xl" size="md" />
@@ -41,7 +44,12 @@ export const PostReplyModal = ({
 			}
 		>
 			<Text my="xs">{post?.content}</Text>
-			<CreatePost mutationFn={mutationFn} queryKey={queryKey} />
+			<CreatePost
+				mutationFn={mutationFn}
+				queryKey={queryKey}
+				setOpened={setOpened}
+				ref={focusTrapRef}
+			/>
 		</Modal>
 	);
 };

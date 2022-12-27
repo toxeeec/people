@@ -12,6 +12,9 @@ import { QueryKey } from "../query-key";
 import { PostsContext } from "../context/PostsContext";
 import { CenterLoader } from "../components/CenterLoader";
 import { MutationFn, CreatePost } from "../components/post/CreatePost";
+import { Container } from "@mantine/core";
+import { PostParents } from "../components/post/PostParents";
+import { useScrollIntoView } from "@mantine/hooks";
 
 const Post = () => {
 	const params = useParams();
@@ -36,15 +39,23 @@ const Post = () => {
 		return getPostsPostIDReplies(postID, queryParams);
 	};
 
+	const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
+		offset: 60,
+		duration: 0,
+	});
+	const scroll = () => scrollIntoView({ alignment: "start" });
 	return isLoading || !data ? (
 		<CenterLoader />
 	) : (
 		<>
-			<MainPost id={postID} handle={data.user.handle} />
-			<CreatePost
-				mutationFn={mutationFn}
-				queryKey={[QueryKey.REPLIES, postID]}
-			/>
+			<PostParents id={postID} scroll={scroll} />
+			<MainPost id={postID} handle={data.user.handle} ref={targetRef} />
+			<Container p="md" pos="relative">
+				<CreatePost
+					mutationFn={mutationFn}
+					queryKey={[QueryKey.REPLIES, postID]}
+				/>
+			</Container>
 			<Posts query={query} queryKey={[QueryKey.REPLIES, postID]} />
 		</>
 	);

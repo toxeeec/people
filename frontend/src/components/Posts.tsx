@@ -19,6 +19,7 @@ interface PaginationParams {
 export type Query = (params: PaginationParams) => Promise<PostsResponse>;
 
 interface PostsProps {
+	enabled?: boolean;
 	query: Query;
 	queryKey: QueryKey;
 }
@@ -27,7 +28,7 @@ interface QueryFunctionArgs {
 	pageParam?: PaginationParams;
 }
 
-export const Posts = ({ query, queryKey }: PostsProps) => {
+export const Posts = ({ query, queryKey, enabled = true }: PostsProps) => {
 	const { ref, inView } = useInView();
 	const { setUser } = useContext(UsersContext);
 	const { setPost } = useContext(PostsContext);
@@ -37,16 +38,10 @@ export const Posts = ({ query, queryKey }: PostsProps) => {
 		return query(pageParam);
 	};
 
-	const {
-		isLoading,
-		data,
-		hasNextPage,
-		isFetching,
-		fetchNextPage,
-		isRefetching,
-	} = useInfiniteQuery({
+	const { status, data, isFetchingNextPage, fetchNextPage } = useInfiniteQuery({
 		queryKey,
 		queryFn,
+		enabled,
 		getNextPageParam: (lastPage) => {
 			if (!lastPage.meta || lastPage.data.length < queryLimit) return undefined;
 			return { before: lastPage.meta?.oldest };
@@ -62,34 +57,31 @@ export const Posts = ({ query, queryKey }: PostsProps) => {
 	});
 
 	useEffect(() => {
-		if (inView && hasNextPage) {
+		if (inView) {
 			fetchNextPage();
 		}
-	}, [fetchNextPage, inView, hasNextPage]);
+	}, [fetchNextPage, inView]);
 
 	return (
 		<Container px={0}>
-			{isLoading || isRefetching ? (
+			{enabled && status === "loading" ? (
 				<CenterLoader />
 			) : (
-				data?.pages?.map((group, i) =>
-					i > 0 && i === data.pages.length - 1 && isFetching ? (
-						<CenterLoader key={i} />
-					) : (
-						<Fragment key={i}>
-							{group.data?.map((postResponse) => (
-								<Post
-									key={postResponse.data.createdAt}
-									ref={ref}
-									id={postResponse.data.id}
-									handle={postResponse.user.handle}
-									queryKey={queryKey}
-								/>
-							))}
-						</Fragment>
-					)
-				)
+				data?.pages?.map((page, i) => (
+					<Fragment key={i}>
+						{page.data?.map((postResponse) => (
+							<Post
+								key={postResponse.data.id}
+								ref={ref}
+								id={postResponse.data.id}
+								handle={postResponse.user.handle}
+								queryKey={queryKey}
+							/>
+						))}
+					</Fragment>
+				))
 			)}
+			{isFetchingNextPage && <CenterLoader />}
 		</Container>
 	);
 };

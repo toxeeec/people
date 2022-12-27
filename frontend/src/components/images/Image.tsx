@@ -22,14 +22,23 @@ export const Image = ({ path }: ImageProps) => {
 			/>
 			<Modal
 				centered
-				size="auto"
 				opened={opened}
 				onClose={() => setOpened(false)}
 				onClick={stopPropagation}
+				zIndex={9999}
+				size="auto"
+				fullScreen
 			>
 				<ImageComponent
 					src={`${baseURL}${path}`}
-					styles={{ image: { maxHeight: "75vh", maxWidth: "75vw" } }}
+					styles={{
+						image: {
+							maxHeight: "85vh",
+							maxWidth: "85vw",
+							margin: "auto",
+						},
+					}}
+					fit="contain"
 				/>
 			</Modal>
 		</>

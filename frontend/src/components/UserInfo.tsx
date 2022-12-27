@@ -4,12 +4,12 @@ import { Link } from "react-router-dom";
 import { UsersContext } from "../context/UsersContext";
 import { stopPropagation } from "../utils";
 
-interface AccountInfoProps {
+interface UserInfo {
 	handle: string;
 	children?: React.ReactNode;
 }
 
-export const AccountInfo = ({ handle, children }: AccountInfoProps) => {
+export const UserInfo = ({ handle, children }: UserInfo) => {
 	const { users } = useContext(UsersContext);
 	const user = users[handle]!;
 	return (
@@ -31,7 +31,7 @@ export const AccountInfo = ({ handle, children }: AccountInfoProps) => {
 				weight="bold"
 				onClick={stopPropagation}
 			>
-				@{user.handle}
+				{user.handle}
 			</Text>
 			{user.status?.isFollowing ? <Badge ml="xs">follows you</Badge> : null}
 			<Group mt="xs">

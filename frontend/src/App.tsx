@@ -18,7 +18,8 @@ import Auth from "./pages/Auth";
 import Follows from "./pages/Follows";
 import Home from "./pages/Home";
 import Post from "./pages/Post";
-import Profile from "./pages/Profile";
+import User from "./pages/User";
+import Search from "./pages/Search";
 import { useGetUsersHandle } from "./spec.gen";
 
 const App = () => {
@@ -61,11 +62,11 @@ const App = () => {
 				},
 				{
 					path: "/:handle",
-					element: <Profile value={"posts"} />,
+					element: <User value={"posts"} />,
 				},
 				{
 					path: "/:handle/likes",
-					element: <Profile value={"likes"} />,
+					element: <User value={"likes"} />,
 				},
 				{
 					path: "/:handle/:postID",
@@ -78,6 +79,14 @@ const App = () => {
 				{
 					path: "/:handle/followers",
 					element: <Follows value={"followers"} />,
+				},
+				{
+					path: "/search/posts",
+					element: <Search value={"posts"} />,
+				},
+				{
+					path: "/search/people",
+					element: <Search value={"people"} />,
 				},
 			],
 		},

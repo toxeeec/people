@@ -5,4 +5,7 @@ export enum QueryKey {
 	FOLLOWERS = "followers",
 	REPLIES = "replies",
 	LIKES = "likes",
+	POSTS_SEARCH = "posts search",
+	USERS_SEARCH = "users search",
+	PARENT = "parent",
 }

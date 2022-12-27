@@ -3,7 +3,7 @@ import { MouseEvent } from "react";
 import { Dispatch, SetStateAction } from "react";
 import { QueryKey } from "../../query-key";
 import { getPostsPostIDLikes } from "../../spec.gen";
-import { Profiles, Query } from "../Profiles";
+import { Users, Query } from "../Users";
 
 interface PostLikesProps {
 	opened: boolean;
@@ -25,7 +25,7 @@ export const PostLikes = ({ opened, setOpened, id }: PostLikesProps) => {
 			centered
 			title={<Text weight="bold">Liked by</Text>}
 		>
-			<Profiles query={query} queryKey={[QueryKey.LIKES, id]} />
+			<Users query={query} queryKey={[QueryKey.LIKES, id]} />
 		</Modal>
 	);
 };

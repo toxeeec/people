@@ -23,13 +23,13 @@ import {
 } from "../spec.gen";
 import { stopPropagation } from "../utils";
 
-export type ProfilePage = "posts" | "likes";
+export type UserPage = "posts" | "likes";
 
-interface ProfileProps {
-	value: ProfilePage;
+interface UserProps {
+	value: UserPage;
 }
 
-const Profile = ({ value }: ProfileProps) => {
+const User = ({ value }: UserProps) => {
 	const params = useParams();
 	const { users, setUser } = useContext(UsersContext);
 	const { isAuthenticated, getAuth } = useContext(AuthContext);
@@ -58,7 +58,7 @@ const Profile = ({ value }: ProfileProps) => {
 					)}
 				</Group>
 				<Group>
-					<Text weight="bold">@{user.handle}</Text>
+					<Text weight="bold">{user.handle}</Text>
 					{user.status?.isFollowing ? <Badge>follows you</Badge> : null}
 				</Group>
 				<Group mt="xs">
@@ -105,4 +105,4 @@ const Profile = ({ value }: ProfileProps) => {
 	);
 };
 
-export default Profile;
+export default User;

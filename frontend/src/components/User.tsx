@@ -1,6 +1,6 @@
 import { Avatar, Group, Stack, Text } from "@mantine/core";
-import { Link } from "react-router-dom";
-import { ProfileHoverCard } from "./ProfileHoverCard";
+import { Link, useNavigate } from "react-router-dom";
+import { UserHoverCard } from "./UserHoverCard";
 import { stopPropagation } from "../utils";
 import { forwardRef, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
@@ -11,11 +11,21 @@ interface UserProps {
 }
 export const User = forwardRef<HTMLDivElement, UserProps>(({ handle }, ref) => {
 	const { isAuthenticated, getAuth } = useContext(AuthContext);
+	const navigate = useNavigate();
 	return (
 		<>
-			<Group ref={ref} p="md" align="start" position="apart">
+			<Group
+				ref={ref}
+				p="md"
+				align="start"
+				position="apart"
+				onClick={() => {
+					navigate(`/${handle}`);
+				}}
+				style={{ cursor: "pointer" }}
+			>
 				<Group align="stretch">
-					<ProfileHoverCard handle={handle}>
+					<UserHoverCard handle={handle}>
 						<Avatar
 							radius="xl"
 							size="lg"
@@ -23,9 +33,9 @@ export const User = forwardRef<HTMLDivElement, UserProps>(({ handle }, ref) => {
 							to={`/${handle}`}
 							onClick={stopPropagation}
 						/>
-					</ProfileHoverCard>
+					</UserHoverCard>
 					<Stack>
-						<ProfileHoverCard handle={handle}>
+						<UserHoverCard handle={handle}>
 							<Text
 								component={Link}
 								to={`/${handle}`}
@@ -34,7 +44,7 @@ export const User = forwardRef<HTMLDivElement, UserProps>(({ handle }, ref) => {
 							>
 								@{handle}
 							</Text>
-						</ProfileHoverCard>
+						</UserHoverCard>
 					</Stack>
 				</Group>
 				{isAuthenticated && getAuth().handle !== handle ? (

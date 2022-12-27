@@ -1,7 +1,7 @@
 import { Avatar, Group, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
 import { stopPropagation } from "../../utils";
-import { ProfileHoverCard } from "../ProfileHoverCard";
+import { UserHoverCard } from "../UserHoverCard";
 
 interface PostAuthorProps {
 	handle: string;
@@ -10,7 +10,7 @@ interface PostAuthorProps {
 export const PostAuthor = ({ handle }: PostAuthorProps) => {
 	return (
 		<Group align="center">
-			<ProfileHoverCard handle={handle}>
+			<UserHoverCard handle={handle}>
 				<Avatar
 					radius="xl"
 					size="md"
@@ -18,8 +18,8 @@ export const PostAuthor = ({ handle }: PostAuthorProps) => {
 					to={`/${handle}`}
 					onClick={stopPropagation}
 				/>
-			</ProfileHoverCard>
-			<ProfileHoverCard handle={handle}>
+			</UserHoverCard>
+			<UserHoverCard handle={handle}>
 				<Text
 					component={Link}
 					to={`/${handle}`}
@@ -28,7 +28,7 @@ export const PostAuthor = ({ handle }: PostAuthorProps) => {
 				>
 					{handle}
 				</Text>
-			</ProfileHoverCard>
+			</UserHoverCard>
 		</Group>
 	);
 };

@@ -35,7 +35,7 @@ export const Signup = ({
 		<AuthModal
 			title="Sign up"
 			opened={signupOpened}
-			setOpened={setLoginOpened}
+			setOpened={setSignupOpened}
 			isLoading={isLoading}
 			form={form}
 			handleSubmit={handleSubmit(mutate, setLoginOpened, setAuth, form)}
