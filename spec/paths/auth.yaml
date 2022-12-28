@@ -34,12 +34,6 @@ login:
           application/json:
             schema:
               $ref: '#/components/schemas/AuthResponse'
-      400:
-        description: Bad Request
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
       401:
         description: Invalid Credentials
         content:
@@ -60,12 +54,22 @@ refresh:
           application/json:
             schema:
               $ref: '#/components/schemas/Tokens'
-      400:
-        description: Bad Request
+      403:
+        description: Malformed Token
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
+
+logout:
+  post:
+    tags:
+      - auth
+    requestBody:
+      $ref: '#/components/requestBodies/RefreshTokenBody'
+    responses:
+      204:
+        description: No Content
       403:
         description: Malformed Token
         content:

@@ -139,6 +139,11 @@ type RefreshTokenBody struct {
 	RefreshToken string `json:"refreshToken"`
 }
 
+// PostLogoutJSONBody defines parameters for PostLogout.
+type PostLogoutJSONBody struct {
+	RefreshToken string `json:"refreshToken"`
+}
+
 // GetMeFeedParams defines parameters for GetMeFeed.
 type GetMeFeedParams struct {
 	Limit  *LimitParam  `form:"limit,omitempty" json:"limit,omitempty"`
@@ -228,6 +233,9 @@ type PostImagesMultipartRequestBody = NewImage
 
 // PostLoginJSONRequestBody defines body for PostLogin for application/json ContentType.
 type PostLoginJSONRequestBody = AuthUser
+
+// PostLogoutJSONRequestBody defines body for PostLogout for application/json ContentType.
+type PostLogoutJSONRequestBody PostLogoutJSONBody
 
 // PostPostsJSONRequestBody defines body for PostPosts for application/json ContentType.
 type PostPostsJSONRequestBody = NewPost

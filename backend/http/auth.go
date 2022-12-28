@@ -52,4 +52,17 @@ func (h *handler) PostRefresh(ctx context.Context, r people.PostRefreshRequestOb
 	return people.PostRefresh200JSONResponse(ts), nil
 }
 
-//TODO: logout (remove refresh token from db)
+func (h *handler) PostLogout(ctx context.Context, r people.PostLogoutRequestObject) (people.PostLogoutResponseObject, error) {
+	err := h.as.Logout(r.Body.RefreshToken)
+	if err != nil {
+		var e *people.Error
+		if errors.As(err, &e) {
+			switch *e.Kind {
+			case people.AuthError:
+				return people.PostLogout403JSONResponse(*e), nil
+			}
+		}
+		return nil, err
+	}
+	return people.PostLogout204Response{}, nil
+}

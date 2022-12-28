@@ -30,6 +30,9 @@ type ServerInterface interface {
 	// (POST /login)
 	PostLogin(ctx echo.Context) error
 
+	// (POST /logout)
+	PostLogout(ctx echo.Context) error
+
 	// (GET /me/feed)
 	GetMeFeed(ctx echo.Context, params GetMeFeedParams) error
 
@@ -119,6 +122,15 @@ func (w *ServerInterfaceWrapper) PostLogin(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.PostLogin(ctx)
+	return err
+}
+
+// PostLogout converts echo context to params.
+func (w *ServerInterfaceWrapper) PostLogout(ctx echo.Context) error {
+	var err error
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.PostLogout(ctx)
 	return err
 }
 
@@ -755,6 +767,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 
 	router.POST(baseURL+"/images", wrapper.PostImages)
 	router.POST(baseURL+"/login", wrapper.PostLogin)
+	router.POST(baseURL+"/logout", wrapper.PostLogout)
 	router.GET(baseURL+"/me/feed", wrapper.GetMeFeed)
 	router.GET(baseURL+"/me/followers", wrapper.GetMeFollowers)
 	router.GET(baseURL+"/me/following", wrapper.GetMeFollowing)
@@ -823,20 +836,36 @@ func (response PostLogin200JSONResponse) VisitPostLoginResponse(w http.ResponseW
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostLogin400JSONResponse Error
-
-func (response PostLogin400JSONResponse) VisitPostLoginResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type PostLogin401JSONResponse Error
 
 func (response PostLogin401JSONResponse) VisitPostLoginResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(401)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type PostLogoutRequestObject struct {
+	Body *PostLogoutJSONRequestBody
+}
+
+type PostLogoutResponseObject interface {
+	VisitPostLogoutResponse(w http.ResponseWriter) error
+}
+
+type PostLogout204Response struct {
+}
+
+func (response PostLogout204Response) VisitPostLogoutResponse(w http.ResponseWriter) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+type PostLogout403JSONResponse Error
+
+func (response PostLogout403JSONResponse) VisitPostLogoutResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1224,15 +1253,6 @@ func (response PostRefresh200JSONResponse) VisitPostRefreshResponse(w http.Respo
 	return json.NewEncoder(w).Encode(response)
 }
 
-type PostRefresh400JSONResponse Error
-
-func (response PostRefresh400JSONResponse) VisitPostRefreshResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(400)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
 type PostRefresh403JSONResponse Error
 
 func (response PostRefresh403JSONResponse) VisitPostRefreshResponse(w http.ResponseWriter) error {
@@ -1428,6 +1448,9 @@ type StrictServerInterface interface {
 	// (POST /login)
 	PostLogin(ctx context.Context, request PostLoginRequestObject) (PostLoginResponseObject, error)
 
+	// (POST /logout)
+	PostLogout(ctx context.Context, request PostLogoutRequestObject) (PostLogoutResponseObject, error)
+
 	// (GET /me/feed)
 	GetMeFeed(ctx context.Context, request GetMeFeedRequestObject) (GetMeFeedResponseObject, error)
 
@@ -1560,6 +1583,35 @@ func (sh *strictHandler) PostLogin(ctx echo.Context) error {
 		return err
 	} else if validResponse, ok := response.(PostLoginResponseObject); ok {
 		return validResponse.VisitPostLoginResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("Unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// PostLogout operation middleware
+func (sh *strictHandler) PostLogout(ctx echo.Context) error {
+	var request PostLogoutRequestObject
+
+	var body PostLogoutJSONRequestBody
+	if err := ctx.Bind(&body); err != nil {
+		return err
+	}
+	request.Body = &body
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.PostLogout(ctx.Request().Context(), request.(PostLogoutRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "PostLogout")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(PostLogoutResponseObject); ok {
+		return validResponse.VisitPostLogoutResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("Unexpected response type: %T", response)
 	}
@@ -2143,38 +2195,39 @@ func (sh *strictHandler) GetUsersHandlePosts(ctx echo.Context, handle HandlePara
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"H4sIAAAAAAAC/+xaW2/buBL+KwbPeaRrO02Bc/zWy2brbZoN0iz2wTACxhrbbCRRJakmQaD/viAp6mLd",
+	"FTvrtn4JEGs012+GMxw9oSXzAuaDLwWaPqGAcOKBBK7/IysJ/CPxHRcu1QP1G/XRFH0LgT8ijHziAZoa",
+	"OoSRWG7AI4pKPgbqgZCc+msURdjQdOTiUZ96oYemY2w5Ul/CWpM9DNdsGP8aUl9qKbewYhxaqGwIG3Q2",
+	"RF35dNd6U6JvQOQmFWMoEEYcvoWUg4OmkoeQE0sezsFfyw2aTt5gpYX99w0usc2lHpW1pmkKtCXCWDYZ",
+	"j3Fq56StnQETcvahzk5DUW9nZ/dqu2pNtf9WS912YGSIQch3zKGg0+VtKDd/CeDvmPOo/l8yX4IvdSYF",
+	"gUuXRFLmj74K5qvfUub/5bBCU/SfUZqMI/NUjCzTVGaqYITRzCNrKBHoha6kAeFytGLcGzpEkvYyL+Be",
+	"862QeQH3l0wbvjszY54VEq9gxUFsrtkd+J3FBpwFwGUcJJ5hVZ71qfR5nnpRplxkUZJA4ApEwHwBRdlS",
+	"sRFNrrg2VBFGoYp7A3WMjbzasaCYwyLCCTaLSsWlpVsFUZnGSECHS+bAGvwhPEhOhpKsNU/nNluzVuRO",
+	"vfrkgpTA/elkHJlyQIS4Z9xRbyiUEqnrQfxjToHJSUcNrEzLziT01p8VcQXgyUm0Dbt5qnyij/Lib5yz",
+	"EhfeUd8pYilfjfSrnxRhhJEHQqj8asSfJVTCz5jrsvsvkshQFHWgwjyHrCa3jLlA/FbhouJmZTkoNSxD",
+	"pdYzOeZKpjUtyx9n1Ve22hN8TX2d1p9BluSyD/cgZIkXMWKuU/5oS4uYDltei3zU8hrMDZOFEqDOsY7a",
+	"1R1TJRo3nGr9rVAsjA2qyFeXK+pUaxMfnPqsLqjXChxK9g110vog7mhQAhMDiHN6B9XQV0+fgXtXv16C",
+	"UMN3Yc48cyQWpdufkxJ2S32i24l66JkXFwkZu/0KSw0FexgWZGUP+LRYn/xv3LM6ClD8lmDqsVbI2CTB",
+	"E62R65GHmXnhNNGDcE4eW6pRHnhrq/J+oze6n072ZVzhjCUHIsF5K3OhdYiEoaQeIFxb7RXJq2tD10IX",
+	"I+uGyEI24P1moeq3y5KwDgxpke0fazV/3EFLiLUxxLArmsEhcOkuBVmGlaKu2c6F3UhWIk8k5bCuP8wU",
+	"zrijnH2oVlB1z0O69tVMG89AvRRXchSuysp5ogXOJKGNX+reNAFtBag+qex4U+cIM148o6nWQjIttWIo",
+	"mnVK0qdJuYTVdmbphrHZwEJHUmpAeWsAzhWI0JVintUED5JW4ToZXfJWkuUShKiapnDHcSvLDW8PXxiV",
+	"DzBx18p3mOQpy2LarUq64p2IM6fItrh0POs9gTWdIlVJ/+zTJa0CbatVbsYprR3pVJl1WhIvCxPxzIQ0",
+	"FaBfIpYOL72SUWmBB8nUodwIy5BT+fhFyTJ23QLhwNWAn/53ZhuWP/6+tld45rpSPU2bl42UcetF/ZU5",
+	"uKh0tS7AAhcGby9nCKPvwAVlPpqiyavxq7EeVwLwSUDRFL3WP2F9k6cVGqW9QxA3bioO2hczR/FmQs4M",
+	"TfYa7bHKsbmbtlF65aVdakqVlnYyHu/sQio/G2kXOSCWnAbSeOLPT0r+6Q5FmtuFElHviDO4Mj7IgQBN",
+	"5/nwzxeRmid0Ds5tC7dQr4xctqZ+fUjONUmPiOQuPvcZlNz1Wk1MJvuPycz/TlzqDN5zcMCXlLimYFnn",
+	"ExWQxPUslI2+VzQ9nF+4Gy0G4FSXv5z6F2zwPvaP9tjr/XvsM3HVHAXOwJzoFd7yYLQCM82vocRbv4P8",
+	"DGeKAufWVfNytVKSUWblEeFG6uzypwV5Zr+lcnBvKZDvOityoH2N8CDj9mwjVeP7THO0/wBkd3ltw5B7",
+	"Z5/BMJ1GTSE63X9aXTA5OGOh73QMe75rykEgbm6bIGB6ryMEfngIqEAWITB6Mr12ZE4PFyQU4fBB/55B",
+	"xMd0cdIFF5uXjNdPES6MgrCsmQjlMRo9o6Ek/n//EpXRAyoGxOVAnMdBbu32nOxV7WXD2KXbhz5tZnbp",
+	"H+25vznEseuFmuQzxm+p46j2+JCrkUFaBnUjAYQvN3Vtg4beF0PWtSBlPuFp0QEcG/04YvipPmhP5nur",
+	"Fie81ubSfp3VLXjZz75KXNYwnXYHJa6H4H6sePkKeFC1oS3SRsnerzXezuPV0DFceynlJiAts2YHscDH",
+	"GbF/CU+DVdX8HxPnh5gBlPHZGcB+gtQ5bUtKbOabhxYpfZVs3A8uqX+BnszGahF/Hl8zte0wXIvjANhr",
+	"ADzUMzxFkSoH8XcT9RcB8dpoTxun3QXHfg1fDYTDWV1xWFMh429UajwfU/0Mm9Z/Yftd4vhQNVgtriB0",
+	"I3awVxC/SA8bxFeQOmi5AGYXDrUhPF5r7210r45Ku/1wJj79F8WbbplwXCoeHICK2+VSMDVsmgtg6rNy",
+	"PoLpZwFTuunaAlNyqdgCSP1uRV4ARD/mtHvgAMpek2yBJtmWtgCNXZseQfMrgCZZX0TRPwEAAP//HQ4a",
+	"oyFDAAA=",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
