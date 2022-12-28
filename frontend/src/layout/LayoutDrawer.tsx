@@ -3,6 +3,7 @@ import { Dispatch, SetStateAction, useContext } from "react";
 import { UserInfo } from "../components/UserInfo";
 import { AuthContext } from "../context/AuthContext";
 import { UsersContext } from "../context/UsersContext";
+import { postLogout } from "../spec.gen";
 
 interface LayoutDrawerProps {
 	isOpened: boolean;
@@ -13,6 +14,13 @@ export const LayoutDrawer = ({ isOpened, setIsOpened }: LayoutDrawerProps) => {
 	const { getAuth, clearAuth } = useContext(AuthContext);
 	const { users } = useContext(UsersContext);
 	const user = users[getAuth().handle!];
+	const handleLogout = () => {
+		const { refreshToken } = getAuth();
+		if (refreshToken) {
+			postLogout({ refreshToken });
+		}
+		clearAuth();
+	};
 	return (
 		<Drawer
 			opened={isOpened}
@@ -23,7 +31,7 @@ export const LayoutDrawer = ({ isOpened, setIsOpened }: LayoutDrawerProps) => {
 			zIndex={9999}
 		>
 			<UserInfo handle={user!.handle} />
-			<Button onClick={clearAuth} fullWidth radius="xl" mt="xl">
+			<Button onClick={handleLogout} fullWidth radius="xl" mt="xl">
 				Logout
 			</Button>
 		</Drawer>

@@ -205,6 +205,58 @@ export const usePostRefresh = <
 	>(mutationFn, mutationOptions);
 };
 
+export const postLogout = (
+	refreshTokenBodyBody: RefreshTokenBodyBody,
+	options?: SecondParameter<typeof customInstance>
+) => {
+	return customInstance<void>(
+		{
+			url: `/logout`,
+			method: "post",
+			headers: { "Content-Type": "application/json" },
+			data: refreshTokenBodyBody,
+		},
+		options
+	);
+};
+
+export type PostLogoutMutationResult = NonNullable<
+	Awaited<ReturnType<typeof postLogout>>
+>;
+export type PostLogoutMutationBody = RefreshTokenBodyBody;
+export type PostLogoutMutationError = ErrorType<Error>;
+
+export const usePostLogout = <
+	TError = ErrorType<Error>,
+	TContext = unknown
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof postLogout>>,
+		TError,
+		{ data: RefreshTokenBodyBody },
+		TContext
+	>;
+	request?: SecondParameter<typeof customInstance>;
+}) => {
+	const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof postLogout>>,
+		{ data: RefreshTokenBodyBody }
+	> = (props) => {
+		const { data } = props ?? {};
+
+		return postLogout(data, requestOptions);
+	};
+
+	return useMutation<
+		Awaited<ReturnType<typeof postLogout>>,
+		TError,
+		{ data: RefreshTokenBodyBody },
+		TContext
+	>(mutationFn, mutationOptions);
+};
+
 export const getMeFeed = (
 	params?: GetMeFeedParams,
 	options?: SecondParameter<typeof customInstance>,
