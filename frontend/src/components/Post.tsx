@@ -22,13 +22,14 @@ export const Post = forwardRef<HTMLDivElement, PostProps>(
 		return (
 			post && (
 				<Paper
-					p="xs"
-					radius="xs"
-					withBorder
-					ref={ref}
 					onClick={() => {
 						navigate(`/${handle}/${id}`);
 					}}
+					ref={ref}
+					p="xs"
+					m={-1}
+					withBorder
+					radius={0}
 					style={{ cursor: "pointer" }}
 				>
 					<Group>

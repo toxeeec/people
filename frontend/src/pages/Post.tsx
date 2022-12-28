@@ -15,6 +15,7 @@ import { MutationFn, CreatePost } from "../components/post/CreatePost";
 import { Container } from "@mantine/core";
 import { PostParents } from "../components/post/PostParents";
 import { useScrollIntoView } from "@mantine/hooks";
+import { Wrapper } from "../components/Wrapper";
 
 const Post = () => {
 	const params = useParams();
@@ -47,7 +48,7 @@ const Post = () => {
 	return isLoading || !data ? (
 		<CenterLoader />
 	) : (
-		<>
+		<Wrapper>
 			<PostParents id={postID} scroll={scroll} />
 			<MainPost id={postID} handle={data.user.handle} ref={targetRef} />
 			<Container p="md" pos="relative">
@@ -57,7 +58,7 @@ const Post = () => {
 				/>
 			</Container>
 			<Posts query={query} queryKey={[QueryKey.REPLIES, postID]} />
-		</>
+		</Wrapper>
 	);
 };
 

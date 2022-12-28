@@ -107,6 +107,8 @@ export const CreatePost = forwardRef<HTMLTextAreaElement, CreatePostProps>(
 				<Textarea
 					placeholder="Create new post"
 					value={content}
+					autosize
+					minRows={4}
 					variant="unstyled"
 					onChange={(e) => setContent(e.currentTarget.value)}
 					error={error}

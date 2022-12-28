@@ -1,6 +1,7 @@
 import { Tabs } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { Users, Query } from "../components/Users";
+import { Wrapper } from "../components/Wrapper";
 import { QueryKey } from "../query-key";
 import { getUsersHandleFollowers, getUsersHandleFollowing } from "../spec.gen";
 
@@ -19,30 +20,32 @@ const Follows = ({ value }: { value: FollowsPage }) => {
 	};
 
 	return (
-		<Tabs
-			value={value}
-			onTabChange={(value) =>
-				navigate(`/${params.handle}/${value}`, { replace: true })
-			}
-		>
-			<Tabs.List grow position="center">
-				<Tabs.Tab value="following">Following</Tabs.Tab>
-				<Tabs.Tab value="followers">Followers</Tabs.Tab>
-			</Tabs.List>
+		<Wrapper>
+			<Tabs
+				value={value}
+				onTabChange={(value) =>
+					navigate(`/${params.handle}/${value}`, { replace: true })
+				}
+			>
+				<Tabs.List grow position="center">
+					<Tabs.Tab value="following">Following</Tabs.Tab>
+					<Tabs.Tab value="followers">Followers</Tabs.Tab>
+				</Tabs.List>
 
-			<Tabs.Panel value="following">
-				<Users
-					query={queryFollowing}
-					queryKey={[QueryKey.FOLLOWING, params.handle!]}
-				/>
-			</Tabs.Panel>
-			<Tabs.Panel value="followers">
-				<Users
-					query={queryFollowers}
-					queryKey={[QueryKey.FOLLOWERS, params.handle!]}
-				/>
-			</Tabs.Panel>
-		</Tabs>
+				<Tabs.Panel value="following">
+					<Users
+						query={queryFollowing}
+						queryKey={[QueryKey.FOLLOWING, params.handle!]}
+					/>
+				</Tabs.Panel>
+				<Tabs.Panel value="followers">
+					<Users
+						query={queryFollowers}
+						queryKey={[QueryKey.FOLLOWERS, params.handle!]}
+					/>
+				</Tabs.Panel>
+			</Tabs>
+		</Wrapper>
 	);
 };
 

@@ -1,9 +1,8 @@
 import {
 	Avatar,
 	Badge,
-	Container,
+	Box,
 	Group,
-	Paper,
 	Tabs,
 	Text,
 	UnstyledButton,
@@ -13,6 +12,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { CenterLoader } from "../components/CenterLoader";
 import { FollowButton } from "../components/FollowButton";
 import { Posts, Query } from "../components/Posts";
+import { Wrapper } from "../components/Wrapper";
 import { AuthContext } from "../context/AuthContext";
 import { UsersContext } from "../context/UsersContext";
 import { QueryKey } from "../query-key";
@@ -49,8 +49,8 @@ const User = ({ value }: UserProps) => {
 	return isLoading || !user ? (
 		<CenterLoader />
 	) : (
-		<Paper withBorder radius="xs">
-			<Container p="xs">
+		<Wrapper>
+			<Box p="xs">
 				<Group align="center" position="apart">
 					<Avatar size="xl" radius={999} mb="xs" />
 					{!isAuthenticated || getAuth().handle === user.handle ? null : (
@@ -78,7 +78,7 @@ const User = ({ value }: UserProps) => {
 						{user?.followers === 1 ? " Follower" : " Followers"}
 					</UnstyledButton>
 				</Group>
-			</Container>
+			</Box>
 			<Tabs
 				value={value}
 				onTabChange={(value) => {
@@ -101,7 +101,7 @@ const User = ({ value }: UserProps) => {
 					<Posts query={likesQuery} queryKey={[QueryKey.LIKES, user.handle]} />
 				</Tabs.Panel>
 			</Tabs>
-		</Paper>
+		</Wrapper>
 	);
 };
 

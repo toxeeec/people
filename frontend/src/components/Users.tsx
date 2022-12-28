@@ -1,7 +1,6 @@
 import { QueryKey, useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useContext, useEffect } from "react";
 import { Users as UsersType } from "../models";
-import { Container } from "@mantine/core";
 import { useInView } from "react-intersection-observer";
 import { CenterLoader } from "../components/CenterLoader";
 import { UsersContext } from "../context/UsersContext";
@@ -57,7 +56,7 @@ export const Users = ({ query, queryKey, enabled = true }: PostsProps) => {
 	}, [fetchNextPage, inView]);
 
 	return (
-		<Container px={0}>
+		<>
 			{enabled && status === "loading" ? (
 				<CenterLoader />
 			) : (
@@ -70,6 +69,6 @@ export const Users = ({ query, queryKey, enabled = true }: PostsProps) => {
 				))
 			)}
 			{isFetchingNextPage && <CenterLoader />}
-		</Container>
+		</>
 	);
 };

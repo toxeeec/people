@@ -17,7 +17,7 @@ export const MainPost = forwardRef<HTMLDivElement, MainPostProps>(
 
 		return (
 			post && (
-				<Paper p="xs" radius="xs" withBorder ref={ref}>
+				<Paper p="xs" withBorder radius={0} m={-1} ref={ref}>
 					<PostAuthor handle={handle} />
 					<Text my="xs">{post.content}</Text>
 					<Images images={post.images} />

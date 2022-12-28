@@ -4,12 +4,12 @@ import { Link } from "react-router-dom";
 import { UsersContext } from "../context/UsersContext";
 import { stopPropagation } from "../utils";
 
-interface UserInfo {
+interface UserInfoProps {
 	handle: string;
 	children?: React.ReactNode;
 }
 
-export const UserInfo = ({ handle, children }: UserInfo) => {
+export const UserInfo = ({ handle, children }: UserInfoProps) => {
 	const { users } = useContext(UsersContext);
 	const user = users[handle]!;
 	return (

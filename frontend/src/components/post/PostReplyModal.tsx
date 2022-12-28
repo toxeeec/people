@@ -34,14 +34,14 @@ export const PostReplyModal = ({
 				setOpened(false);
 			}}
 			onClick={stopPropagation}
-			centered
-			padding="md"
 			title={
 				<Group align="center">
 					<Avatar radius="xl" size="md" />
 					<Text weight="bold">{handle}</Text>
 				</Group>
 			}
+			centered
+			padding="lg"
 		>
 			<Text my="xs">{post?.content}</Text>
 			<CreatePost

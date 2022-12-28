@@ -47,7 +47,7 @@ export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 	return (
 		<>
 			<Space h={60} />
-			<Header height={60} fixed>
+			<Header height={60} fixed withBorder>
 				<Group h={60} align="center" px="xs" position="apart">
 					<Group>
 						{isHome && isAuthenticated ? (

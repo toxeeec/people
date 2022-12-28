@@ -16,7 +16,6 @@ export const Search = ({ value, setValue }: SearchProps) => {
 			radius={0}
 			size="md"
 			w="100%"
-			pos="fixed"
 			autoComplete="off"
 			style={{ zIndex: 1 }}
 		/>

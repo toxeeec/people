@@ -1,7 +1,6 @@
 import { QueryKey, useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useContext, useEffect } from "react";
 import { PostsResponse } from "../models";
-import { Container } from "@mantine/core";
 import { Post } from "../components/Post";
 import { useInView } from "react-intersection-observer";
 import { CenterLoader } from "../components/CenterLoader";
@@ -63,7 +62,7 @@ export const Posts = ({ query, queryKey, enabled = true }: PostsProps) => {
 	}, [fetchNextPage, inView]);
 
 	return (
-		<Container px={0}>
+		<>
 			{enabled && status === "loading" ? (
 				<CenterLoader />
 			) : (
@@ -82,6 +81,6 @@ export const Posts = ({ query, queryKey, enabled = true }: PostsProps) => {
 				))
 			)}
 			{isFetchingNextPage && <CenterLoader />}
-		</Container>
+		</>
 	);
 };
