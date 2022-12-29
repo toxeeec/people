@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/getkin/kin-openapi/openapi3filter"
 	"github.com/go-playground/validator/v10"
@@ -24,5 +26,6 @@ func main() {
 	}
 	v := validator.New()
 	e := http.NewServer(db, v)
-	e.Logger.Fatal(e.Start(":8000"))
+	port := os.Getenv("BACKEND_PORT")
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%v", port)))
 }
