@@ -1,0 +1,14 @@
+FROM golang:1.19-alpine3.17 AS build
+WORKDIR /app
+RUN go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
+RUN go install golang.org/x/tools/cmd/stringer@latest
+COPY openapi.json ./
+COPY go.mod ./
+COPY go.sum ./
+RUN go mod download
+COPY . .
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" cmd/main.go
+
+FROM scratch
+COPY --from=build /app/main .
+CMD ["/main"]

@@ -22,7 +22,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	v := validator.New()
 	e := http.NewServer(db, v)
 	e.Logger.Fatal(e.Start(":8000"))

@@ -31,7 +31,9 @@ services:
       - db-data:/var/lib/postgresql/data
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     image: frontend-dev
     ports: 
       - 5173:5173
