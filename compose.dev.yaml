@@ -7,7 +7,7 @@ services:
       - .env.dev
     image: backend-dev
     depends_on:
-      - db
+      - postgres
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
@@ -21,7 +21,7 @@ services:
     volumes:
       - ./backend:/app
 
-  db:
+  postgres:
     env_file:
       - .env.dev
     environment:

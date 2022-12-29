@@ -7,7 +7,7 @@ services:
     env_file:
       - .env.test
     depends_on:
-      - db
+      - postgres
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
@@ -16,7 +16,7 @@ services:
       - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET:-ACCESS_SECRET}
       - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET:-REFRESH_SECRET}
 
-  db:
+  postgres:
     env_file:
       - .env.test
     environment:

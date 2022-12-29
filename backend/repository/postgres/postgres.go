@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	host     = "host.docker.internal"
+	host     = "postgres"
 	port     = os.Getenv("POSTGRES_PORT")
 	user     = os.Getenv("POSTGRES_USER")
 	password = os.Getenv("POSTGRES_PASSWORD")

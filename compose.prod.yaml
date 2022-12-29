@@ -2,7 +2,7 @@ services:
   backend:
     image: toxec/people-backend:main
     depends_on:
-      - db
+      - postgres
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -11,15 +11,13 @@ services:
       - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
       - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
       - BACKEND_PORT=${BACKEND_PORT}
-    extra_hosts:
-      - host.docker.internal:host-gateway
     ports:
       - ${BACKEND_PORT}:${BACKEND_PORT}
     restart: always 
     volumes:
       - .:/backend/app
 
-  db:
+  postgres:
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_USER=${POSTGRES_USER}
