@@ -1,4 +1,4 @@
-name: Publish Backend Docker image
+name: Publish Docker images
 
 on:
   push:
@@ -50,3 +50,16 @@ jobs:
           push: true
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
+
+  update_linode:
+    name: Tell linode server to update
+    needs: push_to_registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.LINODE_HOST }}
+          username: ${{ secrets.LINODE_USERNAME }}
+          password: ${{ secrets.LINODE_PASSWORD }}
+          script: bash update.sh
