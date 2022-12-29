@@ -1,8 +1,7 @@
 FROM node:19.3-alpine3.16 AS build
 WORKDIR /app
-COPY openapi.json ./
 COPY . .
-RUN npm install
+RUN npm ci
 RUN npm run build
 
 FROM nginx:1.23-alpine

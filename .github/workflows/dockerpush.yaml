@@ -1,0 +1,52 @@
+name: Publish Backend Docker image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      # backend
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta-backend
+        uses: docker/metadata-action@v4
+        with:
+          images: toxec/people-backend
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./backend
+          file: 'backend/Dockerfile.prod'
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+
+      # frontend
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta-frontend
+        uses: docker/metadata-action@v4
+        with:
+          images: toxec/people-frontend
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./frontend
+          file: 'frontend/Dockerfile.prod'
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
