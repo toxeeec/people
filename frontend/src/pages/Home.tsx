@@ -9,7 +9,11 @@ const Home = () => {
 	return (
 		<Wrapper>
 			<Container p="md" pos="relative">
-				<CreatePost mutationFn={postPosts} queryKey={[QueryKey.FEED]} />
+				<CreatePost
+					mutationFn={postPosts}
+					queryKey={[QueryKey.FEED]}
+					placeholder={"Create post"}
+				/>
 			</Container>
 			<Posts query={getMeFeed} queryKey={[QueryKey.FEED]} />
 		</Wrapper>

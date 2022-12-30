@@ -67,6 +67,7 @@ func (r *postRepo) Delete(postID, userID uint) error {
 func (r *postRepo) ListUserPosts(userID uint, p pagination.ID) ([]people.Post, error) {
 	q, args, err := NewQuery(SelectPost).
 		Where("user_id = ?", userID).
+		Where("replies_to IS NULL").
 		Paginate(p, "post_id", "?").
 		Build()
 	if err != nil {

@@ -49,6 +49,7 @@ export const PostReplyModal = ({
 				queryKey={queryKey}
 				setOpened={setOpened}
 				ref={focusTrapRef}
+				placeholder={"Create reply"}
 			/>
 		</Modal>
 	);

@@ -32,10 +32,11 @@ interface CreatePostProps {
 	mutationFn: MutationFn;
 	queryKey: QueryKey;
 	setOpened?: Dispatch<SetStateAction<boolean>>;
+	placeholder: string;
 }
 
 export const CreatePost = forwardRef<HTMLTextAreaElement, CreatePostProps>(
-	({ mutationFn, queryKey, setOpened }, ref) => {
+	({ mutationFn, queryKey, setOpened, placeholder }, ref) => {
 		const [content, setContent] = useState("");
 		const [error, setError] = useState("");
 		const queryClient = useQueryClient();
@@ -105,7 +106,7 @@ export const CreatePost = forwardRef<HTMLTextAreaElement, CreatePostProps>(
 			<>
 				<LoadingOverlay visible={loading} />
 				<Textarea
-					placeholder="Create new post"
+					placeholder={placeholder}
 					value={content}
 					autosize
 					minRows={4}

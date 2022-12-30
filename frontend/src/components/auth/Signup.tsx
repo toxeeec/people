@@ -20,8 +20,10 @@ export const Signup = ({
 	const form = useForm<AuthUser>({
 		initialValues: { handle: "", password: "" },
 		validate: {
-			handle: (value) => (value.length < 5 ? "Invalid Handle" : null),
-			password: (value) => (value.length < 12 ? "Invalid Password" : null),
+			handle: (value) =>
+				value.length < 5 ? "Handle must have at least 5 characters" : null,
+			password: (value) =>
+				value.length < 12 ? "Password must have at least 12 characters" : null,
 		},
 	});
 	const { setAuth } = useContext(AuthContext);

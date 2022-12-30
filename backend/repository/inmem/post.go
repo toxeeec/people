@@ -66,7 +66,7 @@ func (r *postRepo) ListUserPosts(userID uint, p pagination.Pagination[uint]) ([]
 	}
 	var ps []people.Post
 	for k, v := range r.m {
-		if v.UserID == userID && k < before && k > after {
+		if v.UserID == userID && v.RepliesTo == nil && k < before && k > after {
 			ps = append(ps, v)
 		}
 		if len(ps) == int(p.Limit) {
