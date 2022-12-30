@@ -1,3 +1,5 @@
+.air.toml
+.gitignore
 Dockerfile*
 init.sql
 tmp/

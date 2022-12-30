@@ -1,0 +1,6 @@
+.eslintignore
+.eslintrc.json
+.gitignore
+.prettierrc
+Dockerfile*
+node_modules/

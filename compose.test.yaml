@@ -4,28 +4,24 @@ services:
       context: ./backend
       dockerfile: Dockerfile.test
     image: backend-test
-    env_file:
-      - .env.test
     depends_on:
       - postgres
     environment:
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_DB=${POSTGRES_DB:-people-test}
-      - POSTGRES_PORT=${POSTGRES_PORT:-5433}
-      - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET:-ACCESS_SECRET}
-      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET:-REFRESH_SECRET}
+      - POSTGRES_DB=${TEST_POSTGRES_DB:-people-test}
+      - POSTGRES_PORT=5432
+      - ACCESS_TOKEN_SECRET=${TEST_ACCESS_TOKEN_SECRET:-ACCESS_SECRET}
+      - REFRESH_TOKEN_SECRET=${TEST_REFRESH_TOKEN_SECRET:-REFRESH_SECRET}
 
   postgres:
-    env_file:
-      - .env.test
     environment:
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_DB=${POSTGRES_DB:-people-test}
+      - POSTGRES_DB=${TEST_POSTGRES_DB:-people-test}
     image: postgres:alpine
     ports: 
-      - ${POSTGRES_PORT:-5433}:5432
+      - 5433:5432
     volumes:
       - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
       - db-data:/var/lib/postgresql/data

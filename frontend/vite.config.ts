@@ -27,7 +27,10 @@ export default defineConfig(({ mode }) => {
 			},
 		},
 		define: {
-			BACKEND_PORT: env.BACKEND_PORT,
+			BACKEND_PORT: env.BACKEND_PORT || "8000",
+		},
+		server: {
+			port: parseInt(env.FRONTEND_PORT) || 80,
 		},
 	};
 });

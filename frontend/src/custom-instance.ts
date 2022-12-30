@@ -2,8 +2,8 @@ import Axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { AuthValues, SetAuthProps } from "./context/AuthContext";
 import { postRefresh } from "./spec.gen";
 
-export const baseURL = "http://" + location.hostname + `:${BACKEND_PORT}`;
-
+const port = BACKEND_PORT;
+export const baseURL = "http://" + location.hostname + `:${port}`;
 export const AXIOS_INSTANCE = Axios.create({
 	baseURL,
 });

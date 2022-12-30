@@ -3,16 +3,14 @@ services:
     build: 
       context: ./backend
       dockerfile: Dockerfile.dev
-    env_file:
-      - .env.dev
     image: backend-dev
     depends_on:
       - postgres
     environment:
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_DB=${POSTGRES_DB:-people}
-      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_PORT=5432
       - ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET:-ACCESS_SECRET}
       - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET:-REFRESH_SECRET}
       - BACKEND_PORT=${BACKEND_PORT:-8000}
@@ -22,15 +20,13 @@ services:
       - ./backend:/app
 
   postgres:
-    env_file:
-      - .env.dev
     environment:
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_DB=${POSTGRES_DB:-people}
     image: postgres:alpine
     ports: 
-      - ${POSTGRES_PORT:-5432}:5432
+      - 5432:5432
     volumes:
       - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
       - db-data:/var/lib/postgresql/data
@@ -41,14 +37,12 @@ services:
       dockerfile: Dockerfile.dev
     environment:
       - BACKEND_PORT=${BACKEND_PORT:-8000}
-    env_file:
-      - .env.dev
+      - FRONTEND_PORT=${FRONTEND_PORT:-5173}
     image: frontend-dev
     ports: 
-      - ${FRONTEND_PORT:-5173}:5173
+      - ${FRONTEND_PORT:-5173}:${FRONTEND_PORT:-5173}
     volumes:
       - ./frontend:/app
 
 volumes:
   db-data:
-    
