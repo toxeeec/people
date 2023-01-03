@@ -1,9 +1,9 @@
 import { Avatar, Group, Modal, Text } from "@mantine/core";
 import { useFocusTrap } from "@mantine/hooks";
+import { QueryKey } from "@tanstack/react-query";
 import { Dispatch, SetStateAction, useContext } from "react";
 import { PostsContext } from "../../context/PostsContext";
 import { postPostsPostIDReplies } from "../../spec.gen";
-import { stopPropagation } from "../../utils";
 import { MutationFn, CreatePost } from "./CreatePost";
 
 interface PostReplyModalProps {
@@ -11,7 +11,7 @@ interface PostReplyModalProps {
 	setOpened: Dispatch<SetStateAction<boolean>>;
 	id: number;
 	handle: string;
-	queryKey: readonly unknown[];
+	queryKey: QueryKey;
 }
 
 export const PostReplyModal = ({
@@ -33,7 +33,6 @@ export const PostReplyModal = ({
 			onClose={() => {
 				setOpened(false);
 			}}
-			onClick={stopPropagation}
 			title={
 				<Group align="center">
 					<Avatar radius="xl" size="md" />

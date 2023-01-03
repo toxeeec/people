@@ -1,7 +1,6 @@
 import { Image as ImageComponent, Modal } from "@mantine/core";
 import { useState } from "react";
 import { baseURL } from "../../custom-instance";
-import { stopPropagation } from "../../utils";
 
 interface ImageProps {
 	path: string;
@@ -15,8 +14,7 @@ export const Image = ({ path }: ImageProps) => {
 				src={`${baseURL}${path}`}
 				styles={{ image: { aspectRatio: "3 / 2" } }}
 				radius="lg"
-				onClick={(e) => {
-					e.stopPropagation();
+				onClick={() => {
 					setOpened(true);
 				}}
 			/>
@@ -24,7 +22,6 @@ export const Image = ({ path }: ImageProps) => {
 				centered
 				opened={opened}
 				onClose={() => setOpened(false)}
-				onClick={stopPropagation}
 				zIndex={9999}
 				size="auto"
 				fullScreen

@@ -33,7 +33,7 @@ export const PostParents = ({ id, scroll }: PostParentsProps) => {
 			<Post
 				id={data.data.id}
 				handle={data.user.handle}
-				queryKey={[QueryKey.PARENT, data.data.id]}
+				queryKey={[QueryKey.POSTS, data.data.id]}
 			/>
 		</>
 	) : null;

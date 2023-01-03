@@ -1,5 +1,5 @@
 import { Button } from "@mantine/core";
-import { MouseEvent, useCallback, useContext } from "react";
+import { useCallback, useContext } from "react";
 import { UsersContext } from "../context/UsersContext";
 import {
 	useDeleteMeFollowingHandle,
@@ -24,21 +24,17 @@ export const FollowButton = ({ handle }: FollowButtonProps) => {
 
 	const isLoading = isFollowLoading || isUnfollowLoading;
 
-	const handleFollow = useCallback(
-		(e: MouseEvent) => {
-			e.stopPropagation();
-			const fn = user!.status?.isFollowed ? unfollow : follow;
-			fn(
-				{ handle: user!.handle! },
-				{
-					onSuccess: (user) => {
-						setUser(user);
-					},
-				}
-			);
-		},
-		[follow, unfollow, user, setUser]
-	);
+	const handleFollow = useCallback(() => {
+		const fn = user!.status?.isFollowed ? unfollow : follow;
+		fn(
+			{ handle: user!.handle! },
+			{
+				onSuccess: (user) => {
+					setUser(user);
+				},
+			}
+		);
+	}, [follow, unfollow, user, setUser]);
 
 	return (
 		<Button

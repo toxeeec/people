@@ -4,7 +4,7 @@ import {
 	QueryKey as QueryKeyType,
 	useQueryClient,
 } from "@tanstack/react-query";
-import { MouseEvent, useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import { PostsContext } from "../../context/PostsContext";
 import { UsersContext } from "../../context/UsersContext";
 import { QueryKey } from "../../query-key";
@@ -31,32 +31,27 @@ export const PostActions = ({ id, handle, queryKey }: PostActionsProps) => {
 		mutation: { retry: 1 },
 	});
 	const post = posts[id]!;
-	const handleLike = useCallback(
-		(e: MouseEvent) => {
-			e.stopPropagation();
-			const fn = post.status?.isLiked ? unlike : like;
-			fn(
-				{ postID: post.id },
-				{
-					onSuccess: (postResponse) => {
-						setPost(postResponse.data);
-						setUser(postResponse.user);
-						queryClient.resetQueries({
-							queryKey: [QueryKey.LIKES, id],
-						});
-						queryClient.invalidateQueries({
-							queryKey: [QueryKey.LIKES, handle],
-						});
-					},
-				}
-			);
-		},
-		[post, setPost, setUser, like, unlike, queryClient, id, handle]
-	);
+	const handleLike = useCallback(() => {
+		const fn = post.status?.isLiked ? unlike : like;
+		fn(
+			{ postID: post.id },
+			{
+				onSuccess: (postResponse) => {
+					setPost(postResponse.data);
+					setUser(postResponse.user);
+					queryClient.resetQueries({
+						queryKey: [QueryKey.POSTS],
+					});
+					queryClient.invalidateQueries({
+						queryKey: [QueryKey.USERS],
+					});
+				},
+			}
+		);
+	}, [post, setPost, setUser, like, unlike, queryClient]);
 
 	const [opened, setOpened] = useState(false);
-	const handleOpen = (e: MouseEvent) => {
-		e.stopPropagation();
+	const handleOpen = () => {
 		setOpened(true);
 	};
 

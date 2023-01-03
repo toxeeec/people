@@ -45,14 +45,14 @@ const Search = ({ value }: { value: SearchPage }) => {
 						<Posts
 							enabled={value === "posts" && debounced.length > 0}
 							query={postsQuery}
-							queryKey={[QueryKey.POSTS_SEARCH, debounced]}
+							queryKey={[QueryKey.POSTS, QueryKey.SEARCH, debounced]}
 						/>
 					</Tabs.Panel>
 					<Tabs.Panel value="people">
 						<Users
 							enabled={value === "people" && debounced.length > 0}
 							query={usersQuery}
-							queryKey={[QueryKey.USERS_SEARCH, debounced]}
+							queryKey={[QueryKey.USERS, QueryKey.SEARCH, debounced]}
 						/>
 					</Tabs.Panel>
 				</Box>

@@ -12,6 +12,7 @@ require (
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/lib/pq v1.10.7
+	github.com/robfig/cron/v3 v3.0.0
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/crypto v0.4.0
 )
@@ -20,7 +21,6 @@ require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/robfig/cron/v3 v3.0.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 )
 

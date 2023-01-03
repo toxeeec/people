@@ -1,7 +1,6 @@
 import { Avatar, Group, Stack, Text } from "@mantine/core";
 import { Link, useNavigate } from "react-router-dom";
 import { UserHoverCard } from "./UserHoverCard";
-import { stopPropagation } from "../utils";
 import { forwardRef, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { FollowButton } from "./FollowButton";
@@ -19,29 +18,20 @@ export const User = forwardRef<HTMLDivElement, UserProps>(({ handle }, ref) => {
 				p="md"
 				align="start"
 				position="apart"
-				onClick={() => {
-					navigate(`/${handle}`);
+				onClick={(e) => {
+					if (e.target === e.currentTarget) {
+						navigate(`/${handle}`);
+					}
 				}}
 				style={{ cursor: "pointer" }}
 			>
 				<Group align="stretch">
 					<UserHoverCard handle={handle}>
-						<Avatar
-							radius="xl"
-							size="lg"
-							component={Link}
-							to={`/${handle}`}
-							onClick={stopPropagation}
-						/>
+						<Avatar radius="xl" size="lg" component={Link} to={`/${handle}`} />
 					</UserHoverCard>
 					<Stack>
 						<UserHoverCard handle={handle}>
-							<Text
-								component={Link}
-								to={`/${handle}`}
-								weight="bold"
-								onClick={stopPropagation}
-							>
+							<Text component={Link} to={`/${handle}`} weight="bold">
 								@{handle}
 							</Text>
 						</UserHoverCard>

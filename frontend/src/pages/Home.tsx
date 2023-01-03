@@ -11,11 +11,11 @@ const Home = () => {
 			<Container p="md" pos="relative">
 				<CreatePost
 					mutationFn={postPosts}
-					queryKey={[QueryKey.FEED]}
+					queryKey={[QueryKey.POSTS, QueryKey.FEED]}
 					placeholder={"Create post"}
 				/>
 			</Container>
-			<Posts query={getMeFeed} queryKey={[QueryKey.FEED]} />
+			<Posts query={getMeFeed} queryKey={[QueryKey.POSTS, QueryKey.FEED]} />
 		</Wrapper>
 	);
 };

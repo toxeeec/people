@@ -41,6 +41,8 @@ services:
     image: frontend-dev
     ports: 
       - ${FRONTEND_PORT:-5173}:${FRONTEND_PORT:-5173}
+    volumes:
+      - ./frontend:/app
 
 volumes:
   db-data:

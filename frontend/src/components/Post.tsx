@@ -6,6 +6,7 @@ import { PostsContext } from "../context/PostsContext";
 import { Images } from "./images/Images";
 import { PostActions } from "./post/PostActions";
 import { PostAuthor } from "./post/PostAuthor";
+import { PostEdit } from "./post/PostEdit";
 
 interface PostProps {
 	id: number;
@@ -22,8 +23,10 @@ export const Post = forwardRef<HTMLDivElement, PostProps>(
 		return (
 			post && (
 				<Paper
-					onClick={() => {
-						navigate(`/${handle}/${id}`);
+					onClick={(e) => {
+						if (e.target === e.currentTarget) {
+							navigate(`/${handle}/${id}`);
+						}
 					}}
 					ref={ref}
 					p="xs"
@@ -32,10 +35,18 @@ export const Post = forwardRef<HTMLDivElement, PostProps>(
 					radius={0}
 					style={{ cursor: "pointer" }}
 				>
-					<Group>
+					<Group position="apart">
 						<PostAuthor handle={handle} />
+						<PostEdit
+							id={id}
+							handle={handle}
+							queryKey={queryKey}
+							exact={true}
+						/>
 					</Group>
-					<Text my="xs">{post.content}</Text>
+					<Text my="xs" style={{ display: "inline-block" }}>
+						{post.content}
+					</Text>
 					<Images images={post.images} />
 					<PostActions id={id} handle={handle} queryKey={queryKey} />
 				</Paper>

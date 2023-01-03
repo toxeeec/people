@@ -14,7 +14,6 @@ import { QueryKey, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
 	Dispatch,
 	forwardRef,
-	MouseEvent,
 	SetStateAction,
 	useCallback,
 	useContext,
@@ -49,7 +48,7 @@ export const CreatePost = forwardRef<HTMLTextAreaElement, CreatePostProps>(
 				setPost(postResponse.data);
 				setUser(postResponse.user);
 				setContent("");
-				queryClient.invalidateQueries({ queryKey });
+				queryClient.invalidateQueries({ queryKey, exact: true });
 				setOpened && setOpened(false);
 			},
 			onError: (error) => {
@@ -78,25 +77,21 @@ export const CreatePost = forwardRef<HTMLTextAreaElement, CreatePostProps>(
 			resetRef.current?.();
 		};
 
-		const handleSubmit = useCallback(
-			(e: MouseEvent) => {
-				e.stopPropagation();
-				setLoading(true);
-				Promise.all(imageResponses).then((irs) => {
-					mutate(
-						{ content: content.trim(), images: irs.map((ir) => ir.id) },
-						{
-							onSettled: () => {
-								setFiles([]);
-								setImageResponses([]);
-								setLoading(false);
-							},
-						}
-					);
-				});
-			},
-			[content, mutate, imageResponses]
-		);
+		const handleSubmit = useCallback(() => {
+			setLoading(true);
+			Promise.all(imageResponses).then((irs) => {
+				mutate(
+					{ content: content.trim(), images: irs.map((ir) => ir.id) },
+					{
+						onSettled: () => {
+							setFiles([]);
+							setImageResponses([]);
+							setLoading(false);
+						},
+					}
+				);
+			});
+		}, [content, mutate, imageResponses]);
 
 		const postDisabled =
 			(files.length === 0 && content.trim().length === 0) ||

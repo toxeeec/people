@@ -49,14 +49,12 @@ export const MainPostActions = ({ id, handle }: MainPostActionsProps) => {
 				onSuccess: (postResponse) => {
 					setPost(postResponse.data);
 					setUser(postResponse.user);
-					queryClient.resetQueries({ queryKey: [QueryKey.LIKES, id] });
-					queryClient.resetQueries({
-						queryKey: [QueryKey.LIKES, handle],
-					});
+					queryClient.resetQueries({ queryKey: [QueryKey.POSTS] });
+					queryClient.resetQueries({ queryKey: [QueryKey.USERS] });
 				},
 			}
 		);
-	}, [like, unlike, post, id, queryClient, setPost, setUser, handle]);
+	}, [like, unlike, post, queryClient, setPost, setUser]);
 
 	return (
 		<>
@@ -87,7 +85,7 @@ export const MainPostActions = ({ id, handle }: MainPostActionsProps) => {
 				setOpened={setReplyOpened}
 				id={id}
 				handle={handle}
-				queryKey={[QueryKey.REPLIES, id]}
+				queryKey={[QueryKey.POSTS, QueryKey.REPLIES, id]}
 			/>
 		</>
 	);

@@ -54,11 +54,14 @@ const Post = () => {
 			<Container p="md" pos="relative">
 				<CreatePost
 					mutationFn={mutationFn}
-					queryKey={[QueryKey.REPLIES, postID]}
+					queryKey={[QueryKey.POSTS, QueryKey.REPLIES, postID]}
 					placeholder={"Create reply"}
 				/>
 			</Container>
-			<Posts query={query} queryKey={[QueryKey.REPLIES, postID]} />
+			<Posts
+				query={query}
+				queryKey={[QueryKey.POSTS, QueryKey.REPLIES, postID]}
+			/>
 		</Wrapper>
 	);
 };

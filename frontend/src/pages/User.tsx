@@ -21,7 +21,6 @@ import {
 	getUsersHandlePosts,
 	useGetUsersHandle,
 } from "../spec.gen";
-import { stopPropagation } from "../utils";
 
 export type UserPage = "posts" | "likes";
 
@@ -62,18 +61,10 @@ const User = ({ value }: UserProps) => {
 					{user.status?.isFollowing ? <Badge>follows you</Badge> : null}
 				</Group>
 				<Group mt="xs">
-					<UnstyledButton
-						component={Link}
-						to={`/${user.handle}/following`}
-						onClick={stopPropagation}
-					>
+					<UnstyledButton component={Link} to={`/${user.handle}/following`}>
 						<b>{user?.following}</b> Following
 					</UnstyledButton>
-					<UnstyledButton
-						component={Link}
-						to={`/${user.handle}/followers`}
-						onClick={stopPropagation}
-					>
+					<UnstyledButton component={Link} to={`/${user.handle}/followers`}>
 						<b>{user?.followers}</b>
 						{user?.followers === 1 ? " Follower" : " Followers"}
 					</UnstyledButton>
@@ -98,7 +89,10 @@ const User = ({ value }: UserProps) => {
 					<Posts query={postsQuery} queryKey={[QueryKey.POSTS, user.handle]} />
 				</Tabs.Panel>
 				<Tabs.Panel value="likes">
-					<Posts query={likesQuery} queryKey={[QueryKey.LIKES, user.handle]} />
+					<Posts
+						query={likesQuery}
+						queryKey={[QueryKey.POSTS, QueryKey.LIKES, user.handle]}
+					/>
 				</Tabs.Panel>
 			</Tabs>
 		</Wrapper>

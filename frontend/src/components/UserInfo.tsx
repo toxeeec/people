@@ -2,7 +2,6 @@ import { Avatar, Badge, Group, Text, UnstyledButton } from "@mantine/core";
 import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { UsersContext } from "../context/UsersContext";
-import { stopPropagation } from "../utils";
 
 interface UserInfoProps {
 	handle: string;
@@ -21,32 +20,18 @@ export const UserInfo = ({ handle, children }: UserInfoProps) => {
 					mb="xs"
 					component={Link}
 					to={`/${user!.handle}`}
-					onClick={stopPropagation}
 				/>
 				{children}
 			</Group>
-			<Text
-				component={Link}
-				to={`/${user!.handle}`}
-				weight="bold"
-				onClick={stopPropagation}
-			>
+			<Text component={Link} to={`/${user!.handle}`} weight="bold">
 				{user.handle}
 			</Text>
 			{user.status?.isFollowing ? <Badge ml="xs">follows you</Badge> : null}
 			<Group mt="xs">
-				<UnstyledButton
-					component={Link}
-					to={`/${user.handle}/following`}
-					onClick={stopPropagation}
-				>
+				<UnstyledButton component={Link} to={`/${user.handle}/following`}>
 					<b>{user.following}</b> Following
 				</UnstyledButton>
-				<UnstyledButton
-					component={Link}
-					to={`/${user.handle}/followers`}
-					onClick={stopPropagation}
-				>
+				<UnstyledButton component={Link} to={`/${user.handle}/followers`}>
 					<b>{user.followers}</b>
 					{user.followers === 1 ? " Follower" : " Followers"}
 				</UnstyledButton>

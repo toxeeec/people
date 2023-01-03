@@ -35,13 +35,13 @@ const Follows = ({ value }: { value: FollowsPage }) => {
 				<Tabs.Panel value="following">
 					<Users
 						query={queryFollowing}
-						queryKey={[QueryKey.FOLLOWING, params.handle!]}
+						queryKey={[QueryKey.USERS, QueryKey.FOLLOWING, params.handle!]}
 					/>
 				</Tabs.Panel>
 				<Tabs.Panel value="followers">
 					<Users
 						query={queryFollowers}
-						queryKey={[QueryKey.FOLLOWERS, params.handle!]}
+						queryKey={[QueryKey.USERS, QueryKey.FOLLOWERS, params.handle!]}
 					/>
 				</Tabs.Panel>
 			</Tabs>
