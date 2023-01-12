@@ -35,6 +35,5 @@ Docker compose will create the database, build and then run both backend and fro
 * Profile pictures
 * Editing profile 
 * Real-time chat
-* Log out from all devices
 * Deleting account
 * Notifications

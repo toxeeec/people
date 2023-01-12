@@ -21,6 +21,7 @@ import Post from "./pages/Post";
 import User from "./pages/User";
 import Search from "./pages/Search";
 import { useGetUsersHandle } from "./spec.gen";
+import Settings from "./pages/Settings";
 
 const App = () => {
 	const { getAuth, setAuth, clearAuth, isAuthenticated } = useAuth();
@@ -87,6 +88,16 @@ const App = () => {
 				{
 					path: "/search/people",
 					element: <Search value={"people"} />,
+				},
+				{
+					path: "/settings",
+					element: <Settings />,
+					loader: () => {
+						if (!isAuthenticated) {
+							return redirect("/");
+						}
+						return null;
+					},
 				},
 			],
 		},

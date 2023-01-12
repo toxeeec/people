@@ -49,3 +49,11 @@ func (r *tokenRepo) Update(rt people.RefreshToken) error {
 	}
 	return nil
 }
+
+func (r *tokenRepo) DeleteAll(userID uint) error {
+	const query = "DELETE FROM token WHERE user_id = $1"
+	if _, err := r.db.Exec(query, userID); err != nil {
+		return fmt.Errorf("Token.DeleteAll: %w", err)
+	}
+	return nil
+}

@@ -34,3 +34,16 @@ components:
         multipart/form-data:
           schema:
             $ref: '#/components/schemas/NewImage'
+
+    LogoutBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            properties:
+              refreshToken:
+                type: string
+              logoutFromAll:
+                type: boolean
+            required:
+              - refreshToken

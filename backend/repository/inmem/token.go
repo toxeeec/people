@@ -48,3 +48,13 @@ func (r *tokenRepo) Update(rt people.RefreshToken) error {
 	}
 	return nil
 }
+
+func (r *tokenRepo) DeleteAll(userID uint) error {
+	for k, v := range r.m {
+		if v.UserID == userID {
+			delete(r.m, k)
+		}
+
+	}
+	return nil
+}

@@ -53,7 +53,7 @@ func (h *handler) PostRefresh(ctx context.Context, r people.PostRefreshRequestOb
 }
 
 func (h *handler) PostLogout(ctx context.Context, r people.PostLogoutRequestObject) (people.PostLogoutResponseObject, error) {
-	err := h.as.Logout(r.Body.RefreshToken)
+	err := h.as.Logout(r.Body.RefreshToken, r.Body.LogoutFromAll)
 	if err != nil {
 		var e *people.Error
 		if errors.As(err, &e) {

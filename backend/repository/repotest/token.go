@@ -77,6 +77,23 @@ func (s *TokenSuite) TestUpdate() {
 	assert.NoError(s.T(), err)
 }
 
+func (s *TokenSuite) TestDeleteAll() {
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	u, _ := s.ur.Create(au)
+	rt1, _ := auth.NewRefreshToken(u.ID, nil)
+	rt2, _ := auth.NewRefreshToken(u.ID, nil)
+	s.repo.Create(rt1)
+	s.repo.Create(rt2)
+
+	err := s.repo.DeleteAll(u.ID)
+	assert.NoError(s.T(), err)
+	_, err = s.repo.Get(rt1.Value)
+	assert.Error(s.T(), err)
+	_, err = s.repo.Get(rt2.Value)
+	assert.Error(s.T(), err)
+}
+
 func (s *TokenSuite) SetupTest() {
 	if s.fns.SetupTest != nil {
 		s.fns.SetupTest()

@@ -131,6 +131,12 @@ type QueryParam = string
 // AuthUserBody defines model for AuthUserBody.
 type AuthUserBody = AuthUser
 
+// LogoutBody defines model for LogoutBody.
+type LogoutBody struct {
+	LogoutFromAll *bool  `json:"logoutFromAll,omitempty"`
+	RefreshToken  string `json:"refreshToken"`
+}
+
 // NewPostBody defines model for NewPostBody.
 type NewPostBody = NewPost
 
@@ -141,7 +147,8 @@ type RefreshTokenBody struct {
 
 // PostLogoutJSONBody defines parameters for PostLogout.
 type PostLogoutJSONBody struct {
-	RefreshToken string `json:"refreshToken"`
+	LogoutFromAll *bool  `json:"logoutFromAll,omitempty"`
+	RefreshToken  string `json:"refreshToken"`
 }
 
 // GetMeFeedParams defines parameters for GetMeFeed.

@@ -33,6 +33,8 @@ export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 			setRoute("Post");
 		} else if (params.handle) {
 			setRoute(params.handle);
+		} else if (location.pathname === "/settings") {
+			setRoute("Settings");
 		} else {
 			setRoute("");
 		}
@@ -44,6 +46,7 @@ export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 
 	const isHome = route === "Home";
 	const isSearch = location.pathname.includes("search");
+	const isSettings = route === "Settings";
 	return (
 		<>
 			<Space h={60} />
@@ -66,7 +69,7 @@ export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 					<ActionIcon
 						component={Link}
 						to={`/search/posts`}
-						display={isSearch ? "none" : "unset"}
+						display={isSearch || isSettings ? "none" : "unset"}
 					>
 						<IconSearch />
 					</ActionIcon>

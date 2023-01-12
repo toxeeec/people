@@ -10,4 +10,5 @@ type Token interface {
 	Get(value string) (people.RefreshToken, error)
 	Delete(uuid.UUID) error
 	Update(people.RefreshToken) error
+	DeleteAll(userID uint) error
 }

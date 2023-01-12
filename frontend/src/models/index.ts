@@ -33,6 +33,7 @@ export * from "./imageResponse";
 export * from "./likeStatus";
 export * from "./likes";
 export * from "./limitParamParameter";
+export * from "./logoutBodyBody";
 export * from "./newImage";
 export * from "./newPost";
 export * from "./newPostBody";

@@ -19,6 +19,7 @@ import type {
 	AuthUserBodyBody,
 	Tokens,
 	RefreshTokenBodyBody,
+	LogoutBodyBody,
 	PostsResponse,
 	GetMeFeedParams,
 	User,
@@ -206,7 +207,7 @@ export const usePostRefresh = <
 };
 
 export const postLogout = (
-	refreshTokenBodyBody: RefreshTokenBodyBody,
+	logoutBodyBody: LogoutBodyBody,
 	options?: SecondParameter<typeof customInstance>
 ) => {
 	return customInstance<void>(
@@ -214,7 +215,7 @@ export const postLogout = (
 			url: `/logout`,
 			method: "post",
 			headers: { "Content-Type": "application/json" },
-			data: refreshTokenBodyBody,
+			data: logoutBodyBody,
 		},
 		options
 	);
@@ -223,7 +224,7 @@ export const postLogout = (
 export type PostLogoutMutationResult = NonNullable<
 	Awaited<ReturnType<typeof postLogout>>
 >;
-export type PostLogoutMutationBody = RefreshTokenBodyBody;
+export type PostLogoutMutationBody = LogoutBodyBody;
 export type PostLogoutMutationError = ErrorType<Error>;
 
 export const usePostLogout = <
@@ -233,7 +234,7 @@ export const usePostLogout = <
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof postLogout>>,
 		TError,
-		{ data: RefreshTokenBodyBody },
+		{ data: LogoutBodyBody },
 		TContext
 	>;
 	request?: SecondParameter<typeof customInstance>;
@@ -242,7 +243,7 @@ export const usePostLogout = <
 
 	const mutationFn: MutationFunction<
 		Awaited<ReturnType<typeof postLogout>>,
-		{ data: RefreshTokenBodyBody }
+		{ data: LogoutBodyBody }
 	> = (props) => {
 		const { data } = props ?? {};
 
@@ -252,7 +253,7 @@ export const usePostLogout = <
 	return useMutation<
 		Awaited<ReturnType<typeof postLogout>>,
 		TError,
-		{ data: RefreshTokenBodyBody },
+		{ data: LogoutBodyBody },
 		TContext
 	>(mutationFn, mutationOptions);
 };

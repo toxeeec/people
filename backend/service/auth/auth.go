@@ -14,7 +14,7 @@ type Service interface {
 	Register(au people.AuthUser) (people.AuthResponse, error)
 	Login(au people.AuthUser) (people.AuthResponse, error)
 	Refresh(refreshToken string) (people.Tokens, error)
-	Logout(rtString string) error
+	Logout(rtString string, logoutFromAll *bool) error
 }
 
 type authService struct {
@@ -106,7 +106,7 @@ func (s *authService) Refresh(rtString string) (people.Tokens, error) {
 	return people.Tokens{AccessToken: at, RefreshToken: newRT.Value}, nil
 }
 
-func (s *authService) Logout(rtString string) error {
+func (s *authService) Logout(rtString string, logoutFromAll *bool) error {
 	rt, err := parseRefreshToken(rtString)
 	if err != nil {
 		return service.NewError(people.AuthError, "Malformed refresh token")
@@ -115,6 +115,10 @@ func (s *authService) Logout(rtString string) error {
 		// token doesn't exist
 		go s.tr.Delete(rt.ID)
 		return service.NewError(people.AuthError, "Invalid refresh token")
+	}
+
+	if logoutFromAll != nil && *logoutFromAll == true {
+		return s.tr.DeleteAll(rt.UserID)
 	}
 
 	return s.tr.Delete(rt.ID)

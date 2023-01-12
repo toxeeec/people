@@ -122,6 +122,29 @@ func (s *AuthSuite) TestRefresh() {
 	assert.Equal(s.T(), authError, *e.Kind)
 }
 
+func (s *AuthSuite) TestLogout() {
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	ar1, _ := s.as.Register(au)
+	ts1 := ar1.Tokens
+	ar2, _ := s.as.Login(au)
+	ts2 := ar2.Tokens
+
+	ts1, err := s.as.Refresh(ts1.RefreshToken)
+	assert.NoError(s.T(), err)
+	ts2, err = s.as.Refresh(ts2.RefreshToken)
+	assert.NoError(s.T(), err)
+
+	logoutFromAll := true
+	err = s.as.Logout(ts1.RefreshToken, &logoutFromAll)
+	assert.NoError(s.T(), err)
+
+	_, err = s.as.Refresh(ts1.RefreshToken)
+	assert.Error(s.T(), err)
+	_, err = s.as.Refresh(ts2.RefreshToken)
+	assert.Error(s.T(), err)
+}
+
 func (s *AuthSuite) SetupTest() {
 	um := map[uint]people.User{}
 	tsm := map[uuid.UUID]people.RefreshToken{}
