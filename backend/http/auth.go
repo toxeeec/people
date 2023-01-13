@@ -66,3 +66,21 @@ func (h *handler) PostLogout(ctx context.Context, r people.PostLogoutRequestObje
 	}
 	return people.PostLogout204Response{}, nil
 }
+
+func (h *handler) DeleteMe(ctx context.Context, r people.DeleteMeRequestObject) (people.DeleteMeResponseObject, error) {
+	userID, _ := fromContext(ctx, userIDKey)
+	err := h.as.Delete(userID, r.Body.Password, r.Body.RefreshToken)
+	if err != nil {
+		var e *people.Error
+		if errors.As(err, &e) {
+			switch *e.Kind {
+			case people.ValidationError:
+				return people.DeleteMe401JSONResponse(*e), nil
+			case people.AuthError:
+				return people.DeleteMe403JSONResponse(*e), nil
+			}
+		}
+		return nil, err
+	}
+	return people.DeleteMe204Response{}, nil
+}

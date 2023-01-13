@@ -72,3 +72,4 @@ export * from "./userResponseResponse";
 export * from "./users";
 export * from "./usersResponse";
 export * from "./usersResponseResponse";
+export * from "./accountBodyBody";

@@ -28,11 +28,7 @@ export const handleSubmit = (
 				},
 				onError: (error) => {
 					const err = error.response?.data.message;
-					if (err?.startsWith("Handle")) {
-						form.setFieldError("handle", err);
-					} else {
-						form.setErrors({ handle: err, password: err });
-					}
+					form.setErrors({ handle: err, password: err });
 				},
 			}
 		);

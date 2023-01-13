@@ -47,3 +47,17 @@ components:
                 type: boolean
             required:
               - refreshToken
+
+    AccountBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            properties:
+              refreshToken:
+                type: string
+              password:
+                type: string
+            required:
+              - refreshToken
+              - password

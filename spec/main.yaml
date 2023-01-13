@@ -16,6 +16,9 @@ paths:
   /logout:
     $ref: './paths/auth.yaml#/logout'
 
+  /me:
+    $ref: './paths/me.yaml#/account'
+
   /me/feed:
     $ref: './paths/me.yaml#/feed'
 

@@ -15,6 +15,7 @@ type Service interface {
 	Login(au people.AuthUser) (people.AuthResponse, error)
 	Refresh(refreshToken string) (people.Tokens, error)
 	Logout(rtString string, logoutFromAll *bool) error
+	Delete(userID uint, password string, refreshToken string) error
 }
 
 type authService struct {
@@ -80,14 +81,9 @@ func (s *authService) Login(au people.AuthUser) (people.AuthResponse, error) {
 }
 
 func (s *authService) Refresh(rtString string) (people.Tokens, error) {
-	rt, err := parseRefreshToken(rtString)
+	rt, err := s.checkRefreshToken(rtString)
 	if err != nil {
-		return people.Tokens{}, service.NewError(people.AuthError, "Malformed refresh token")
-	}
-	if _, err := s.tr.Get(rt.Value); err != nil {
-		// token doesn't exist
-		go s.tr.Delete(rt.ID)
-		return people.Tokens{}, service.NewError(people.AuthError, "Invalid refresh token")
+		return people.Tokens{}, err
 	}
 
 	at, err := NewAccessToken(rt.UserID)
@@ -122,6 +118,22 @@ func (s *authService) Logout(rtString string, logoutFromAll *bool) error {
 	}
 
 	return s.tr.Delete(rt.ID)
+}
+
+func (s *authService) Delete(userID uint, password string, rtString string) error {
+	hash, err := s.ur.GetHash(userID)
+	if err != nil {
+		return err
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	if err != nil {
+		return service.NewError(people.ValidationError, "Invalid password")
+	}
+	rt, err := s.checkRefreshToken(rtString)
+	if err != nil {
+		return err
+	}
+	return s.ur.Delete(rt.UserID)
 }
 
 func (s *authService) validate(u people.AuthUser) error {

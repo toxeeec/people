@@ -145,6 +145,43 @@ func (s *AuthSuite) TestLogout() {
 	assert.Error(s.T(), err)
 }
 
+func (s *AuthSuite) TestDelete() {
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	ar, _ := s.as.Register(au)
+
+	validationError := people.ValidationError
+	authError := people.AuthError
+
+	tests := map[string]struct {
+		password     string
+		refreshToken string
+		valid        bool
+		kind         *people.ErrorKind
+	}{
+
+		"invalid password":      {gofakeit.Password(true, true, true, true, true, 12), ar.Tokens.RefreshToken, false, &validationError},
+		"invalid refresh token": {au.Password, ar.Tokens.AccessToken, false, &authError},
+		"valid":                 {au.Password, ar.Tokens.RefreshToken, true, nil},
+	}
+
+	for name, tc := range tests {
+		s.Run(name, func() {
+			err := s.as.Delete(ar.User.ID, tc.password, tc.refreshToken)
+			assert.Equal(s.T(), tc.valid, err == nil)
+			if tc.valid {
+				_, err := s.ur.Get(ar.User.ID)
+				assert.Error(s.T(), err)
+			} else {
+				var e *people.Error
+				assert.ErrorAs(s.T(), err, &e)
+				assert.Equal(s.T(), *tc.kind, *e.Kind)
+
+			}
+		})
+	}
+}
+
 func (s *AuthSuite) SetupTest() {
 	um := map[uint]people.User{}
 	tsm := map[uuid.UUID]people.RefreshToken{}

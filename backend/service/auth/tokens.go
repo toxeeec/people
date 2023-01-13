@@ -10,6 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 	people "github.com/toxeeec/people/backend"
+	"github.com/toxeeec/people/backend/service"
 )
 
 var (
@@ -62,6 +63,20 @@ func (s *authService) newTokens(id uint) (people.Tokens, error) {
 		return people.Tokens{}, err
 	}
 	return people.Tokens{AccessToken: at, RefreshToken: rt.Value}, nil
+}
+
+func (s *authService) checkRefreshToken(rtString string) (people.RefreshToken, error) {
+	rt, err := parseRefreshToken(rtString)
+	if err != nil {
+		return people.RefreshToken{}, service.NewError(people.AuthError, "Malformed refresh token")
+	}
+	if _, err := s.tr.Get(rt.Value); err != nil {
+		// token doesn't exist
+		go s.tr.Delete(rt.ID)
+		return people.RefreshToken{}, service.NewError(people.AuthError, "Invalid refresh token")
+	}
+
+	return rt, nil
 }
 
 func NewAccessToken(userID uint) (string, error) {

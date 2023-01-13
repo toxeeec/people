@@ -128,6 +128,12 @@ type PostIDParam = uint
 // QueryParam defines model for queryParam.
 type QueryParam = string
 
+// AccountBody defines model for AccountBody.
+type AccountBody struct {
+	Password     string `json:"password"`
+	RefreshToken string `json:"refreshToken"`
+}
+
 // AuthUserBody defines model for AuthUserBody.
 type AuthUserBody = AuthUser
 
@@ -149,6 +155,12 @@ type RefreshTokenBody struct {
 type PostLogoutJSONBody struct {
 	LogoutFromAll *bool  `json:"logoutFromAll,omitempty"`
 	RefreshToken  string `json:"refreshToken"`
+}
+
+// DeleteMeJSONBody defines parameters for DeleteMe.
+type DeleteMeJSONBody struct {
+	Password     string `json:"password"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 // GetMeFeedParams defines parameters for GetMeFeed.
@@ -243,6 +255,9 @@ type PostLoginJSONRequestBody = AuthUser
 
 // PostLogoutJSONRequestBody defines body for PostLogout for application/json ContentType.
 type PostLogoutJSONRequestBody PostLogoutJSONBody
+
+// DeleteMeJSONRequestBody defines body for DeleteMe for application/json ContentType.
+type DeleteMeJSONRequestBody DeleteMeJSONBody
 
 // PostPostsJSONRequestBody defines body for PostPosts for application/json ContentType.
 type PostPostsJSONRequestBody = NewPost
