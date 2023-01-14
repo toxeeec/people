@@ -179,7 +179,7 @@ func (s *PostSuite) SetupTest() {
 	fr := inmem.NewFollowRepository(fm, um)
 	lr := inmem.NewLikeRepository(lm, pm, um)
 	ir := inmem.NewImageRepository(im)
-	us := user.NewService(s.ur, fr, lr)
+	us := user.NewService(v, s.ur, fr, lr)
 	is := image.NewService(ir)
 	s.ps = post.NewService(v, s.pr, s.ur, fr, lr, us, is)
 }

@@ -153,23 +153,20 @@ func (s *AuthSuite) TestDelete() {
 	ar, _ := s.as.Register(au)
 
 	validationError := people.ValidationError
-	authError := people.AuthError
 
 	tests := map[string]struct {
-		password     string
-		refreshToken string
-		valid        bool
-		kind         *people.ErrorKind
+		password string
+		valid    bool
+		kind     *people.ErrorKind
 	}{
 
-		"invalid password":      {gofakeit.Password(true, true, true, true, true, 12), ar.Tokens.RefreshToken, false, &validationError},
-		"invalid refresh token": {au.Password, ar.Tokens.AccessToken, false, &authError},
-		"valid":                 {au.Password, ar.Tokens.RefreshToken, true, nil},
+		"invalid password": {gofakeit.Password(true, true, true, true, true, 12), false, &validationError},
+		"valid":            {au.Password, true, nil},
 	}
 
 	for name, tc := range tests {
 		s.Run(name, func() {
-			err := s.as.Delete(ar.User.ID, tc.password, tc.refreshToken)
+			err := s.as.Delete(ar.User.ID, tc.password)
 			assert.Equal(s.T(), tc.valid, err == nil)
 			if tc.valid {
 				_, err := s.ur.Get(ar.User.ID)
@@ -195,8 +192,8 @@ func (s *AuthSuite) SetupTest() {
 	tr := inmem.NewTokenRepository(tsm)
 	fr := inmem.NewFollowRepository(fm, um)
 	lr := inmem.NewLikeRepository(lm, pm, um)
-	s.us = user.NewService(s.ur, fr, lr)
-	s.as = auth.NewService(v, s.ur, tr, s.us)
+	s.us = user.NewService(v, s.ur, fr, lr)
+	s.as = auth.NewService(s.ur, tr, s.us)
 }
 
 func TestAuthSuite(t *testing.T) {

@@ -139,3 +139,19 @@ func (h *handler) GetUsersSearch(ctx context.Context, r people.GetUsersSearchReq
 	}
 	return people.GetUsersSearch200JSONResponse(ur), nil
 }
+
+func (h *handler) PutMe(ctx context.Context, r people.PutMeRequestObject) (people.PutMeResponseObject, error) {
+	userID, _ := fromContext(ctx, userIDKey)
+	u, err := h.us.Update(userID, r.Body.Handle)
+	if err != nil {
+		var e *people.Error
+		if errors.As(err, &e) {
+			switch *e.Kind {
+			case people.ValidationError:
+				return people.PutMe401JSONResponse(*e), nil
+			}
+		}
+		return nil, err
+	}
+	return people.PutMe200JSONResponse(u), nil
+}

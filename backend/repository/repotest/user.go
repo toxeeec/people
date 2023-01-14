@@ -82,6 +82,26 @@ func (s *UserSuite) TestListMatches() {
 	assert.Len(s.T(), ps, 2)
 }
 
+func (s *UserSuite) TestUpdate() {
+	var au1 people.AuthUser
+	var au2 people.AuthUser
+	gofakeit.Struct(&au1)
+	gofakeit.Struct(&au2)
+	u1, _ := s.repo.Create(au1)
+
+	u2, err := s.repo.Update(u1.ID, au2.Handle)
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), u1.ID, u2.ID)
+	assert.Equal(s.T(), au2.Handle, u2.Handle)
+
+	_, err = s.repo.GetID(u1.Handle)
+	assert.Error(s.T(), err)
+	u3, err := s.repo.Get(u2.ID)
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), u2.ID, u3.ID)
+	assert.Equal(s.T(), u2.Handle, u3.Handle)
+}
+
 func (s *UserSuite) SetupTest() {
 	if s.fns.SetupTest != nil {
 		s.fns.SetupTest()

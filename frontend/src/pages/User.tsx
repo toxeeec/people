@@ -10,6 +10,7 @@ import {
 import { useContext } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CenterLoader } from "../components/CenterLoader";
+import { EditButton } from "../components/EditButton";
 import { FollowButton } from "../components/FollowButton";
 import { Posts, Query } from "../components/Posts";
 import { Wrapper } from "../components/Wrapper";
@@ -52,7 +53,9 @@ const User = ({ value }: UserProps) => {
 			<Box p="xs">
 				<Group align="center" position="apart">
 					<Avatar size="xl" radius={999} mb="xs" />
-					{!isAuthenticated || getAuth().handle === user.handle ? null : (
+					{isAuthenticated && getAuth().handle === user.handle ? (
+						<EditButton handle={user.handle} />
+					) : (
 						<FollowButton handle={user.handle} />
 					)}
 				</Group>

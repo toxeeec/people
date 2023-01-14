@@ -6,7 +6,7 @@ import { useDeleteMe } from "../../spec.gen";
 import { DangerButton } from "../DangerButton";
 
 export const DeleteAccount = () => {
-	const { getAuth, clearAuth } = useContext(AuthContext);
+	const { clearAuth } = useContext(AuthContext);
 	const [opened, setOpened] = useState(false);
 	const form = useForm<{ password: string }>({
 		initialValues: { password: "" },
@@ -25,7 +25,7 @@ export const DeleteAccount = () => {
 	const handleDelete = ({ password }: { password: string }) => {
 		if (!password) return;
 		mutate({
-			data: { password, refreshToken: getAuth().refreshToken! },
+			data: { password },
 		});
 	};
 	return (

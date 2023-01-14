@@ -121,24 +121,52 @@ followers:
               $ref: '#/components/schemas/Error'
 
 account:
+  put:
+    tags:
+      - me
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/Handle'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      401:
+        description: Invalid Credentials
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
   delete:
     tags:
       - me
     security:
       - bearerAuth: []
     requestBody:
-      $ref: '#/components/requestBodies/AccountBody'
+      required: true
+      content:
+        application/json:
+          schema:
+            properties:
+              password:
+                type: string
+            required:
+              - password
     responses:
       204:
         description: No Content
       401:
         description: Invalid Password
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-      403:
-        description: Malformed Token
         content:
           application/json:
             schema:

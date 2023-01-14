@@ -1,6 +1,6 @@
 FROM golang:alpine
 WORKDIR /app
-RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/cosmtrek/air@v1.40.4
 RUN go install github.com/deepmap/oapi-codegen/cmd/oapi-codegen@latest
 RUN go install golang.org/x/tools/cmd/stringer@latest
 COPY go.mod ./

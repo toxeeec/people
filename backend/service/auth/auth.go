@@ -1,9 +1,6 @@
 package auth
 
 import (
-	"errors"
-
-	"github.com/go-playground/validator/v10"
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/repository"
 	"github.com/toxeeec/people/backend/service"
@@ -16,19 +13,17 @@ type Service interface {
 	Login(au people.AuthUser) (people.AuthResponse, error)
 	Refresh(refreshToken string) (people.Tokens, error)
 	Logout(rtString string, logoutFromAll *bool) error
-	Delete(userID uint, password string, refreshToken string) error
+	Delete(userID uint, password string) error
 }
 
 type authService struct {
-	v  *validator.Validate
 	ur repository.User
 	tr repository.Token
 	us user.Service
 }
 
-func NewService(v *validator.Validate, ur repository.User, tr repository.Token, us user.Service) Service {
+func NewService(ur repository.User, tr repository.Token, us user.Service) Service {
 	s := authService{}
-	s.v = v
 	s.ur = ur
 	s.tr = tr
 	s.us = us
@@ -36,7 +31,7 @@ func NewService(v *validator.Validate, ur repository.User, tr repository.Token, 
 }
 
 func (s *authService) Register(au people.AuthUser) (people.AuthResponse, error) {
-	err := s.validate(au)
+	err := s.us.Validate(au)
 	if err != nil {
 		return people.AuthResponse{}, err
 	}
@@ -123,7 +118,7 @@ func (s *authService) Logout(rtString string, logoutFromAll *bool) error {
 	return s.tr.Delete(rt.ID)
 }
 
-func (s *authService) Delete(userID uint, password string, rtString string) error {
+func (s *authService) Delete(userID uint, password string) error {
 	hash, err := s.ur.GetHash(userID)
 	if err != nil {
 		return err
@@ -132,27 +127,5 @@ func (s *authService) Delete(userID uint, password string, rtString string) erro
 	if err != nil {
 		return service.NewError(people.ValidationError, "Invalid password")
 	}
-	rt, err := s.checkRefreshToken(rtString)
-	if err != nil {
-		return err
-	}
-
-	// TODO: delete likes and follows
-	return s.us.Delete(rt.UserID)
-}
-
-func (s *authService) validate(u people.AuthUser) error {
-	if err := s.v.Var(u.Handle, "alphanum"); err != nil {
-		err := err.(validator.ValidationErrors)
-		switch err[0].Tag() {
-		case "alphanum":
-			return service.NewError(people.ValidationError, "Handle cannot contain special characters")
-		default:
-			return errors.New("Unknown")
-		}
-	}
-	if _, err := s.ur.GetID(u.Handle); err == nil {
-		return service.NewError(people.ValidationError, "User already exists")
-	}
-	return nil
+	return s.us.Delete(userID)
 }

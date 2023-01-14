@@ -37,6 +37,11 @@ type FollowStatus struct {
 	IsFollowing bool `db:"is_following" json:"isFollowing"`
 }
 
+// Handle defines model for Handle.
+type Handle struct {
+	Handle string `db:"handle" fake:"{lettern:10}" json:"handle"`
+}
+
 // HandlePaginationMeta defines model for HandlePaginationMeta.
 type HandlePaginationMeta = PaginationMeta[string]
 
@@ -128,12 +133,6 @@ type PostIDParam = uint
 // QueryParam defines model for queryParam.
 type QueryParam = string
 
-// AccountBody defines model for AccountBody.
-type AccountBody struct {
-	Password     string `json:"password"`
-	RefreshToken string `json:"refreshToken"`
-}
-
 // AuthUserBody defines model for AuthUserBody.
 type AuthUserBody = AuthUser
 
@@ -159,9 +158,11 @@ type PostLogoutJSONBody struct {
 
 // DeleteMeJSONBody defines parameters for DeleteMe.
 type DeleteMeJSONBody struct {
-	Password     string `json:"password"`
-	RefreshToken string `json:"refreshToken"`
+	Password string `json:"password"`
 }
+
+// PutMeJSONBody defines parameters for PutMe.
+type PutMeJSONBody = Handle
 
 // GetMeFeedParams defines parameters for GetMeFeed.
 type GetMeFeedParams struct {
@@ -258,6 +259,9 @@ type PostLogoutJSONRequestBody PostLogoutJSONBody
 
 // DeleteMeJSONRequestBody defines body for DeleteMe for application/json ContentType.
 type DeleteMeJSONRequestBody DeleteMeJSONBody
+
+// PutMeJSONRequestBody defines body for PutMe for application/json ContentType.
+type PutMeJSONRequestBody = PutMeJSONBody
 
 // PostPostsJSONRequestBody defines body for PostPosts for application/json ContentType.
 type PostPostsJSONRequestBody = NewPost

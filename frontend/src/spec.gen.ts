@@ -20,10 +20,11 @@ import type {
 	Tokens,
 	RefreshTokenBodyBody,
 	LogoutBodyBody,
-	AccountBodyBody,
+	User,
+	Handle,
+	DeleteMeBody,
 	PostsResponse,
 	GetMeFeedParams,
-	User,
 	Users,
 	GetMeFollowingParams,
 	GetMeFollowersParams,
@@ -259,8 +260,60 @@ export const usePostLogout = <
 	>(mutationFn, mutationOptions);
 };
 
+export const putMe = (
+	handle: Handle,
+	options?: SecondParameter<typeof customInstance>
+) => {
+	return customInstance<User>(
+		{
+			url: `/me`,
+			method: "put",
+			headers: { "Content-Type": "application/json" },
+			data: handle,
+		},
+		options
+	);
+};
+
+export type PutMeMutationResult = NonNullable<
+	Awaited<ReturnType<typeof putMe>>
+>;
+export type PutMeMutationBody = Handle;
+export type PutMeMutationError = ErrorType<Error>;
+
+export const usePutMe = <
+	TError = ErrorType<Error>,
+	TContext = unknown
+>(options?: {
+	mutation?: UseMutationOptions<
+		Awaited<ReturnType<typeof putMe>>,
+		TError,
+		{ data: Handle },
+		TContext
+	>;
+	request?: SecondParameter<typeof customInstance>;
+}) => {
+	const { mutation: mutationOptions, request: requestOptions } = options ?? {};
+
+	const mutationFn: MutationFunction<
+		Awaited<ReturnType<typeof putMe>>,
+		{ data: Handle }
+	> = (props) => {
+		const { data } = props ?? {};
+
+		return putMe(data, requestOptions);
+	};
+
+	return useMutation<
+		Awaited<ReturnType<typeof putMe>>,
+		TError,
+		{ data: Handle },
+		TContext
+	>(mutationFn, mutationOptions);
+};
+
 export const deleteMe = (
-	accountBodyBody: AccountBodyBody,
+	deleteMeBody: DeleteMeBody,
 	options?: SecondParameter<typeof customInstance>
 ) => {
 	return customInstance<void>(
@@ -268,7 +321,7 @@ export const deleteMe = (
 			url: `/me`,
 			method: "delete",
 			headers: { "Content-Type": "application/json" },
-			data: accountBodyBody,
+			data: deleteMeBody,
 		},
 		options
 	);
@@ -277,7 +330,7 @@ export const deleteMe = (
 export type DeleteMeMutationResult = NonNullable<
 	Awaited<ReturnType<typeof deleteMe>>
 >;
-export type DeleteMeMutationBody = AccountBodyBody;
+export type DeleteMeMutationBody = DeleteMeBody;
 export type DeleteMeMutationError = ErrorType<Error>;
 
 export const useDeleteMe = <
@@ -287,7 +340,7 @@ export const useDeleteMe = <
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof deleteMe>>,
 		TError,
-		{ data: AccountBodyBody },
+		{ data: DeleteMeBody },
 		TContext
 	>;
 	request?: SecondParameter<typeof customInstance>;
@@ -296,7 +349,7 @@ export const useDeleteMe = <
 
 	const mutationFn: MutationFunction<
 		Awaited<ReturnType<typeof deleteMe>>,
-		{ data: AccountBodyBody }
+		{ data: DeleteMeBody }
 	> = (props) => {
 		const { data } = props ?? {};
 
@@ -306,7 +359,7 @@ export const useDeleteMe = <
 	return useMutation<
 		Awaited<ReturnType<typeof deleteMe>>,
 		TError,
-		{ data: AccountBodyBody },
+		{ data: DeleteMeBody },
 		TContext
 	>(mutationFn, mutationOptions);
 };

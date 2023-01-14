@@ -92,3 +92,12 @@ func (r *userRepo) ListMatches(query string, p pagination.ID) ([]people.User, er
 	}
 	return us, nil
 }
+
+func (r *userRepo) Update(userID uint, handle string) (people.User, error) {
+	const query = "UPDATE user_profile SET handle = $1 WHERE user_id = $2 RETURNING user_id, handle, following, followers"
+	var u people.User
+	if err := r.db.Get(&u, query, handle, userID); err != nil {
+		return people.User{}, fmt.Errorf("User.Update: %w", err)
+	}
+	return u, nil
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/go-playground/validator/v10"
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
@@ -31,16 +32,20 @@ type Service interface {
 	ListUsersWithStatus(ctx context.Context, userIDs []uint, srcID uint, auth bool) ([]people.User, error)
 	ListMatches(ctx context.Context, query string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error)
 	Delete(userID uint) error
+	Update(userID uint, handle string) (people.User, error)
+	Validate(u people.AuthUser) error
 }
 
 type userService struct {
+	v  *validator.Validate
 	ur repository.User
 	fr repository.Follow
 	lr repository.Like
 }
 
-func NewService(ur repository.User, fr repository.Follow, lr repository.Like) Service {
+func NewService(v *validator.Validate, ur repository.User, fr repository.Follow, lr repository.Like) Service {
 	s := userService{}
+	s.v = v
 	s.ur = ur
 	s.fr = fr
 	s.lr = lr
@@ -240,4 +245,33 @@ func (s *userService) Delete(userID uint) error {
 		return err
 	}
 	return s.ur.Delete(userID)
+}
+
+func (s *userService) Update(userID uint, handle string) (people.User, error) {
+	u, err := s.ur.Get(userID)
+	if err != nil {
+		return people.User{}, err
+	}
+	if handle != u.Handle {
+		if err := s.Validate(people.AuthUser{Handle: handle}); err != nil {
+			return people.User{}, err
+		}
+	}
+	return s.ur.Update(userID, handle)
+}
+
+func (s *userService) Validate(u people.AuthUser) error {
+	if err := s.v.Var(u.Handle, "alphanum"); err != nil {
+		err := err.(validator.ValidationErrors)
+		switch err[0].Tag() {
+		case "alphanum":
+			return service.NewError(people.ValidationError, "Handle cannot contain special characters")
+		default:
+			return errors.New("Unknown")
+		}
+	}
+	if _, err := s.ur.GetID(u.Handle); err == nil {
+		return service.NewError(people.ValidationError, "User with this handle already exists")
+	}
+	return nil
 }

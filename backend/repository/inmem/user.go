@@ -84,3 +84,13 @@ func (r *userRepo) ListMatches(query string, p pagination.ID) ([]people.User, er
 	}
 	return us, nil
 }
+
+func (r *userRepo) Update(userID uint, handle string) (people.User, error) {
+	u, ok := r.m[userID]
+	if !ok {
+		return people.User{}, fmt.Errorf("User.Update: %w", errors.New("User not found"))
+	}
+	u.Handle = handle
+	r.m[userID] = u
+	return u, nil
+}

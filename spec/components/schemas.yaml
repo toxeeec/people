@@ -69,7 +69,7 @@ components:
       required:
         - data
 
-    AuthUser:
+    Handle:
       properties:
         handle:
           type: string
@@ -78,15 +78,29 @@ components:
           x-oapi-codegen-extra-tags:
             db: handle
             fake: '{lettern:10}'
-        password:
-          type: string
-          format: password
-          minLength: 12
-          x-oapi-codegen-extra-tags:
-            fake: '{password:true,true,true,true,false,12}'
       required:
         - handle
-        - password
+
+    AuthUser:
+      allOf:
+        - $ref: '#/components/schemas/Handle'
+        - type: object
+          properties:
+            handle:
+              type: string
+              minLength: 5
+              maxLength: 15
+              x-oapi-codegen-extra-tags:
+                db: handle
+                fake: '{lettern:10}'
+            password:
+              type: string
+              format: password
+              minLength: 12
+              x-oapi-codegen-extra-tags:
+                fake: '{password:true,true,true,true,false,12}'
+          required:
+            - password
 
     AuthResponse:
       properties:

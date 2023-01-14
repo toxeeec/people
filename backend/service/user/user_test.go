@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	people "github.com/toxeeec/people/backend"
@@ -236,16 +237,53 @@ func (s *UserSuite) TestListPostLikes() {
 	assert.Len(s.T(), us.Data, len(users))
 }
 
+func (s *UserSuite) TestUpdate() {
+	var au1 people.AuthUser
+	var au2 people.AuthUser
+	gofakeit.Struct(&au1)
+	gofakeit.Struct(&au2)
+	ar1, _ := s.ur.Create(au1)
+	s.ur.Create(au2)
+
+	validationError := people.ValidationError
+
+	tests := map[string]struct {
+		handle string
+		valid  bool
+		kind   *people.ErrorKind
+	}{
+
+		"taken handle": {au2.Handle, false, &validationError},
+		"valid":        {gofakeit.LetterN(10), true, nil},
+	}
+
+	for name, tc := range tests {
+		s.Run(name, func() {
+			u, err := s.us.Update(ar1.ID, tc.handle)
+			assert.Equal(s.T(), tc.valid, err == nil)
+			if tc.valid {
+				assert.Equal(s.T(), tc.handle, u.Handle)
+			} else {
+				var e *people.Error
+				assert.ErrorAs(s.T(), err, &e)
+				assert.Equal(s.T(), *tc.kind, *e.Kind)
+
+			}
+		})
+	}
+}
+
 func (s *UserSuite) SetupTest() {
 	um := map[uint]people.User{}
 	fm := map[inmem.FollowKey]time.Time{}
 	lm := map[inmem.LikeKey]struct{}{}
 	pm := map[uint]people.Post{}
+	v := validator.New()
 	s.ur = inmem.NewUserRepository(um)
 	s.fr = inmem.NewFollowRepository(fm, um)
 	s.lr = inmem.NewLikeRepository(lm, pm, um)
 	s.pr = inmem.NewPostRepository(pm)
-	s.us = user.NewService(s.ur, s.fr, s.lr)
+	s.us = user.NewService(v, s.ur, s.fr, s.lr)
 }
 
 func TestUserSuite(t *testing.T) {

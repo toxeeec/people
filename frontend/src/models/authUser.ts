@@ -4,8 +4,7 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
+import type { Handle } from "./handle";
+import type { AuthUserAllOf } from "./authUserAllOf";
 
-export interface AuthUser {
-	handle: string;
-	password: string;
-}
+export type AuthUser = Handle & AuthUserAllOf;
