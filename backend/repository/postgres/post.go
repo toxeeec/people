@@ -64,6 +64,20 @@ func (r *postRepo) Delete(postID, userID uint) error {
 	return nil
 }
 
+func (r *postRepo) List(ids []uint) ([]people.Post, error) {
+	q, args, err := NewQuery(SelectPost).
+		Where("post_id IN (?)", ids).
+		Build()
+	if err != nil {
+		return nil, fmt.Errorf("Post.List: %w", err)
+	}
+	ps := []people.Post{}
+	if err := r.db.Select(&ps, q, args...); err != nil {
+		return nil, fmt.Errorf("Post.List: %w", err)
+	}
+	return ps, nil
+}
+
 func (r *postRepo) ListUserPosts(userID uint, p pagination.ID) ([]people.Post, error) {
 	q, args, err := NewQuery(SelectPost).
 		Where("user_id = ?", userID).

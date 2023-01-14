@@ -7,6 +7,7 @@ import (
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/repository"
 	"github.com/toxeeec/people/backend/service"
+	"github.com/toxeeec/people/backend/service/user"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,13 +23,15 @@ type authService struct {
 	v  *validator.Validate
 	ur repository.User
 	tr repository.Token
+	us user.Service
 }
 
-func NewService(v *validator.Validate, ur repository.User, tr repository.Token) Service {
+func NewService(v *validator.Validate, ur repository.User, tr repository.Token, us user.Service) Service {
 	s := authService{}
 	s.v = v
 	s.ur = ur
 	s.tr = tr
+	s.us = us
 	return &s
 }
 
@@ -133,7 +136,9 @@ func (s *authService) Delete(userID uint, password string, rtString string) erro
 	if err != nil {
 		return err
 	}
-	return s.ur.Delete(rt.UserID)
+
+	// TODO: delete likes and follows
+	return s.us.Delete(rt.UserID)
 }
 
 func (s *authService) validate(u people.AuthUser) error {

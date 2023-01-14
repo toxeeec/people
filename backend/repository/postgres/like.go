@@ -80,38 +80,43 @@ func (r *likeRepo) Delete(postID, userID uint) error {
 	return nil
 }
 
-func (r *likeRepo) ListPostLikes(postID uint, p pagination.ID) (people.Users, error) {
+func (r *likeRepo) ListPostLikes(postID uint, p *pagination.ID) ([]uint, error) {
 	const paginationValue = "(SELECT liked_at FROM post_like WHERE user_id = ? AND post_id = ?)"
-	q, args, err := NewQuery(SelectUser).
+	query := NewQuery("SELECT user_profile.user_id FROM user_profile").
 		Join("post_like", "user_profile.user_id = post_like.user_id").
-		Where("post_id = ?", postID).
-		Paginate(p, "liked_at", paginationValue, postID).
-		Build()
+		Where("post_id = ?", postID)
+	if p != nil {
+		const paginationValue = "(SELECT liked_at FROM post_like WHERE user_id = ? AND post_id = ?)"
+		query = query.Paginate(*p, "liked_at", paginationValue, postID)
+	}
+	q, args, err := query.Build()
 	if err != nil {
-		return people.Users{}, fmt.Errorf("Like.ListUsers: %w", err)
+		return nil, fmt.Errorf("Like.ListPostLikes: %w", err)
 	}
-	us := make([]people.User, p.Limit)
-	if err := r.db.Select(&us, q, args...); err != nil {
-		return people.Users{}, fmt.Errorf("Like.ListUsers: %w", err)
+	ids := []uint{}
+	if err := r.db.Select(&ids, q, args...); err != nil {
+		return nil, fmt.Errorf("Like.ListPostLikes: %w", err)
 	}
-	return pagination.NewResults[people.User, string](us), nil
+	return ids, nil
 }
 
-func (r *likeRepo) ListUserLikes(userID uint, p pagination.ID) ([]people.Post, error) {
+func (r *likeRepo) ListUserLikes(userID uint, p *pagination.ID) ([]uint, error) {
 	const paginationValue = "(SELECT liked_at FROM post_like WHERE user_id = ? AND post_id = ?)"
-	q, args, err := NewQuery(SelectPost).
+	query := NewQuery("SELECT post.post_id FROM post").
 		Join("post_like", "post_like.post_id = post.post_id").
-		Where("post_like.user_id = ?", userID).
-		Paginate(p, "liked_at", paginationValue, userID).
-		Build()
+		Where("post_like.user_id = ?", userID)
+	if p != nil {
+		query = query.Paginate(*p, "liked_at", paginationValue, userID)
+	}
+	q, args, err := query.Build()
 	if err != nil {
 		return nil, fmt.Errorf("Post.ListUserLikes: %w", err)
 	}
-	ps := make([]people.Post, p.Limit)
-	if err := r.db.Select(&ps, q, args...); err != nil {
+	ids := []uint{}
+	if err := r.db.Select(&ids, q, args...); err != nil {
 		return nil, fmt.Errorf("Post.ListUserLikes: %w", err)
 	}
-	return ps, nil
+	return ids, nil
 }
 
 func (r *likeRepo) ListStatusLiked(ids []uint, userID uint) (map[uint]struct{}, error) {
@@ -133,4 +138,16 @@ func (r *likeRepo) ListStatusLiked(ids []uint, userID uint) (map[uint]struct{}, 
 		lss[id] = struct{}{}
 	}
 	return lss, nil
+}
+
+func (r *likeRepo) DeleteLike(ids []uint) error {
+	q, args, err := NewQuery("UPDATE post SET likes = likes - 1").Where("post_id IN (?)", ids).Build()
+	if err != nil {
+		return fmt.Errorf("Like.DeleteLike: %w", err)
+	}
+	_, err = r.db.Exec(q, args...)
+	if err != nil {
+		return fmt.Errorf("Like.DeleteLike: %w", err)
+	}
+	return nil
 }

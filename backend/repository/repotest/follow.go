@@ -7,6 +7,7 @@ import (
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
+	"github.com/toxeeec/people/backend/service/user"
 )
 
 type FollowSuite struct {
@@ -158,7 +159,7 @@ func (s *FollowSuite) TestListFollowing() {
 	s.repo.Create(users[1].ID, users[0].ID)
 	s.repo.Create(users[2].ID, users[0].ID)
 
-	us, err := s.repo.ListFollowing(users[0].ID, pagination.ID{Limit: 10})
+	us, err := s.repo.ListFollowing(users[0].ID, &pagination.ID{Limit: 10})
 	assert.NoError(s.T(), err)
 	assert.Len(s.T(), us, len(users)-1)
 }
@@ -173,9 +174,49 @@ func (s *FollowSuite) TestListFollowers() {
 	s.repo.Create(users[0].ID, users[1].ID)
 	s.repo.Create(users[0].ID, users[2].ID)
 
-	us, err := s.repo.ListFollowers(users[0].ID, pagination.ID{Limit: 10})
+	us, err := s.repo.ListFollowers(users[0].ID, &pagination.ID{Limit: 10})
 	assert.NoError(s.T(), err)
 	assert.Len(s.T(), us, len(users)-1)
+}
+
+func (s *FollowSuite) TestDeleteFollower() {
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	u1, _ := s.ur.Create(au)
+	var users [3]people.User
+	for i := range users {
+		var au people.AuthUser
+		gofakeit.Struct(&au)
+		users[i], _ = s.ur.Create(au)
+		s.repo.Create(users[i].ID, u1.ID)
+	}
+
+	err := s.repo.DeleteFollower(user.IDs(users[:]))
+	assert.NoError(s.T(), err)
+	us, _ := s.ur.List(user.IDs(users[:]))
+	for _, u := range us {
+		assert.Equal(s.T(), uint(0), u.Followers)
+	}
+}
+
+func (s *FollowSuite) TestDeleteFollowing() {
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	u, _ := s.ur.Create(au)
+	var users [3]people.User
+	for i := range users {
+		var au people.AuthUser
+		gofakeit.Struct(&au)
+		users[i], _ = s.ur.Create(au)
+		s.repo.Create(u.ID, users[i].ID)
+	}
+
+	err := s.repo.DeleteFollowing(user.IDs(users[:]))
+	assert.NoError(s.T(), err)
+	us, _ := s.ur.List(user.IDs(users[:]))
+	for _, u := range us {
+		assert.Equal(s.T(), uint(0), u.Following)
+	}
 }
 
 func (s *FollowSuite) SetupTest() {

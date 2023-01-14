@@ -7,6 +7,7 @@ import (
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
+	"github.com/toxeeec/people/backend/service/post"
 )
 
 type LikeSuite struct {
@@ -115,7 +116,7 @@ func (s *LikeSuite) TestDelete() {
 	}
 }
 
-func (s *LikeSuite) TestListUsers() {
+func (s *LikeSuite) TestListPostLikes() {
 	var au people.AuthUser
 	var np people.NewPost
 	gofakeit.Struct(&au)
@@ -130,8 +131,9 @@ func (s *LikeSuite) TestListUsers() {
 		s.repo.Create(p.ID, users[i].ID)
 	}
 
-	us, _ := s.repo.ListPostLikes(p.ID, pagination.ID{Limit: 10})
-	assert.Len(s.T(), us.Data, len(users))
+	us, err := s.repo.ListPostLikes(p.ID, &pagination.ID{Limit: 10})
+	assert.NoError(s.T(), err)
+	assert.Len(s.T(), us, len(users))
 }
 
 func (s *LikeSuite) TestListStatusLiked() {
@@ -167,9 +169,27 @@ func (s *LikeSuite) TestListUserLikes() {
 		s.repo.Create(posts[i].ID, u.ID)
 	}
 
-	ps, err := s.repo.ListUserLikes(u.ID, pagination.ID{Limit: 10})
+	ps, err := s.repo.ListUserLikes(u.ID, &pagination.ID{Limit: 10})
 	assert.NoError(s.T(), err)
 	assert.Len(s.T(), ps, len(posts))
+}
+
+func (s *LikeSuite) TestDeleteLike() {
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	u, _ := s.ur.Create(au)
+	var posts [5]people.Post
+	for i := range posts {
+		var np people.NewPost
+		gofakeit.Struct(&np)
+		posts[i], _ = s.pr.Create(np, u.ID, nil)
+		s.repo.Create(posts[i].ID, u.ID)
+	}
+	s.repo.DeleteLike(post.IDs(posts[:]))
+	ps, _ := s.pr.List(post.IDs(posts[:]))
+	for _, p := range ps {
+		assert.Equal(s.T(), uint(0), p.Likes)
+	}
 }
 
 func (s *LikeSuite) SetupTest() {

@@ -27,9 +27,10 @@ type Service interface {
 	ListCurrUserFollowing(ctx context.Context, userID uint, params HandlePaginationParams) (people.Users, error)
 	ListCurrUserFollowers(ctx context.Context, userID uint, params HandlePaginationParams) (people.Users, error)
 	ListPostLikes(ctx context.Context, postID, userID uint, auth bool, params HandlePaginationParams) (people.Users, error)
-	ListStatus(ctx context.Context, srcIDs []uint, userID uint) (map[uint]people.FollowStatus, error)
-	ListUsersWithStatus(ctx context.Context, srcIDs []uint, userID uint, auth bool) ([]people.User, error)
+	ListStatus(ctx context.Context, userIDs []uint, srcID uint) (map[uint]people.FollowStatus, error)
+	ListUsersWithStatus(ctx context.Context, userIDs []uint, srcID uint, auth bool) ([]people.User, error)
 	ListMatches(ctx context.Context, query string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error)
+	Delete(userID uint) error
 }
 
 type userService struct {
@@ -117,17 +118,11 @@ func (s *userService) ListFollowing(ctx context.Context, handle string, userID u
 		return people.Users{}, err
 	}
 
-	us, err := s.fr.ListFollowing(id, p)
+	ids, err := s.fr.ListFollowing(id, &p)
 	if err != nil {
 		return people.Users{}, err
 	}
-	if auth {
-		fss, err := s.ListStatus(context.Background(), Slice(us).IDs(), userID)
-		if err != nil {
-			return people.Users{}, err
-		}
-		Slice(us).AddStatus(fss)
-	}
+	us, err := s.ListUsersWithStatus(context.Background(), ids, userID, auth)
 	return pagination.NewResults[people.User, string](us), nil
 }
 
@@ -156,17 +151,11 @@ func (s *userService) ListFollowers(ctx context.Context, handle string, userID u
 		return people.Users{}, err
 	}
 
-	us, err := s.fr.ListFollowers(id, p)
+	ids, err := s.fr.ListFollowers(id, &p)
 	if err != nil {
 		return people.Users{}, err
 	}
-	if auth {
-		fss, err := s.ListStatus(context.Background(), Slice(us).IDs(), userID)
-		if err != nil {
-			return people.Users{}, err
-		}
-		Slice(us).AddStatus(fss)
-	}
+	us, err := s.ListUsersWithStatus(context.Background(), ids, userID, auth)
 	return pagination.NewResults[people.User, string](us), nil
 }
 
@@ -192,18 +181,23 @@ func (s *userService) ListPostLikes(ctx context.Context, postID, userID uint, au
 	if err != nil {
 		return people.Users{}, service.NewError(people.NotFoundError, "User not found")
 	}
-	us, err := s.lr.ListPostLikes(postID, p)
+	ids, err := s.lr.ListPostLikes(postID, &p)
 	if err != nil {
 		return people.Users{}, err
 	}
+	us, err := s.ur.List(ids)
+	if err != nil {
+		return people.Users{}, err
+	}
+
 	if auth {
-		fss, err := s.ListStatus(context.Background(), Slice(us.Data).IDs(), userID)
+		fss, err := s.ListStatus(context.Background(), IDs(us), userID)
 		if err != nil {
 			return people.Users{}, err
 		}
-		Slice(us.Data).AddStatus(fss)
+		AddStatuses(us, fss)
 	}
-	return us, nil
+	return pagination.NewResults[people.User, string](us), nil
 }
 
 func (s *userService) ListMatches(ctx context.Context, query string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error) {
@@ -217,11 +211,33 @@ func (s *userService) ListMatches(ctx context.Context, query string, userID uint
 		return people.Users{}, err
 	}
 	if auth {
-		fss, err := s.ListStatus(context.Background(), Slice(us).IDs(), userID)
+		fss, err := s.ListStatus(context.Background(), IDs(us), userID)
 		if err != nil {
 			return people.Users{}, err
 		}
-		Slice(us).AddStatus(fss)
+		AddStatuses(us, fss)
 	}
 	return pagination.NewResults[people.User, string](us), nil
+}
+
+func (s *userService) Delete(userID uint) error {
+	ids, err := s.lr.ListUserLikes(userID, nil)
+	if err != nil {
+		return err
+	}
+	err = s.lr.DeleteLike(ids)
+	if err != nil {
+		return err
+	}
+	ids, err = s.fr.ListFollowing(userID, nil)
+	err = s.fr.DeleteFollower(ids)
+	if err != nil {
+		return err
+	}
+	ids, err = s.fr.ListFollowers(userID, nil)
+	err = s.fr.DeleteFollowing(ids)
+	if err != nil {
+		return err
+	}
+	return s.ur.Delete(userID)
 }

@@ -204,5 +204,5 @@ func (s *imageService) wipeUnused() {
 	for _, i := range imgs {
 		os.Remove(path(i.CreatedAt, i.Name))
 	}
-	s.ir.DeleteMany(Slice(imgs).IDs())
+	s.ir.DeleteMany(IDs(imgs))
 }

@@ -9,6 +9,7 @@ type Post interface {
 	Create(np people.NewPost, userID uint, repliesTo *uint) (people.Post, error)
 	Get(postID uint) (people.Post, error)
 	Delete(postID, userID uint) error
+	List(ids []uint) ([]people.Post, error)
 	ListUserPosts(userID uint, p pagination.ID) ([]people.Post, error)
 	ListFeed(followingIDs []uint, userID uint, p pagination.ID) ([]people.Post, error)
 	ListReplies(postID uint, p pagination.ID) ([]people.Post, error)

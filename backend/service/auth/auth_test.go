@@ -13,12 +13,14 @@ import (
 	"github.com/toxeeec/people/backend/repository"
 	"github.com/toxeeec/people/backend/repository/inmem"
 	"github.com/toxeeec/people/backend/service/auth"
+	"github.com/toxeeec/people/backend/service/user"
 )
 
 type AuthSuite struct {
 	suite.Suite
 	as auth.Service
 	ur repository.User
+	us user.Service
 }
 
 func (s *AuthSuite) TestRegister() {
@@ -185,10 +187,16 @@ func (s *AuthSuite) TestDelete() {
 func (s *AuthSuite) SetupTest() {
 	um := map[uint]people.User{}
 	tsm := map[uuid.UUID]people.RefreshToken{}
+	fm := map[inmem.FollowKey]time.Time{}
+	lm := map[inmem.LikeKey]struct{}{}
+	pm := map[uint]people.Post{}
 	v := validator.New()
 	s.ur = inmem.NewUserRepository(um)
 	tr := inmem.NewTokenRepository(tsm)
-	s.as = auth.NewService(v, s.ur, tr)
+	fr := inmem.NewFollowRepository(fm, um)
+	lr := inmem.NewLikeRepository(lm, pm, um)
+	s.us = user.NewService(s.ur, fr, lr)
+	s.as = auth.NewService(v, s.ur, tr, s.us)
 }
 
 func TestAuthSuite(t *testing.T) {

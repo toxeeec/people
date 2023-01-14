@@ -72,66 +72,90 @@ func (r *followRepo) Delete(targetID, id uint) error {
 	return nil
 }
 
-func (r *followRepo) ListStatusFollowing(srcIDs []uint, userID uint) (map[uint]struct{}, error) {
-	fss := make(map[uint]struct{}, len(srcIDs))
-	for _, srcID := range srcIDs {
-		_, ok := r.m[FollowKey{userID: userID, followerID: srcID}]
-		if ok {
-			fss[srcID] = struct{}{}
-		}
-	}
-	return fss, nil
-}
-
-func (r *followRepo) ListStatusFollowed(srcIDs []uint, userID uint) (map[uint]struct{}, error) {
-	fss := make(map[uint]struct{}, len(srcIDs))
-	for _, srcID := range srcIDs {
+func (r *followRepo) ListStatusFollowing(userIDs []uint, srcID uint) (map[uint]struct{}, error) {
+	fss := make(map[uint]struct{}, len(userIDs))
+	for _, userID := range userIDs {
 		_, ok := r.m[FollowKey{userID: srcID, followerID: userID}]
 		if ok {
-			fss[srcID] = struct{}{}
+			fss[userID] = struct{}{}
 		}
 	}
 	return fss, nil
 }
 
-func (r *followRepo) ListFollowing(id uint, p pagination.ID) ([]people.User, error) {
-	before := time.Now()
-	if p.Before != nil {
-		before = r.m[FollowKey{userID: *p.Before, followerID: id}]
-	}
-	after := time.Time{}
-	if p.After != nil {
-		after = r.m[FollowKey{userID: *p.Before, followerID: id}]
-	}
-	var us []people.User
-	for k, v := range r.m {
-		if k.followerID == id && v.Before(before) && v.After(after) {
-			us = append(us, r.um[k.userID])
-		}
-		if len(us) == int(p.Limit) {
-			break
+func (r *followRepo) ListStatusFollowed(userIDs []uint, srcID uint) (map[uint]struct{}, error) {
+	fss := make(map[uint]struct{}, len(userIDs))
+	for _, userID := range userIDs {
+		_, ok := r.m[FollowKey{userID: userID, followerID: srcID}]
+		if ok {
+			fss[userID] = struct{}{}
 		}
 	}
-	return us, nil
+	return fss, nil
 }
 
-func (r *followRepo) ListFollowers(id uint, p pagination.ID) ([]people.User, error) {
+func (r *followRepo) ListFollowing(id uint, p *pagination.ID) ([]uint, error) {
 	before := time.Now()
-	if p.Before != nil {
-		before = r.m[FollowKey{userID: id, followerID: *p.Before}]
-	}
 	after := time.Time{}
-	if p.After != nil {
-		after = r.m[FollowKey{userID: id, followerID: *p.After}]
-	}
-	var us []people.User
-	for k, v := range r.m {
-		if k.userID == id && v.Before(before) && v.After(after) {
-			us = append(us, r.um[k.followerID])
+	if p != nil {
+		if p.Before != nil {
+			before = r.m[FollowKey{userID: *p.Before, followerID: id}]
 		}
-		if len(us) == int(p.Limit) {
+		if p.After != nil {
+			after = r.m[FollowKey{userID: *p.Before, followerID: id}]
+		}
+	}
+	var ids []uint
+	for k, v := range r.m {
+		if k.followerID == id && v.Before(before) && v.After(after) {
+			ids = append(ids, k.userID)
+		}
+		if p != nil && len(ids) == int(p.Limit) {
 			break
 		}
 	}
-	return us, nil
+	return ids, nil
+}
+
+func (r *followRepo) ListFollowers(id uint, p *pagination.ID) ([]uint, error) {
+	before := time.Now()
+	after := time.Time{}
+	if p != nil {
+		if p.Before != nil {
+			before = r.m[FollowKey{userID: *p.Before, followerID: id}]
+		}
+		if p.After != nil {
+			after = r.m[FollowKey{userID: *p.Before, followerID: id}]
+		}
+	}
+	var ids []uint
+	for k, v := range r.m {
+		if k.userID == id && v.Before(before) && v.After(after) {
+			ids = append(ids, k.followerID)
+		}
+		if p != nil && len(ids) == int(p.Limit) {
+			break
+		}
+	}
+	return ids, nil
+}
+
+func (r *followRepo) DeleteFollower(userIDs []uint) error {
+	for k, v := range r.um {
+		if contains(userIDs, k) {
+			v.Followers--
+			r.um[k] = v
+		}
+	}
+	return nil
+}
+
+func (r *followRepo) DeleteFollowing(userIDs []uint) error {
+	for k, v := range r.um {
+		if contains(userIDs, k) {
+			v.Following--
+			r.um[k] = v
+		}
+	}
+	return nil
 }

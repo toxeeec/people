@@ -75,6 +75,7 @@ func (h *handler) GetMeFeed(ctx context.Context, r people.GetMeFeedRequestObject
 	userID, _ := fromContext(ctx, userIDKey)
 	prs, err := h.ps.ListFeed(ctx, userID, post.IDPaginationParams(r.Params))
 	if err != nil {
+		println(err.Error())
 		return nil, err
 	}
 	return people.GetMeFeed200JSONResponse(prs), nil

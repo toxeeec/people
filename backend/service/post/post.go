@@ -157,12 +157,13 @@ func (s *postService) ListUserPosts(ctx context.Context, handle string, userID u
 
 func (s *postService) ListFeed(ctx context.Context, userID uint, params IDPaginationParams) (people.PostsResponse, error) {
 	p := pagination.New(params.Before, params.After, params.Limit)
-	us, err := s.fr.ListFollowing(userID, p)
+	ids, err := s.fr.ListFollowing(userID, &p)
 	if err != nil {
 		return people.PostsResponse{}, err
 	}
-	ids := append(user.Slice(us).IDs(), userID)
+	ids = append(ids, userID)
 	var ps []people.Post
+	var us []people.User
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		var err error
@@ -173,19 +174,11 @@ func (s *postService) ListFeed(ctx context.Context, userID uint, params IDPagina
 		return s.addData(context.Background(), ps, userID, true)
 	})
 	g.Go(func() error {
-		fss, err := s.us.ListStatus(context.Background(), ids, userID)
+		var err error
+		us, err = s.us.ListUsersWithStatus(ctx, ids, userID, true)
 		if err != nil {
 			return err
 		}
-		user.Slice(us).AddStatus(fss)
-		return nil
-	})
-	g.Go(func() error {
-		u, err := s.us.GetUserWithStatus(context.Background(), userID, 0, false)
-		if err != nil {
-			return err
-		}
-		us = append(us, u)
 		return nil
 	})
 	if err := g.Wait(); err != nil {
@@ -203,7 +196,7 @@ func (s *postService) ListReplies(ctx context.Context, postID uint, userID uint,
 	var us []people.User
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
-		ids := Slice(ps).UserIDs()
+		ids := UserIDs(ps)
 		var err error
 		us, err = s.us.ListUsersWithStatus(context.Background(), ids, userID, auth)
 		return err
@@ -253,15 +246,16 @@ func (s *postService) ListUserLikes(ctx context.Context, handle string, userID u
 	if err != nil {
 		return people.PostsResponse{}, service.NewError(people.NotFoundError, "User not found")
 	}
-	ps, err := s.lr.ListUserLikes(id, p)
+	ids, err := s.lr.ListUserLikes(id, &p)
 	if err != nil {
 		return people.PostsResponse{}, err
 	}
+	ps, err := s.pr.List(ids)
 	var us []people.User
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		var err error
-		us, err = s.us.ListUsersWithStatus(ctx, Slice(ps).UserIDs(), userID, auth)
+		us, err = s.us.ListUsersWithStatus(ctx, UserIDs(ps), userID, auth)
 		if err != nil {
 			return err
 		}
@@ -286,7 +280,7 @@ func (s *postService) ListMatches(ctx context.Context, query string, userID uint
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		var err error
-		us, err = s.us.ListUsersWithStatus(ctx, Slice(ps).UserIDs(), userID, auth)
+		us, err = s.us.ListUsersWithStatus(ctx, UserIDs(ps), userID, auth)
 		if err != nil {
 			return err
 		}
@@ -372,7 +366,7 @@ func (s *postService) getPostResponse(ctx context.Context, postID uint, userID u
 }
 
 func (s *postService) postResponseResults(ps []people.Post, us []people.User) people.PaginatedResults[people.PostResponse, uint] {
-	um := user.Slice(us).ToMap()
+	um := user.IntoMap(us)
 	prs := make([]people.PostResponse, len(ps))
 	for i, p := range ps {
 		prs[i] = people.PostResponse{Data: p, User: um[p.UserID]}
@@ -386,13 +380,13 @@ func (s *postService) addData(ctx context.Context, ps []people.Post, userID uint
 	var lss map[uint]people.LikeStatus
 	g.Go(func() error {
 		var err error
-		imgs, err = s.is.ListPostsImages(Slice(ps).IDs())
+		imgs, err = s.is.ListPostsImages(IDs(ps))
 		return err
 	})
 	if auth {
 		g.Go(func() error {
 			var err error
-			lss, err = s.listStatus(Slice(ps).IDs(), userID)
+			lss, err = s.listStatus(IDs(ps), userID)
 			return err
 		})
 	}

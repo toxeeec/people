@@ -6,7 +6,6 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
 )
@@ -100,78 +99,106 @@ func (r *followRepo) Delete(targetID, id uint) error {
 	return nil
 }
 
-func (r *followRepo) ListStatusFollowing(srcIDs []uint, userID uint) (map[uint]struct{}, error) {
-	if len(srcIDs) == 0 {
+func (r *followRepo) ListStatusFollowing(userIDs []uint, srcID uint) (map[uint]struct{}, error) {
+	if len(userIDs) == 0 {
 		return make(map[uint]struct{}), nil
 	}
 	const query = "SELECT follower_id FROM follower"
-	q, args, err := NewQuery(query).Where("follower_id IN (?)", srcIDs).Where("user_id = ?", userID).Build()
+	q, args, err := NewQuery(query).Where("follower_id IN (?)", userIDs).Where("user_id = ?", srcID).Build()
 	if err != nil {
 		return nil, fmt.Errorf("Follow.ListStatusFollowing: %w", err)
 	}
-	followingIDs := make([]uint, len(srcIDs))
+	followingIDs := make([]uint, len(userIDs))
 	err = r.db.Select(&followingIDs, q, args...)
 	if err != nil {
 		return nil, fmt.Errorf("Follow.ListStatusFollowing: %w", err)
 	}
-	fss := make(map[uint]struct{}, len(srcIDs))
+	fss := make(map[uint]struct{}, len(userIDs))
 	for _, id := range followingIDs {
 		fss[id] = struct{}{}
 	}
 	return fss, nil
 }
 
-func (r *followRepo) ListStatusFollowed(srcIDs []uint, userID uint) (map[uint]struct{}, error) {
-	if len(srcIDs) == 0 {
+func (r *followRepo) ListStatusFollowed(userIDs []uint, srcID uint) (map[uint]struct{}, error) {
+	if len(userIDs) == 0 {
 		return make(map[uint]struct{}), nil
 	}
 	const query = "SELECT user_id FROM follower"
-	q, args, err := NewQuery(query).Where("user_id IN (?)", srcIDs).Where("follower_id = ?", userID).Build()
+	q, args, err := NewQuery(query).Where("user_id IN (?)", userIDs).Where("follower_id = ?", srcID).Build()
 	if err != nil {
 		return nil, fmt.Errorf("Follow.ListStatusFollowed: %w", err)
 	}
-	followedIDs := make([]uint, len(srcIDs))
+	followedIDs := make([]uint, len(userIDs))
 	err = r.db.Select(&followedIDs, q, args...)
 	if err != nil {
 		return nil, fmt.Errorf("Follow.ListStatusFollowed: %w", err)
 	}
-	fss := make(map[uint]struct{}, len(srcIDs))
+	fss := make(map[uint]struct{}, len(userIDs))
 	for _, id := range followedIDs {
 		fss[id] = struct{}{}
 	}
 	return fss, nil
 }
 
-func (r *followRepo) ListFollowing(id uint, p pagination.ID) ([]people.User, error) {
-	const paginationValue = "(SELECT followed_at FROM follower WHERE user_id = ? AND follower_id = ?)"
-	q, args, err := NewQuery(SelectUser).
+func (r *followRepo) ListFollowing(id uint, p *pagination.ID) ([]uint, error) {
+	query := NewQuery("SELECT user_profile.user_id FROM user_profile").
 		Join("follower", "user_profile.user_id = follower.user_id").
-		Where("follower_id = ?", id).
-		Paginate(p, "followed_at", paginationValue, id).
-		Build()
+		Where("follower_id = ?", id)
+	if p != nil {
+		const paginationValue = "(SELECT followed_at FROM follower WHERE user_id = ? AND follower_id = ?)"
+		query = query.Paginate(*p, "followed_at", paginationValue, id)
+	}
+	q, args, err := query.Build()
 	if err != nil {
 		return nil, fmt.Errorf("Follow.ListFollowing: %w", err)
 	}
-	var us []people.User
-	if err := r.db.Select(&us, q, args...); err != nil {
+	var ids []uint
+	if err := r.db.Select(&ids, q, args...); err != nil {
 		return nil, fmt.Errorf("Follow.ListFollowing: %w", err)
 	}
-	return us, nil
+	return ids, nil
 }
 
-func (r *followRepo) ListFollowers(id uint, p pagination.ID) ([]people.User, error) {
+func (r *followRepo) ListFollowers(id uint, p *pagination.ID) ([]uint, error) {
 	const paginationValue = "(SELECT followed_at FROM follower WHERE follower_id = ? AND user_id = ?)"
-	q, args, err := NewQuery(SelectUser).
+	query := NewQuery("SELECT user_profile.user_id FROM user_profile").
 		Join("follower", "user_profile.user_id = follower.follower_id").
-		Where("follower.user_id = ?", id).
-		Paginate(p, "followed_at", paginationValue, id).
-		Build()
+		Where("follower.user_id = ?", id)
+	if p != nil {
+		query = query.Paginate(*p, "followed_at", paginationValue, id)
+	}
+	q, args, err := query.Build()
 	if err != nil {
 		return nil, fmt.Errorf("Follow.ListFollowers: %w", err)
 	}
-	var us []people.User
-	if err := r.db.Select(&us, q, args...); err != nil {
+	var ids []uint
+	if err := r.db.Select(&ids, q, args...); err != nil {
 		return nil, fmt.Errorf("Follow.ListFollowers: %w", err)
 	}
-	return us, nil
+	return ids, nil
+}
+
+func (r *followRepo) DeleteFollower(userIDs []uint) error {
+	q, args, err := NewQuery("UPDATE user_profile SET followers = followers - 1").Where("user_id IN (?)", userIDs).Build()
+	if err != nil {
+		return fmt.Errorf("Follow.DeleteFollower: %w", err)
+	}
+	_, err = r.db.Exec(q, args...)
+	if err != nil {
+		return fmt.Errorf("Follow.DeleteFollower: %w", err)
+	}
+	return nil
+}
+
+func (r *followRepo) DeleteFollowing(userIDs []uint) error {
+	q, args, err := NewQuery("UPDATE user_profile SET following = following - 1").Where("user_id IN (?)", userIDs).Build()
+	if err != nil {
+		return fmt.Errorf("Follow.DeleteFollowing: %w", err)
+	}
+	_, err = r.db.Exec(q, args...)
+	if err != nil {
+		return fmt.Errorf("Follow.DeleteFollowing: %w", err)
+	}
+	return nil
 }

@@ -11,9 +11,12 @@ type Like interface {
 	Status(postID, userID uint) people.LikeStatus
 	Create(postID, userID uint) error
 	Delete(postID, userID uint) error
-	ListPostLikes(postID uint, p pagination.ID) (people.Users, error)
+	//ListPostLikes returns ids of users that liked the post
+	ListPostLikes(postID uint, p *pagination.ID) ([]uint, error)
+	//ListUserLikes returns ids of posts liked by the user
+	ListUserLikes(userID uint, p *pagination.ID) ([]uint, error)
 	ListStatusLiked(ids []uint, userID uint) (map[uint]struct{}, error)
-	ListUserLikes(userID uint, p pagination.ID) ([]people.Post, error)
+	DeleteLike(ids []uint) error
 }
 
 var (

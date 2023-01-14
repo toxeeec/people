@@ -55,6 +55,16 @@ func (r *postRepo) Delete(postID, userID uint) error {
 	return nil
 }
 
+func (r *postRepo) List(ids []uint) ([]people.Post, error) {
+	var ps []people.Post
+	for k, v := range r.m {
+		if contains(ids, k) {
+			ps = append(ps, v)
+		}
+	}
+	return ps, nil
+}
+
 func (r *postRepo) ListUserPosts(userID uint, p pagination.Pagination[uint]) ([]people.Post, error) {
 	before := uint(math.MaxUint)
 	if p.Before != nil {

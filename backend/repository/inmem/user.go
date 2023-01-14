@@ -63,7 +63,7 @@ func (r *userRepo) Get(id uint) (people.User, error) {
 }
 
 func (r *userRepo) List(ids []uint) ([]people.User, error) {
-	us := make([]people.User, len(ids))
+	us := make([]people.User, 0, len(ids))
 	for i, u := range r.m {
 		if contains(ids, i) {
 			us = append(us, u)
