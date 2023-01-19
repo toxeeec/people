@@ -104,6 +104,9 @@ func (r *imageRepo) ListPostImages(postID uint) ([]people.Image, error) {
 }
 
 func (r *imageRepo) MarkUsed(ids []uint) error {
+	if len(ids) == 0 {
+		return nil
+	}
 	q, args, err := NewQuery("UPDATE image SET in_use = TRUE").Where("image_id IN (?)", ids).Build()
 	if err != nil {
 		return fmt.Errorf("Image.MarkUsed: %w", err)

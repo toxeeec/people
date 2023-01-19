@@ -180,6 +180,9 @@ func (r *followRepo) ListFollowers(id uint, p *pagination.ID) ([]uint, error) {
 }
 
 func (r *followRepo) DeleteFollower(userIDs []uint) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
 	q, args, err := NewQuery("UPDATE user_profile SET followers = followers - 1").Where("user_id IN (?)", userIDs).Build()
 	if err != nil {
 		return fmt.Errorf("Follow.DeleteFollower: %w", err)
@@ -192,6 +195,9 @@ func (r *followRepo) DeleteFollower(userIDs []uint) error {
 }
 
 func (r *followRepo) DeleteFollowing(userIDs []uint) error {
+	if len(userIDs) == 0 {
+		return nil
+	}
 	q, args, err := NewQuery("UPDATE user_profile SET following = following - 1").Where("user_id IN (?)", userIDs).Build()
 	if err != nil {
 		return fmt.Errorf("Follow.DeleteFollowing: %w", err)

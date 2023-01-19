@@ -141,6 +141,9 @@ func (r *likeRepo) ListStatusLiked(ids []uint, userID uint) (map[uint]struct{}, 
 }
 
 func (r *likeRepo) DeleteLike(ids []uint) error {
+	if len(ids) == 0 {
+		return nil
+	}
 	q, args, err := NewQuery("UPDATE post SET likes = likes - 1").Where("post_id IN (?)", ids).Build()
 	if err != nil {
 		return fmt.Errorf("Like.DeleteLike: %w", err)

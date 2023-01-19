@@ -66,6 +66,9 @@ func (r *userRepo) Get(id uint) (people.User, error) {
 }
 
 func (r *userRepo) List(ids []uint) ([]people.User, error) {
+	if len(ids) == 0 {
+		return []people.User{}, nil
+	}
 	const query = SelectUser + " WHERE user_id = $1"
 	q, args, err := NewQuery(SelectUser).Where("user_id IN (?)", ids).Build()
 	if err != nil {

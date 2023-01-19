@@ -65,6 +65,9 @@ func (r *postRepo) Delete(postID, userID uint) error {
 }
 
 func (r *postRepo) List(ids []uint) ([]people.Post, error) {
+	if len(ids) == 0 {
+		return []people.Post{}, nil
+	}
 	q, args, err := NewQuery(SelectPost).
 		Where("post_id IN (?)", ids).
 		Build()
