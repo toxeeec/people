@@ -59,11 +59,10 @@ func NewServer(db *sqlx.DB, v *validator.Validate) *echo.Echo {
 				AuthenticationFunc: h.newAuthenticator(),
 			},
 			Skipper: func(c echo.Context) bool {
-				return strings.Contains(c.Path(), "/images*") || strings.Contains(c.Path(), "openapi.json")
+				return !strings.HasPrefix(c.Path(), "/api/")
 			},
 		}))
 
-	people.RegisterHandlers(e, people.NewStrictHandler(&h, nil))
-
+	people.RegisterHandlersWithBaseURL(e, people.NewStrictHandler(&h, nil), "/api")
 	return e
 }

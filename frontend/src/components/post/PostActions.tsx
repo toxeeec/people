@@ -39,7 +39,7 @@ export const PostActions = ({ id, handle, queryKey }: PostActionsProps) => {
 				onSuccess: (postResponse) => {
 					setPost(postResponse.data);
 					setUser(postResponse.user);
-					queryClient.resetQueries({
+					queryClient.invalidateQueries({
 						queryKey: [QueryKey.POSTS],
 					});
 					queryClient.invalidateQueries({
