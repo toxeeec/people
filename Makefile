@@ -21,3 +21,8 @@ down:
 test:
 	docker compose -f $(DOCKER_COMPOSE_TEST) -p $(PROJECT_TEST) build
 	docker compose -f $(DOCKER_COMPOSE_TEST) -p $(PROJECT_TEST) run $(BACKEND_SERVICE); docker compose -f $(DOCKER_COMPOSE_TEST) -p $(PROJECT_TEST) down
+
+clean:
+	docker container prune -f
+	docker image rm -f $(docker image ls -q)
+	docker volume rm -f $(docker volume ls -q)
