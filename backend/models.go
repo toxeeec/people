@@ -52,8 +52,12 @@ type Image struct {
 }
 
 type Message struct {
-	Message string
-	To      string
+	Message string `json:"message"`
+}
+
+type UserMessage struct {
+	Message
+	To string
 }
 
 type NotificationType string
@@ -62,4 +66,9 @@ const (
 	MessageNotification = "message"
 )
 
-type Notification struct{}
+type Notification struct {
+	Type    NotificationType `json:"type"`
+	From    string           `json:"from"`
+	To      uint             `json:"-"`
+	Content *Message         `json:"content,omitempty"`
+}

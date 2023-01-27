@@ -1,12 +1,8 @@
 package ws
 
 import (
-	"fmt"
-
-	"github.com/gorilla/websocket"
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/service/chat"
-	"github.com/toxeeec/people/backend/service/notification"
 )
 
 type Hub struct {
@@ -15,17 +11,15 @@ type Hub struct {
 	unregister   chan *Client
 	notification chan people.Notification
 	cs           chat.Service
-	ns           notification.Service
 }
 
-func NewHub(cs chat.Service, ns notification.Service) *Hub {
+func NewHub(notification chan people.Notification, cs chat.Service) *Hub {
 	return &Hub{
 		clients:      make(map[uint]*Client),
 		register:     make(chan *Client),
 		unregister:   make(chan *Client),
-		notification: make(chan people.Notification),
+		notification: notification,
 		cs:           cs,
-		ns:           ns,
 	}
 }
 
@@ -33,26 +27,19 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case c := <-h.register:
-			{
-				h.clients[c.ID] = c
-			}
+			h.clients[c.ID] = c
 		case c := <-h.unregister:
-			{
-				if _, ok := h.clients[c.ID]; ok {
-					c.Conn.Close()
-					close(c.Send)
-					delete(h.clients, c.ID)
-				}
+			if _, ok := h.clients[c.ID]; ok {
+				c.Conn.Close()
+				close(c.Send)
+				delete(h.clients, c.ID)
 			}
 		case notif := <-h.notification:
-			{
-				fmt.Printf("%+v\n", notif)
+			c, ok := h.clients[notif.To]
+			if !ok {
+				break
 			}
+			c.Send <- notif
 		}
 	}
-}
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
 }

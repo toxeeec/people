@@ -35,14 +35,16 @@ func New(db *sqlx.DB, v *validator.Validate) *echo.Echo {
 	is := image.NewService(ir)
 	as := auth.NewService(ur, tr, us)
 	ps := post.NewService(v, pr, ur, fr, lr, us, is)
-	ns := notification.NewService()
+
+	notif := make(chan people.Notification)
+	ns := notification.NewService(notif, ur)
 	cs := chat.NewService(ur, ns)
 
 	e := echo.New()
 	e.Use(echomiddleware.CORS())
 	e.Static("/images", "images")
 
-	hub := ws.NewHub(cs, ns)
+	hub := ws.NewHub(notif, cs)
 	go hub.Run()
 	e.GET("/ws", ws.Serve(hub), peoplehttp.AuthMiddleware)
 

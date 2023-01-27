@@ -7,13 +7,13 @@ import (
 	"github.com/toxeeec/people/backend/service"
 )
 
-func trim(m people.Message) people.Message {
-	m.Message = strings.TrimSpace(m.Message)
+func trim(m people.UserMessage) people.UserMessage {
+	m.Message.Message = strings.TrimSpace(m.Message.Message)
 	return m
 }
 
-func validate(m people.Message) error {
-	if len(m.Message) == 0 {
+func validate(m people.UserMessage) error {
+	if len(m.Message.Message) == 0 {
 		return service.NewError(people.ValidationError, "Message cannot be empty")
 	}
 	return nil

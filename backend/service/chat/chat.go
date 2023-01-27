@@ -26,7 +26,7 @@ func NewService(ur repository.User, ns notification.Service) Service {
 }
 
 func (s *chatService) ReadMessage(from uint, data []byte) error {
-	var msg people.Message
+	var msg people.UserMessage
 	if err := json.Unmarshal(data, &msg); err != nil {
 		return err
 	}
@@ -40,6 +40,5 @@ func (s *chatService) ReadMessage(from uint, data []byte) error {
 		return service.NewError(people.NotFoundError, "User not found")
 	}
 	// TODO: save message
-	s.ns.Notify(people.MessageNotification, from, to, &msg)
-	return nil
+	return s.ns.Notify(people.MessageNotification, from, to, &msg)
 }
