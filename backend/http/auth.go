@@ -68,7 +68,7 @@ func (h *handler) PostLogout(ctx context.Context, r people.PostLogoutRequestObje
 }
 
 func (h *handler) DeleteMe(ctx context.Context, r people.DeleteMeRequestObject) (people.DeleteMeResponseObject, error) {
-	userID, _ := fromContext(ctx, userIDKey)
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
 	err := h.as.Delete(userID, r.Body.Password)
 	if err != nil {
 		var e *people.Error

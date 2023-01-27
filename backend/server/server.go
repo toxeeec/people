@@ -1,4 +1,4 @@
-package http
+package server
 
 import (
 	"log"
@@ -12,21 +12,18 @@ import (
 	"github.com/labstack/echo/v4"
 	echomiddleware "github.com/labstack/echo/v4/middleware"
 	people "github.com/toxeeec/people/backend"
+	peoplehttp "github.com/toxeeec/people/backend/http"
 	"github.com/toxeeec/people/backend/repository/postgres"
 	"github.com/toxeeec/people/backend/service/auth"
+	"github.com/toxeeec/people/backend/service/chat"
 	"github.com/toxeeec/people/backend/service/image"
+	"github.com/toxeeec/people/backend/service/notification"
 	"github.com/toxeeec/people/backend/service/post"
 	"github.com/toxeeec/people/backend/service/user"
+	"github.com/toxeeec/people/backend/ws"
 )
 
-type handler struct {
-	as auth.Service
-	us user.Service
-	ps post.Service
-	is image.Service
-}
-
-func NewServer(db *sqlx.DB, v *validator.Validate) *echo.Echo {
+func New(db *sqlx.DB, v *validator.Validate) *echo.Echo {
 	pr := postgres.NewPostRepository(db)
 	ur := postgres.NewUserRepository(db)
 	tr := postgres.NewTokenRepository(db)
@@ -34,35 +31,38 @@ func NewServer(db *sqlx.DB, v *validator.Validate) *echo.Echo {
 	lr := postgres.NewLikeRepository(db)
 	ir := postgres.NewImageRepository(db)
 
-	var h handler
-	h.us = user.NewService(v, ur, fr, lr)
-	h.is = image.NewService(ir)
-	h.as = auth.NewService(ur, tr, h.us)
-	h.ps = post.NewService(v, pr, ur, fr, lr, h.us, h.is)
+	us := user.NewService(v, ur, fr, lr)
+	is := image.NewService(ir)
+	as := auth.NewService(ur, tr, us)
+	ps := post.NewService(v, pr, ur, fr, lr, us, is)
+	ns := notification.NewService()
+	cs := chat.NewService(ur, ns)
 
 	e := echo.New()
 	e.Use(echomiddleware.CORS())
+	e.Static("/images", "images")
+
+	hub := ws.NewHub(cs, ns)
+	go hub.Run()
+	e.GET("/ws", ws.Serve(hub), peoplehttp.AuthMiddleware)
 
 	swagger, err := people.GetSwagger()
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	e.GET("openapi.json", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, swagger)
 	})
-	e.Static("/images", "images")
-
+	h := peoplehttp.NewHandler(v, as, us, ps, is)
 	e.Use(middleware.OapiRequestValidatorWithOptions(swagger,
 		&middleware.Options{
 			Options: openapi3filter.Options{
-				AuthenticationFunc: h.newAuthenticator(),
+				AuthenticationFunc: h.NewAuthenticator(),
 			},
 			Skipper: func(c echo.Context) bool {
 				return !strings.HasPrefix(c.Path(), "/api/")
 			},
 		}))
-
-	people.RegisterHandlersWithBaseURL(e, people.NewStrictHandler(&h, nil), "/api")
+	people.RegisterHandlersWithBaseURL(e, people.NewStrictHandler(h, nil), "/api")
 	return e
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func (h *handler) GetUsersHandle(ctx context.Context, r people.GetUsersHandleRequestObject) (people.GetUsersHandleResponseObject, error) {
-	userID, ok := fromContext(ctx, userIDKey)
+	userID, ok := people.FromContext(ctx, people.UserIDKey)
 	u, err := h.us.GetUser(ctx, r.Handle, userID, ok)
 	if err != nil {
 		var e *people.Error
@@ -25,7 +25,7 @@ func (h *handler) GetUsersHandle(ctx context.Context, r people.GetUsersHandleReq
 }
 
 func (h *handler) PutMeFollowingHandle(ctx context.Context, r people.PutMeFollowingHandleRequestObject) (people.PutMeFollowingHandleResponseObject, error) {
-	userID, _ := fromContext(ctx, userIDKey)
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
 	u, err := h.us.Follow(ctx, r.Handle, userID)
 	if err != nil {
 		var e *people.Error
@@ -43,7 +43,7 @@ func (h *handler) PutMeFollowingHandle(ctx context.Context, r people.PutMeFollow
 }
 
 func (h *handler) DeleteMeFollowingHandle(ctx context.Context, r people.DeleteMeFollowingHandleRequestObject) (people.DeleteMeFollowingHandleResponseObject, error) {
-	userID, _ := fromContext(ctx, userIDKey)
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
 	u, err := h.us.Unfollow(ctx, r.Handle, userID)
 	if err != nil {
 		var e *people.Error
@@ -59,7 +59,7 @@ func (h *handler) DeleteMeFollowingHandle(ctx context.Context, r people.DeleteMe
 }
 
 func (h *handler) GetMeFollowing(ctx context.Context, r people.GetMeFollowingRequestObject) (people.GetMeFollowingResponseObject, error) {
-	userID, _ := fromContext(ctx, userIDKey)
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
 	us, err := h.us.ListCurrUserFollowing(ctx, userID, user.HandlePaginationParams(r.Params))
 	if err != nil {
 		var e *people.Error
@@ -75,7 +75,7 @@ func (h *handler) GetMeFollowing(ctx context.Context, r people.GetMeFollowingReq
 }
 
 func (h *handler) GetMeFollowers(ctx context.Context, r people.GetMeFollowersRequestObject) (people.GetMeFollowersResponseObject, error) {
-	userID, _ := fromContext(ctx, userIDKey)
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
 	us, err := h.us.ListCurrUserFollowers(ctx, userID, user.HandlePaginationParams(r.Params))
 	if err != nil {
 		var e *people.Error
@@ -91,7 +91,7 @@ func (h *handler) GetMeFollowers(ctx context.Context, r people.GetMeFollowersReq
 }
 
 func (h *handler) GetUsersHandleFollowing(ctx context.Context, r people.GetUsersHandleFollowingRequestObject) (people.GetUsersHandleFollowingResponseObject, error) {
-	userID, ok := fromContext(ctx, userIDKey)
+	userID, ok := people.FromContext(ctx, people.UserIDKey)
 	us, err := h.us.ListFollowing(ctx, r.Handle, userID, ok, user.HandlePaginationParams(r.Params))
 	if err != nil {
 		var e *people.Error
@@ -107,7 +107,7 @@ func (h *handler) GetUsersHandleFollowing(ctx context.Context, r people.GetUsers
 }
 
 func (h *handler) GetUsersHandleFollowers(ctx context.Context, r people.GetUsersHandleFollowersRequestObject) (people.GetUsersHandleFollowersResponseObject, error) {
-	userID, ok := fromContext(ctx, userIDKey)
+	userID, ok := people.FromContext(ctx, people.UserIDKey)
 	us, err := h.us.ListFollowers(ctx, r.Handle, userID, ok, user.HandlePaginationParams(r.Params))
 	if err != nil {
 		var e *people.Error
@@ -123,7 +123,7 @@ func (h *handler) GetUsersHandleFollowers(ctx context.Context, r people.GetUsers
 }
 
 func (h *handler) GetPostsPostIDLikes(ctx context.Context, r people.GetPostsPostIDLikesRequestObject) (people.GetPostsPostIDLikesResponseObject, error) {
-	userID, ok := fromContext(ctx, userIDKey)
+	userID, ok := people.FromContext(ctx, people.UserIDKey)
 	ur, err := h.us.ListPostLikes(ctx, r.PostID, userID, ok, user.HandlePaginationParams(r.Params))
 	if err != nil {
 		return nil, err
@@ -132,7 +132,7 @@ func (h *handler) GetPostsPostIDLikes(ctx context.Context, r people.GetPostsPost
 }
 
 func (h *handler) GetUsersSearch(ctx context.Context, r people.GetUsersSearchRequestObject) (people.GetUsersSearchResponseObject, error) {
-	userID, ok := fromContext(ctx, userIDKey)
+	userID, ok := people.FromContext(ctx, people.UserIDKey)
 	ur, err := h.us.ListMatches(ctx, r.Params.Query, userID, ok, user.HandlePaginationParams{Limit: r.Params.Limit, Before: r.Params.Before, After: r.Params.After})
 	if err != nil {
 		return nil, err
@@ -141,7 +141,7 @@ func (h *handler) GetUsersSearch(ctx context.Context, r people.GetUsersSearchReq
 }
 
 func (h *handler) PutMe(ctx context.Context, r people.PutMeRequestObject) (people.PutMeResponseObject, error) {
-	userID, _ := fromContext(ctx, userIDKey)
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
 	u, err := h.us.Update(userID, r.Body.Handle)
 	if err != nil {
 		var e *people.Error

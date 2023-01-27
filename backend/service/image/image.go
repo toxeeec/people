@@ -40,12 +40,10 @@ func NewService(ir repository.Image) Service {
 	if err != nil && !errors.Is(err, os.ErrExist) {
 		panic(err.Error())
 	}
-
 	s := imageService{ir: ir}
 	c := cron.New()
 	c.AddFunc("@every 1h", s.wipeUnused)
 	c.Start()
-
 	return &s
 }
 

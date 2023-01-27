@@ -8,7 +8,7 @@ import (
 )
 
 func (h *handler) PostImages(ctx context.Context, r people.PostImagesRequestObject) (people.PostImagesResponseObject, error) {
-	userID, _ := fromContext(ctx, userIDKey)
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
 	ir, err := h.is.Create(userID, r.Body)
 	if err != nil {
 		var e *people.Error

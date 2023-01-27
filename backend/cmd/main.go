@@ -9,8 +9,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"github.com/toxeeec/people/backend/http"
 	"github.com/toxeeec/people/backend/repository/postgres"
+	"github.com/toxeeec/people/backend/server"
 )
 
 func init() {
@@ -25,7 +25,7 @@ func main() {
 		log.Fatal(err)
 	}
 	v := validator.New()
-	e := http.NewServer(db, v)
+	e := server.New(db, v)
 	port := os.Getenv("BACKEND_PORT")
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%v", port)))
 }

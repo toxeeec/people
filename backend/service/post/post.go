@@ -50,15 +50,9 @@ type postService struct {
 }
 
 func NewService(v *validator.Validate, pr repository.Post, ur repository.User, fr repository.Follow, lr repository.Like, us user.Service, is image.Service) Service {
-	s := postService{}
-	s.v = v
-	s.pr = pr
-	s.ur = ur
-	s.fr = fr
-	s.lr = lr
-	s.us = us
-	s.is = is
-	return &s
+	return &postService{
+		v, pr, ur, fr, lr, us, is,
+	}
 }
 
 func (s *postService) validate(np people.NewPost) error {

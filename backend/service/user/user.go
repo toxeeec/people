@@ -44,12 +44,9 @@ type userService struct {
 }
 
 func NewService(v *validator.Validate, ur repository.User, fr repository.Follow, lr repository.Like) Service {
-	s := userService{}
-	s.v = v
-	s.ur = ur
-	s.fr = fr
-	s.lr = lr
-	return &s
+	return &userService{
+		v, ur, fr, lr,
+	}
 }
 
 func (s *userService) GetUser(ctx context.Context, handle string, userID uint, auth bool) (people.User, error) {

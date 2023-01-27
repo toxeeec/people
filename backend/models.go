@@ -50,3 +50,16 @@ type Image struct {
 	UserID    uint      `db:"user_id"`
 	InUse     bool      `db:"in_use"`
 }
+
+type Message struct {
+	Message string
+	To      string
+}
+
+type NotificationType string
+
+const (
+	MessageNotification = "message"
+)
+
+type Notification struct{}

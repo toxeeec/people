@@ -9,7 +9,7 @@ import (
 )
 
 func (h *handler) PostPosts(ctx context.Context, r people.PostPostsRequestObject) (people.PostPostsResponseObject, error) {
-	userID, _ := fromContext(ctx, userIDKey)
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
 	pr, err := h.ps.Create(ctx, *r.Body, userID, nil)
 	if err != nil {
 		var e *people.Error
@@ -31,7 +31,7 @@ func (h *handler) PostPosts(ctx context.Context, r people.PostPostsRequestObject
 }
 
 func (h *handler) GetPostsPostID(ctx context.Context, r people.GetPostsPostIDRequestObject) (people.GetPostsPostIDResponseObject, error) {
-	userID, ok := fromContext(ctx, userIDKey)
+	userID, ok := people.FromContext(ctx, people.UserIDKey)
 	pr, err := h.ps.Get(ctx, r.PostID, userID, ok)
 	if err != nil {
 		var e *people.Error
@@ -47,7 +47,7 @@ func (h *handler) GetPostsPostID(ctx context.Context, r people.GetPostsPostIDReq
 }
 
 func (h *handler) DeletePostsPostID(ctx context.Context, r people.DeletePostsPostIDRequestObject) (people.DeletePostsPostIDResponseObject, error) {
-	userID, _ := fromContext(ctx, userIDKey)
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
 	err := h.ps.Delete(r.PostID, userID)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (h *handler) DeletePostsPostID(ctx context.Context, r people.DeletePostsPos
 }
 
 func (h *handler) GetUsersHandlePosts(ctx context.Context, r people.GetUsersHandlePostsRequestObject) (people.GetUsersHandlePostsResponseObject, error) {
-	userID, ok := fromContext(ctx, userIDKey)
+	userID, ok := people.FromContext(ctx, people.UserIDKey)
 	prs, err := h.ps.ListUserPosts(ctx, r.Handle, userID, ok, post.IDPaginationParams(r.Params))
 	if err != nil {
 		var e *people.Error
@@ -72,17 +72,16 @@ func (h *handler) GetUsersHandlePosts(ctx context.Context, r people.GetUsersHand
 }
 
 func (h *handler) GetMeFeed(ctx context.Context, r people.GetMeFeedRequestObject) (people.GetMeFeedResponseObject, error) {
-	userID, _ := fromContext(ctx, userIDKey)
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
 	prs, err := h.ps.ListFeed(ctx, userID, post.IDPaginationParams(r.Params))
 	if err != nil {
-		println(err.Error())
 		return nil, err
 	}
 	return people.GetMeFeed200JSONResponse(prs), nil
 }
 
 func (h *handler) PostPostsPostIDReplies(ctx context.Context, r people.PostPostsPostIDRepliesRequestObject) (people.PostPostsPostIDRepliesResponseObject, error) {
-	userID, _ := fromContext(ctx, userIDKey)
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
 	pr, err := h.ps.Create(ctx, *r.Body, userID, &r.PostID)
 	if err != nil {
 		var e *people.Error
@@ -100,7 +99,7 @@ func (h *handler) PostPostsPostIDReplies(ctx context.Context, r people.PostPosts
 }
 
 func (h *handler) GetPostsPostIDReplies(ctx context.Context, r people.GetPostsPostIDRepliesRequestObject) (people.GetPostsPostIDRepliesResponseObject, error) {
-	userID, ok := fromContext(ctx, userIDKey)
+	userID, ok := people.FromContext(ctx, people.UserIDKey)
 	ps, err := h.ps.ListReplies(ctx, r.PostID, userID, ok, post.IDPaginationParams(r.Params))
 	if err != nil {
 		return nil, err
@@ -109,7 +108,7 @@ func (h *handler) GetPostsPostIDReplies(ctx context.Context, r people.GetPostsPo
 }
 
 func (h *handler) PutPostsPostIDLikes(ctx context.Context, r people.PutPostsPostIDLikesRequestObject) (people.PutPostsPostIDLikesResponseObject, error) {
-	userID, _ := fromContext(ctx, userIDKey)
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
 	pr, err := h.ps.Like(r.PostID, userID)
 	if err != nil {
 		var e *people.Error
@@ -127,7 +126,7 @@ func (h *handler) PutPostsPostIDLikes(ctx context.Context, r people.PutPostsPost
 }
 
 func (h *handler) DeletePostsPostIDLikes(ctx context.Context, r people.DeletePostsPostIDLikesRequestObject) (people.DeletePostsPostIDLikesResponseObject, error) {
-	userID, _ := fromContext(ctx, userIDKey)
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
 	pr, err := h.ps.Unlike(r.PostID, userID)
 	if err != nil {
 		var e *people.Error
@@ -143,7 +142,7 @@ func (h *handler) DeletePostsPostIDLikes(ctx context.Context, r people.DeletePos
 }
 
 func (h *handler) GetUsersHandleLikes(ctx context.Context, r people.GetUsersHandleLikesRequestObject) (people.GetUsersHandleLikesResponseObject, error) {
-	userID, ok := fromContext(ctx, userIDKey)
+	userID, ok := people.FromContext(ctx, people.UserIDKey)
 	prs, err := h.ps.ListUserLikes(ctx, r.Handle, userID, ok, post.IDPaginationParams(r.Params))
 	if err != nil {
 		var e *people.Error
@@ -159,7 +158,7 @@ func (h *handler) GetUsersHandleLikes(ctx context.Context, r people.GetUsersHand
 }
 
 func (h *handler) GetPostsSearch(ctx context.Context, r people.GetPostsSearchRequestObject) (people.GetPostsSearchResponseObject, error) {
-	userID, ok := fromContext(ctx, userIDKey)
+	userID, ok := people.FromContext(ctx, people.UserIDKey)
 	prs, err := h.ps.ListMatches(ctx, r.Params.Query, userID, ok, post.IDPaginationParams{Limit: r.Params.Limit, Before: r.Params.Before, After: r.Params.After})
 	if err != nil {
 		return nil, err

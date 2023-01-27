@@ -23,11 +23,7 @@ type authService struct {
 }
 
 func NewService(ur repository.User, tr repository.Token, us user.Service) Service {
-	s := authService{}
-	s.ur = ur
-	s.tr = tr
-	s.us = us
-	return &s
+	return &authService{ur, tr, us}
 }
 
 func (s *authService) Register(au people.AuthUser) (people.AuthResponse, error) {
