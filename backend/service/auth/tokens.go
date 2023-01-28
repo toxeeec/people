@@ -18,12 +18,17 @@ var (
 )
 
 const (
-	day = 24 * time.Hour
-
-	// accessTokenDuration  = 15 * time.Minute
-	accessTokenDuration  = 30 * day
+	day                  = 24 * time.Hour
 	refreshTokenDuration = 30 * day
 )
+
+var accessTokenDuration = func() time.Duration {
+	value := os.Getenv("MODE")
+	if value == "DEVELOPMENT" {
+		return 30 * day
+	}
+	return 15 * time.Minute
+}()
 
 var (
 	accessTokenSecret  = []byte(os.Getenv("ACCESS_TOKEN_SECRET"))

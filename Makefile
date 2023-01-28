@@ -24,5 +24,5 @@ test:
 
 clean:
 	docker container prune -f
-	docker image rm -f $(docker image ls -q)
-	docker volume rm -f $(docker volume ls -q)
+	docker image rm -f $$(docker image ls -q)
+	docker volume rm -f $$(docker volume ls -q)
