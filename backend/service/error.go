@@ -7,3 +7,7 @@ import (
 func NewError(kind people.ErrorKind, message string) error {
 	return &people.Error{Kind: &kind, Message: message}
 }
+
+var (
+	InternalServerError = NewError(people.InternalError, "Internal Server Error")
+)

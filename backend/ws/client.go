@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -81,6 +82,7 @@ func (c *Client) writePump() {
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin:     func(_ *http.Request) bool { return true },
 }
 
 func Serve(h *Hub) echo.HandlerFunc {

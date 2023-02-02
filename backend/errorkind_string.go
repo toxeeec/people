@@ -13,11 +13,12 @@ func _() {
 	_ = x[NotFoundError-2]
 	_ = x[ConflictError-3]
 	_ = x[ResourceError-4]
+	_ = x[InternalError-5]
 }
 
-const _ErrorKind_name = "ValidationErrorAuthErrorNotFoundErrorConflictErrorResourceError"
+const _ErrorKind_name = "ValidationErrorAuthErrorNotFoundErrorConflictErrorResourceErrorInternalError"
 
-var _ErrorKind_index = [...]uint8{0, 15, 24, 37, 50, 63}
+var _ErrorKind_index = [...]uint8{0, 15, 24, 37, 50, 63, 76}
 
 func (i ErrorKind) String() string {
 	if i >= ErrorKind(len(_ErrorKind_index)-1) {

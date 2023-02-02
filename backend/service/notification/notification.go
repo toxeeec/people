@@ -3,6 +3,7 @@ package notification
 import (
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/repository"
+	"github.com/toxeeec/people/backend/service"
 )
 
 type Service interface {
@@ -21,7 +22,7 @@ func NewService(channel chan<- people.Notification, ur repository.User) Service 
 func (s *notificationService) Notify(notifType people.NotificationType, from, to uint, content *people.UserMessage) error {
 	u, err := s.ur.Get(from)
 	if err != nil {
-		return err
+		return service.InternalServerError
 	}
 	notif := people.Notification{
 		Type: notifType,

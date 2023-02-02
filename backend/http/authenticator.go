@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3filter"
@@ -32,9 +33,12 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func authenticate(r *http.Request) error {
-	jwt, err := getJWTFromRequest(r)
+	jwt, err := getJWTFromHeader(r.Header)
 	if err != nil {
-		return err
+		jwt, err = getJWTFromURL(r.URL)
+		if err != nil {
+			return errors.New("Access token is missing")
+		}
 	}
 	id, err := auth.ValidateAccessToken(jwt)
 	if err != nil {
@@ -45,8 +49,8 @@ func authenticate(r *http.Request) error {
 	return nil
 }
 
-func getJWTFromRequest(r *http.Request) (string, error) {
-	authHeader := r.Header.Get("Authorization")
+func getJWTFromHeader(h http.Header) (string, error) {
+	authHeader := h.Get("Authorization")
 	if authHeader == "" {
 		return "", errors.New("Authorization header is missing")
 	}
@@ -55,4 +59,12 @@ func getJWTFromRequest(r *http.Request) (string, error) {
 		return "", errors.New("Authorization header is malformed")
 	}
 	return strings.TrimPrefix(authHeader, prefix), nil
+}
+
+func getJWTFromURL(url *url.URL) (string, error) {
+	token := url.Query().Get("access_token")
+	if token == "" {
+		return "", errors.New("Access token query param is missing")
+	}
+	return token, nil
 }

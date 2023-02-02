@@ -27,6 +27,7 @@ const (
 	NotFoundError
 	ConflictError
 	ResourceError
+	InternalError
 )
 
 func (e *Error) Error() string {
