@@ -28,7 +28,13 @@ export const handleSubmit = (
 				},
 				onError: (error) => {
 					const err = error.response?.data.message;
-					form.setErrors({ handle: err, password: err });
+					if (err?.startsWith("Handle")) {
+						form.setErrors({ handle: err });
+					} else if (err?.startsWith("Password")) {
+						form.setErrors({ password: err });
+					} else {
+						form.setErrors({ handle: err, password: err });
+					}
 				},
 			}
 		);

@@ -20,7 +20,8 @@ export const Login = ({
 	const form = useForm<AuthUser>({
 		initialValues: { handle: "", password: "" },
 		validate: {
-			handle: (value) => (value.length < 5 ? "Invalid Handle" : null),
+			handle: (value) =>
+				value.length < 5 || value.length > 15 ? "Invalid Handle" : null,
 			password: (value) => (value.length < 12 ? "Invalid Password" : null),
 		},
 	});
