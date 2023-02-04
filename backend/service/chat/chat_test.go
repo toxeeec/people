@@ -31,12 +31,12 @@ func (s *ChatSuite) TestReadMessage() {
 	validationError := people.ValidationError
 
 	tests := map[string]struct {
-		message people.Message
+		message people.UserMessage
 		valid   bool
 		kind    *people.ErrorKind
 	}{
-		"empty message": {people.Message{Message: "", To: u2.Handle}, false, &validationError},
-		"valid":         {people.Message{Message: gofakeit.SentenceSimple(), To: u2.Handle}, true, nil},
+		"empty message": {people.UserMessage{Message: people.Message{Message: ""}, To: u2.Handle}, false, &validationError},
+		"valid":         {people.UserMessage{Message: people.Message{Message: gofakeit.SentenceSimple()}, To: u2.Handle}, true, nil},
 	}
 
 	for name, tc := range tests {
@@ -56,8 +56,8 @@ func (s *ChatSuite) TestReadMessage() {
 
 func (s *ChatSuite) SetupTest() {
 	um := map[uint]people.User{}
-	ns := notification.NewService()
 	s.ur = inmem.NewUserRepository(um)
+	ns := notification.NewService(make(chan people.Notification, 32), s.ur)
 	s.cs = chat.NewService(s.ur, ns)
 
 }

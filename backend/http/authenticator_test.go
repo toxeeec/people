@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"testing"
 	"time"
 
@@ -32,26 +33,30 @@ func TestAuthenticate(t *testing.T) {
 
 	expectedID := uint(rand.Uint32())
 	validToken, _ := auth.NewAccessToken(expectedID)
-
-	malformedToken := []rune(validToken)
-	malformedToken[rand.Intn(len(malformedToken))] += 1
+	malformedToken := validToken[1:]
 
 	noSigningMethod, _ := newTokenWithNoneMethod(expectedID)
 
 	tests := map[string]struct {
 		bearer string
+		query  string
 		valid  bool
 	}{
-		"no token":          {"", false},
-		"no signing method": {"Bearer " + noSigningMethod, false},
-		"malformed token":   {"Bearer " + string(malformedToken), false},
-		"valid":             {"Bearer " + validToken, true},
+		"no token":          {"", "", false},
+		"no signing method": {"Bearer " + noSigningMethod, "", false},
+		"malformed token":   {"Bearer " + string(malformedToken), "", false},
+		"valid(header)":     {"Bearer " + validToken, "", true},
+		"valid(query)":      {"", validToken, true},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			r := http.Request{}
-			r.Header = make(http.Header)
-			r.Header.Add("Authorization", tc.bearer)
+			r := http.Request{Header: http.Header{}, URL: &url.URL{}}
+			if tc.bearer != "" {
+				r.Header.Add("Authorization", tc.bearer)
+			}
+			if tc.query != "" {
+				r.URL.RawQuery = fmt.Sprintf("access_token=%s", tc.query)
+			}
 			err := authenticate(&r)
 			assert.Equal(t, tc.valid, err == nil)
 		})

@@ -34,7 +34,6 @@ func (s *chatService) ReadMessage(from uint, data []byte) error {
 	if err := validate(msg); err != nil {
 		return err
 	}
-	// TODO: check if can send message(followed and following)
 	to, err := s.ur.GetID(msg.To)
 	if err != nil {
 		return service.NewError(people.NotFoundError, "User not found")
