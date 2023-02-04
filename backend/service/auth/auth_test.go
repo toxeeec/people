@@ -160,7 +160,7 @@ func (s *AuthSuite) TestDelete() {
 		kind     *people.ErrorKind
 	}{
 
-		"invalid password": {gofakeit.Password(true, true, true, true, true, 12), false, &validationError},
+		"invalid password": {gofakeit.Password(true, true, true, true, true, 8), false, &validationError},
 		"valid":            {au.Password, true, nil},
 	}
 

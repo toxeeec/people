@@ -27,7 +27,7 @@ export const Signup = ({
 					? "Handle cannot have more than 15 characters"
 					: null,
 			password: (value) =>
-				value.length < 12 ? "Password must have at least 12 characters" : null,
+				value.length < 8 ? "Password must have at least 8 characters" : null,
 		},
 	});
 	const { setAuth } = useContext(AuthContext);

@@ -22,7 +22,7 @@ export const Login = ({
 		validate: {
 			handle: (value) =>
 				value.length < 5 || value.length > 15 ? "Invalid Handle" : null,
-			password: (value) => (value.length < 12 ? "Invalid Password" : null),
+			password: (value) => (value.length < 8 ? "Invalid Password" : null),
 		},
 	});
 	const { setAuth } = useContext(AuthContext);
