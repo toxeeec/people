@@ -7,4 +7,5 @@ export enum QueryKey {
 	REPLIES = "replies",
 	SEARCH = "search",
 	LIKES = "liked",
+	MESSAGES = "messages",
 }

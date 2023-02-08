@@ -5,15 +5,14 @@ import {
 	Group,
 	Text,
 	UnstyledButton,
-	ActionIcon,
 } from "@mantine/core";
 import { useWindowScroll } from "@mantine/hooks";
-import { IconSearch } from "@tabler/icons";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
-import { Link } from "react-router-dom";
 import { LayoutDrawer } from "./LayoutDrawer";
 import { LayoutGoBack } from "./LayoutGoBack";
+import { MessagesIcon } from "./MessagesIcon";
+import { SearchIcon } from "./SearchIcon";
 
 interface LayoutHeaderProps {
 	isAuthenticated: boolean;
@@ -31,10 +30,12 @@ export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 			setRoute("Home");
 		} else if (params.postID) {
 			setRoute("Post");
-		} else if (params.handle) {
-			setRoute(params.handle);
 		} else if (location.pathname === "/settings") {
 			setRoute("Settings");
+		} else if (location.pathname.includes("messages")) {
+			setRoute("Messages");
+		} else if (params.handle) {
+			setRoute(params.handle);
 		} else {
 			setRoute("");
 		}
@@ -45,8 +46,9 @@ export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 	}, [location]);
 
 	const isHome = route === "Home";
-	const isSearch = location.pathname.includes("search");
 	const isSettings = route === "Settings";
+	const isSearch = location.pathname.includes("search");
+	const isMessages = location.pathname.includes("messages");
 	return (
 		<>
 			<Space h={60} />
@@ -66,13 +68,12 @@ export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 							</Text>
 						</UnstyledButton>
 					</Group>
-					<ActionIcon
-						component={Link}
-						to={`/search/posts`}
-						display={isSearch || isSettings ? "none" : "unset"}
+					<Group
+						display={isSearch || isMessages || isSettings ? "none" : "flex"}
 					>
-						<IconSearch />
-					</ActionIcon>
+						<SearchIcon />
+						<MessagesIcon />
+					</Group>
 				</Group>
 			</Header>
 			{isAuthenticated ? (

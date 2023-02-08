@@ -1,10 +1,10 @@
 import { QueryKey, useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useContext, useEffect } from "react";
-import { Users as UsersType } from "../models";
+import { Users as UsersType } from "../../models";
 import { useInView } from "react-intersection-observer";
-import { CenterLoader } from "../components/CenterLoader";
-import { UsersContext } from "../context/UsersContext";
 import { User } from "./User";
+import { UsersContext } from "../../context/UsersContext";
+import { CenterLoader } from "../CenterLoader";
 
 const queryLimit = 10;
 
@@ -20,13 +20,19 @@ interface UsersProps {
 	enabled?: boolean;
 	query: Query;
 	queryKey: QueryKey;
+	onClick: (handle: string) => void;
 }
 
 interface QueryFunctionArgs {
 	pageParam?: PaginationParams;
 }
 
-export const Users = ({ query, queryKey, enabled = true }: UsersProps) => {
+export const Users = ({
+	query,
+	queryKey,
+	onClick,
+	enabled = true,
+}: UsersProps) => {
 	const { ref, inView } = useInView();
 	const { setUser } = useContext(UsersContext);
 	const queryFn = ({ pageParam }: QueryFunctionArgs) => {
@@ -63,7 +69,12 @@ export const Users = ({ query, queryKey, enabled = true }: UsersProps) => {
 				data?.pages.map((page, i) => (
 					<Fragment key={i}>
 						{page.data.map((user) => (
-							<User key={user.handle} handle={user.handle} ref={ref} />
+							<User
+								key={user.handle}
+								handle={user.handle}
+								ref={ref}
+								onClick={onClick}
+							/>
 						))}
 					</Fragment>
 				))

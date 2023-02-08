@@ -22,6 +22,8 @@ import User from "./pages/User";
 import Search from "./pages/Search";
 import { useGetUsersHandle } from "./spec.gen";
 import Settings from "./pages/Settings";
+import Messages from "./pages/Messages";
+import { NotificationsContextProvider } from "./context/NotificationsContext";
 
 const App = () => {
 	const { getAuth, setAuth, clearAuth, isAuthenticated } = useAuth();
@@ -52,16 +54,6 @@ const App = () => {
 			element: <Layout />,
 			children: [
 				{
-					path: "/home",
-					element: <Home />,
-					loader: () => {
-						if (!isAuthenticated) {
-							return redirect("/");
-						}
-						return null;
-					},
-				},
-				{
 					path: "/:handle",
 					element: <User value={"posts"} />,
 				},
@@ -90,14 +82,30 @@ const App = () => {
 					element: <Search value={"people"} />,
 				},
 				{
-					path: "/settings",
-					element: <Settings />,
 					loader: () => {
 						if (!isAuthenticated) {
 							return redirect("/");
 						}
 						return null;
 					},
+					children: [
+						{
+							path: "/home",
+							element: <Home />,
+						},
+						{
+							path: "/messages",
+							element: <Messages />,
+						},
+						{
+							path: "/messages/:handle",
+							element: <Messages />,
+						},
+						{
+							path: "/settings",
+							element: <Settings />,
+						},
+					],
 				},
 			],
 		},
@@ -111,7 +119,9 @@ const App = () => {
 		>
 			<UsersContextProvider initialUsers={users}>
 				<PostsContextProvider>
-					<RouterProvider router={router} />
+					<NotificationsContextProvider>
+						<RouterProvider router={router} />
+					</NotificationsContextProvider>
 				</PostsContextProvider>
 			</UsersContextProvider>
 		</AuthContext.Provider>
