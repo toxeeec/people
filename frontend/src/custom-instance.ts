@@ -3,9 +3,10 @@ import { AuthValues, SetAuthProps } from "./context/AuthContext";
 import { postRefresh } from "./spec.gen";
 
 const port = BACKEND_PORT;
-export const baseURL = `${location.hostname}:${port}`;
+export const baseURL = `${location.protocol}//${location.hostname}:${port}`;
+export const wsURL = `ws://${location.hostname}:${port}/ws`;
 export const AXIOS_INSTANCE = Axios.create({
-	baseURL: `http://${baseURL}/api`,
+	baseURL: `${baseURL}/api`,
 });
 
 export const customInstance = <T>(

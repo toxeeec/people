@@ -6,7 +6,7 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import { baseURL } from "../custom-instance";
+import { wsURL } from "../custom-instance";
 import { AuthContext } from "./AuthContext";
 
 const NotificationTypes = ["message"] as const;
@@ -52,9 +52,7 @@ export const NotificationsContextProvider = ({
 	const { getAuth, isAuthenticated } = useContext(AuthContext);
 	const socket = useMemo(() => {
 		if (isAuthenticated)
-			return new WebSocket(
-				`ws://${baseURL}/ws?access_token=${getAuth().accessToken}`
-			);
+			return new WebSocket(`${wsURL}?access_token=${getAuth().accessToken}`);
 	}, [isAuthenticated, getAuth]);
 	const [newMessages, setNewMessages] = useState<Messages>(new Map());
 
