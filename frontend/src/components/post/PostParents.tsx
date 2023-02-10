@@ -11,11 +11,7 @@ export const PostParents = ({ post, scroll }: PostParentsProps) => {
 	const replyID = post?.repliesTo || 0;
 	const { data, isLoading } = useGetPostsPostID(replyID, {
 		query: {
-			onSuccess: (data) => {
-				if (!data.data.repliesTo) {
-					scroll();
-				}
-			},
+			onSuccess: (data) => !data.data.repliesTo && scroll(),
 			enabled,
 		},
 	});

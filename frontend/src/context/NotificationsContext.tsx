@@ -36,6 +36,7 @@ interface NotificationsContextType {
 	newMessages: Messages;
 	addNewMessage: (from: string, message: UserMessage) => void;
 	sendMessage: (message: UserMessage) => void;
+	addUser: (handle: string) => void;
 }
 
 export const NotificationsContext = createContext<NotificationsContextType>(
@@ -89,22 +90,30 @@ export const NotificationsContextProvider = ({
 	}, [getAuth, isAuthenticated, addNewMessage, handleMessage, socket]);
 
 	const sendMessage = (msg: UserMessage) => {
-		const { message, to } = msg;
 		if (!isAuthenticated) return;
+		const { message, to } = msg;
 		const userMessage: UserMessage = {
 			message,
 			to,
 		};
 		socket?.send(JSON.stringify({ ...userMessage, type: "message" }));
-		addNewMessage(getAuth().handle!, {
+		const { handle } = getAuth();
+		if (handle === to) return;
+		addNewMessage(handle!, {
 			message: message,
 			to,
 		});
 	};
 
+	const addUser = (handle: string) => {
+		const messages = newMessages.get(handle);
+		if (messages) return;
+		setNewMessages(new Map(newMessages.set(handle, [])));
+	};
+
 	return (
 		<NotificationsContext.Provider
-			value={{ newMessages, addNewMessage, sendMessage }}
+			value={{ newMessages, addNewMessage, sendMessage, addUser }}
 		>
 			{children}
 		</NotificationsContext.Provider>

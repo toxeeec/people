@@ -30,12 +30,7 @@ const App = () => {
 		{
 			index: true,
 			element: <Auth />,
-			loader: () => {
-				if (isAuthenticated) {
-					return redirect("/home");
-				}
-				return null;
-			},
+			loader: () => isAuthenticated && redirect("/home"),
 		},
 		{
 			element: <Layout />,
@@ -69,12 +64,7 @@ const App = () => {
 					element: <Search value={"people"} />,
 				},
 				{
-					loader: () => {
-						if (!isAuthenticated) {
-							return redirect("/");
-						}
-						return null;
-					},
+					loader: () => !isAuthenticated && redirect("/"),
 					children: [
 						{
 							path: "/home",

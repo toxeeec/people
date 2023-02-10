@@ -12,14 +12,13 @@ import { NotificationsContext } from "../../context/NotificationsContext";
 interface InputProps {
 	message: string;
 	setMessage: Dispatch<SetStateAction<string>>;
-	to: string | null;
+	to: string;
 }
 export const Input = ({ message, setMessage, to }: InputProps) => {
 	const { sendMessage } = useContext(NotificationsContext);
 	const empty = useMemo(() => message.trim().length === 0, [message]);
 
 	const handleSubmit = () => {
-		if (!to) return;
 		sendMessage({ to, message });
 		setMessage("");
 	};

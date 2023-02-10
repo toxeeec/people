@@ -23,10 +23,10 @@ export const DeleteAccount = () => {
 	});
 
 	const handleDelete = ({ password }: { password: string }) => {
-		if (!password) return;
-		mutate({
-			data: { password },
-		});
+		password &&
+			mutate({
+				data: { password },
+			});
 	};
 	return (
 		<>

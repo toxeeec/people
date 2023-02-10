@@ -1,13 +1,13 @@
 import { ActionIcon, Container, Flex, Tabs } from "@mantine/core";
 import { useClickOutside, useDebouncedValue } from "@mantine/hooks";
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Search } from "../components/Search";
 import { Query as UsersQuery, Users } from "../components/messages/Users";
-import { Messages as MessagesComponent } from "../components/messages/Messages";
 import { getUsersSearch } from "../spec.gen";
 import { IconArrowLeft } from "@tabler/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { NotificationsContext } from "../context/NotificationsContext";
+import { MessagesTab } from "../components/messages/MessagesTab";
 
 const Messages = () => {
 	const params = useParams();
@@ -23,22 +23,30 @@ const Messages = () => {
 		(params) => getUsersSearch({ query: debounced, ...params }),
 		[debounced]
 	);
+	const { newMessages, addUser } = useContext(NotificationsContext);
+
+	useEffect(() => {
+		params.handle && addUser(params.handle);
+	}, [params, addUser]);
+
 	const close = () => {
 		setHidden(true);
 		setQuery("");
 	};
-	const handleClick = (handle: string) => {
+
+	const handleChange = (handle: string) => {
+		addUser(handle);
 		setCurrentUser(handle);
-		navigate(`/messages/${handle}`);
+		navigate(`/messages/${handle}`, { replace: true });
 		close();
 	};
-	const { newMessages } = useContext(NotificationsContext);
+
 	return (
 		<Tabs
 			orientation="vertical"
 			h="calc(100% - 60px)"
 			value={currentUser}
-			onTabChange={setCurrentUser}
+			onTabChange={handleChange}
 		>
 			<Tabs.List w="25%" style={{ flexWrap: "nowrap" }}>
 				<Flex onFocus={() => setHidden(false)} align="center">
@@ -58,7 +66,7 @@ const Messages = () => {
 						queryKey={["users", debounced, "messages"]}
 						enabled={debounced.length > 0}
 						query={usersQuery}
-						onClick={handleClick}
+						onClick={handleChange}
 					/>
 				</Container>
 				<Flex direction="column" hidden={!hidden}>
@@ -71,7 +79,7 @@ const Messages = () => {
 			</Tabs.List>
 			{[...newMessages.entries()].map(([to, messages]) => (
 				<Tabs.Panel key={to} value={to}>
-					<MessagesComponent messages={messages} to={to} />
+					<MessagesTab messages={messages} to={to} />
 				</Tabs.Panel>
 			))}
 		</Tabs>
