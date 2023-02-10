@@ -1,9 +1,9 @@
 import { Button, Modal, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useQueryClient } from "@tanstack/react-query";
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { UsersContext } from "../context/UsersContext";
 import { Handle } from "../models";
 import { usePutMe } from "../spec.gen";
 
@@ -12,18 +12,17 @@ interface EditButtonProps {
 }
 
 export const EditButton = ({ handle }: EditButtonProps) => {
-	const { users, setUser } = useContext(UsersContext);
 	const { setAuth } = useContext(AuthContext);
+	const queryClient = useQueryClient();
 	const navigate = useNavigate();
-	const user = users[handle]!;
-	const form = useForm<Handle>({ initialValues: { handle: user.handle } });
+	const form = useForm<Handle>({ initialValues: { handle } });
 	const [opened, setOpened] = useState(false);
 	const { mutate } = usePutMe({
 		mutation: {
 			retry: 1,
 			onSuccess: (user) => {
+				queryClient.invalidateQueries();
 				setOpened(false);
-				setUser(user);
 				navigate(`/${user.handle}`);
 				setAuth({ handle: user.handle });
 			},
@@ -34,9 +33,9 @@ export const EditButton = ({ handle }: EditButtonProps) => {
 		},
 	});
 
-	const handleSubmit = (handle: Handle) => {
-		if (handle.handle !== user.handle) {
-			mutate({ data: handle });
+	const handleSubmit = (h: Handle) => {
+		if (h.handle !== handle) {
+			mutate({ data: h });
 		} else {
 			setOpened(false);
 		}

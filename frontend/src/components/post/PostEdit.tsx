@@ -1,35 +1,29 @@
 import { ActionIcon, Popover, Stack, Text } from "@mantine/core";
 import { IconDots } from "@tabler/icons";
-import { QueryKey, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import { deletePostsPostID } from "../../spec.gen";
+import { useDeletePostsPostID } from "../../spec.gen";
 
 interface PostEditProps {
 	id: number;
 	handle: string;
-	queryKey: QueryKey;
 	exact: boolean;
 	onSuccess?: () => void;
 }
 
-export const PostEdit = ({
-	id,
-	handle,
-	queryKey,
-	exact,
-	onSuccess,
-}: PostEditProps) => {
+export const PostEdit = ({ id, handle, onSuccess }: PostEditProps) => {
 	const { isAuthenticated, getAuth } = useContext(AuthContext);
 	const queryClient = useQueryClient();
-	const handleDelete = () => {
-		deletePostsPostID(id).then(() => {
-			queryClient.resetQueries({ queryKey, exact });
-			if (onSuccess) {
-				onSuccess();
-			}
-		});
-	};
+	const { mutate } = useDeletePostsPostID({
+		mutation: {
+			onSuccess: () => {
+				queryClient.invalidateQueries();
+				onSuccess && onSuccess();
+			},
+			retry: 1,
+		},
+	});
 	return isAuthenticated && getAuth().handle === handle ? (
 		<Popover position="bottom">
 			<Popover.Target>
@@ -39,7 +33,7 @@ export const PostEdit = ({
 			</Popover.Target>
 			<Popover.Dropdown p={0} style={{ cursor: "pointer" }}>
 				<Stack spacing="xs">
-					<Text onClick={handleDelete} p="xs">
+					<Text onClick={() => mutate({ postID: id })} p="xs">
 						Delete Post
 					</Text>
 				</Stack>

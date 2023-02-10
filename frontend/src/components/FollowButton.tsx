@@ -1,18 +1,16 @@
 import { Button } from "@mantine/core";
-import { useCallback, useContext } from "react";
-import { UsersContext } from "../context/UsersContext";
+import { useCallback } from "react";
+import { User } from "../models";
 import {
 	useDeleteMeFollowingHandle,
 	usePutMeFollowingHandle,
 } from "../spec.gen";
 
 interface FollowButtonProps {
-	handle: string;
+	user: User;
 }
 
-export const FollowButton = ({ handle }: FollowButtonProps) => {
-	const { users, setUser } = useContext(UsersContext);
-	const user = users[handle];
+export const FollowButton = ({ user }: FollowButtonProps) => {
 	const { mutate: follow, isLoading: isFollowLoading } =
 		usePutMeFollowingHandle({
 			mutation: { retry: 1 },
@@ -30,11 +28,11 @@ export const FollowButton = ({ handle }: FollowButtonProps) => {
 			{ handle: user!.handle! },
 			{
 				onSuccess: (user) => {
-					setUser(user);
+					// setUser(user);
 				},
 			}
 		);
-	}, [follow, unfollow, user, setUser]);
+	}, [follow, unfollow, user]);
 
 	return (
 		<Button

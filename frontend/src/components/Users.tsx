@@ -1,9 +1,8 @@
 import { QueryKey, useInfiniteQuery } from "@tanstack/react-query";
-import { Fragment, useContext, useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { Users as UsersType } from "../models";
 import { useInView } from "react-intersection-observer";
 import { CenterLoader } from "../components/CenterLoader";
-import { UsersContext } from "../context/UsersContext";
 import { User } from "./User";
 
 const queryLimit = 10;
@@ -17,9 +16,9 @@ interface PaginationParams {
 export type Query = (params: PaginationParams) => Promise<UsersType>;
 
 interface UsersProps {
-	enabled?: boolean;
 	query: Query;
 	queryKey: QueryKey;
+	enabled?: boolean;
 }
 
 interface QueryFunctionArgs {
@@ -28,7 +27,6 @@ interface QueryFunctionArgs {
 
 export const Users = ({ query, queryKey, enabled = true }: UsersProps) => {
 	const { ref, inView } = useInView();
-	const { setUser } = useContext(UsersContext);
 	const queryFn = ({ pageParam }: QueryFunctionArgs) => {
 		pageParam = { ...pageParam, limit: queryLimit };
 		return query(pageParam);
@@ -41,11 +39,6 @@ export const Users = ({ query, queryKey, enabled = true }: UsersProps) => {
 		getNextPageParam: (lastPage) => {
 			if (!lastPage.meta || lastPage.data.length < queryLimit) return undefined;
 			return { before: lastPage.meta?.oldest };
-		},
-		onSuccess: (data) => {
-			data.pages.forEach((users) =>
-				users.data.forEach((user) => setUser(user))
-			);
 		},
 	});
 
@@ -63,7 +56,7 @@ export const Users = ({ query, queryKey, enabled = true }: UsersProps) => {
 				data?.pages.map((page, i) => (
 					<Fragment key={i}>
 						{page.data.map((user) => (
-							<User key={user.handle} handle={user.handle} ref={ref} />
+							<User key={user.handle} user={user} ref={ref} />
 						))}
 					</Fragment>
 				))

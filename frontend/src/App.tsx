@@ -1,18 +1,14 @@
-import { useMemo } from "react";
+import { useContext } from "react";
 import {
 	createBrowserRouter,
 	redirect,
 	RouterProvider,
 } from "react-router-dom";
-import { CenterLoader } from "./components/CenterLoader";
 import { AuthContext } from "./context/AuthContext";
-import { PostsContextProvider } from "./context/PostsContext";
-import { Users, UsersContextProvider } from "./context/UsersContext";
 import {
 	createRequestInterceptor,
 	createResponseInterceptor,
 } from "./custom-instance";
-import { useAuth } from "./hooks/useAuth";
 import Layout from "./layout";
 import Auth from "./pages/Auth";
 import Follows from "./pages/Follows";
@@ -20,21 +16,12 @@ import Home from "./pages/Home";
 import Post from "./pages/Post";
 import User from "./pages/User";
 import Search from "./pages/Search";
-import { useGetUsersHandle } from "./spec.gen";
 import Settings from "./pages/Settings";
 import Messages from "./pages/Messages";
-import { NotificationsContextProvider } from "./context/NotificationsContext";
 
 const App = () => {
-	const { getAuth, setAuth, clearAuth, isAuthenticated } = useAuth();
-	const users: Users = useMemo(() => ({}), []);
-	const { isLoading } = useGetUsersHandle(getAuth().handle!, {
-		query: {
-			enabled: isAuthenticated,
-			onSuccess: (u) => (users[u.handle] = u),
-			onError: () => clearAuth(),
-		},
-	});
+	const { getAuth, setAuth, clearAuth, isAuthenticated } =
+		useContext(AuthContext);
 
 	createRequestInterceptor(getAuth);
 	createResponseInterceptor(getAuth, setAuth, clearAuth);
@@ -111,21 +98,7 @@ const App = () => {
 		},
 	]);
 
-	return isLoading && isAuthenticated ? (
-		<CenterLoader />
-	) : (
-		<AuthContext.Provider
-			value={{ getAuth, setAuth, clearAuth, isAuthenticated }}
-		>
-			<UsersContextProvider initialUsers={users}>
-				<PostsContextProvider>
-					<NotificationsContextProvider>
-						<RouterProvider router={router} />
-					</NotificationsContextProvider>
-				</PostsContextProvider>
-			</UsersContextProvider>
-		</AuthContext.Provider>
-	);
+	return <RouterProvider router={router} />;
 };
 
 export default App;

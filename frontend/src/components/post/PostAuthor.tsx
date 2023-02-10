@@ -1,20 +1,21 @@
 import { Avatar, Group, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
+import { User } from "../../models";
 import { UserHoverCard } from "../UserHoverCard";
 
 interface PostAuthorProps {
-	handle: string;
+	user: User;
 }
 
-export const PostAuthor = ({ handle }: PostAuthorProps) => {
+export const PostAuthor = ({ user }: PostAuthorProps) => {
 	return (
 		<Group align="center">
-			<UserHoverCard handle={handle}>
-				<Avatar radius="xl" size="md" component={Link} to={`/${handle}`} />
+			<UserHoverCard user={user}>
+				<Avatar radius="xl" size="md" component={Link} to={`/${user.handle}`} />
 			</UserHoverCard>
-			<UserHoverCard handle={handle}>
-				<Text component={Link} to={`/${handle}`} weight="bold">
-					{handle}
+			<UserHoverCard user={user}>
+				<Text component={Link} to={`/${user.handle}`} weight="bold">
+					{user.handle}
 				</Text>
 			</UserHoverCard>
 		</Group>

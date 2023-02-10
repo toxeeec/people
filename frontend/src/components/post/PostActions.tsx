@@ -1,13 +1,8 @@
 import { ActionIcon, Group, Text } from "@mantine/core";
 import { IconHeart, IconMessageCircle2 } from "@tabler/icons";
-import {
-	QueryKey as QueryKeyType,
-	useQueryClient,
-} from "@tanstack/react-query";
-import { useCallback, useContext, useState } from "react";
-import { PostsContext } from "../../context/PostsContext";
-import { UsersContext } from "../../context/UsersContext";
-import { QueryKey } from "../../query-key";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
+import { Post } from "../../models";
 import {
 	useDeletePostsPostIDLikes,
 	usePutPostsPostIDLikes,
@@ -15,40 +10,25 @@ import {
 import { PostReplyModal } from "./PostReplyModal";
 
 interface PostActionsProps {
-	id: number;
+	post: Post;
 	handle: string;
-	queryKey: QueryKeyType;
 }
 
-export const PostActions = ({ id, handle, queryKey }: PostActionsProps) => {
+export const PostActions = ({ post, handle }: PostActionsProps) => {
 	const queryClient = useQueryClient();
-	const { setUser } = useContext(UsersContext);
-	const { posts, setPost } = useContext(PostsContext);
 	const { mutate: like } = usePutPostsPostIDLikes({
 		mutation: { retry: 1 },
 	});
 	const { mutate: unlike } = useDeletePostsPostIDLikes({
 		mutation: { retry: 1 },
 	});
-	const post = posts[id]!;
 	const handleLike = useCallback(() => {
 		const fn = post.status?.isLiked ? unlike : like;
 		fn(
 			{ postID: post.id },
-			{
-				onSuccess: (postResponse) => {
-					setPost(postResponse.data);
-					setUser(postResponse.user);
-					queryClient.invalidateQueries({
-						queryKey: [QueryKey.POSTS],
-					});
-					queryClient.invalidateQueries({
-						queryKey: [QueryKey.USERS],
-					});
-				},
-			}
+			{ onSuccess: () => queryClient.invalidateQueries() }
 		);
-	}, [post, setPost, setUser, like, unlike, queryClient]);
+	}, [post, like, unlike, queryClient]);
 
 	const [opened, setOpened] = useState(false);
 	const handleOpen = () => {
@@ -73,11 +53,10 @@ export const PostActions = ({ id, handle, queryKey }: PostActionsProps) => {
 				<Text size="sm">{post.likes}</Text>
 			</Group>
 			<PostReplyModal
+				post={post}
 				opened={opened}
 				setOpened={setOpened}
-				id={post.id}
 				handle={handle}
-				queryKey={queryKey}
 			/>
 		</Group>
 	);

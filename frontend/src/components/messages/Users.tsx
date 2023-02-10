@@ -1,9 +1,8 @@
 import { QueryKey, useInfiniteQuery } from "@tanstack/react-query";
-import { Fragment, useContext, useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { Users as UsersType } from "../../models";
 import { useInView } from "react-intersection-observer";
 import { User } from "./User";
-import { UsersContext } from "../../context/UsersContext";
 import { CenterLoader } from "../CenterLoader";
 
 const queryLimit = 10;
@@ -17,10 +16,10 @@ interface PaginationParams {
 export type Query = (params: PaginationParams) => Promise<UsersType>;
 
 interface UsersProps {
-	enabled?: boolean;
 	query: Query;
 	queryKey: QueryKey;
 	onClick: (handle: string) => void;
+	enabled?: boolean;
 }
 
 interface QueryFunctionArgs {
@@ -34,7 +33,6 @@ export const Users = ({
 	enabled = true,
 }: UsersProps) => {
 	const { ref, inView } = useInView();
-	const { setUser } = useContext(UsersContext);
 	const queryFn = ({ pageParam }: QueryFunctionArgs) => {
 		pageParam = { ...pageParam, limit: queryLimit };
 		return query(pageParam);
@@ -47,11 +45,6 @@ export const Users = ({
 		getNextPageParam: (lastPage) => {
 			if (!lastPage.meta || lastPage.data.length < queryLimit) return undefined;
 			return { before: lastPage.meta?.oldest };
-		},
-		onSuccess: (data) => {
-			data.pages.forEach((users) =>
-				users.data.forEach((user) => setUser(user))
-			);
 		},
 	});
 

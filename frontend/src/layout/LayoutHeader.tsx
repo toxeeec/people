@@ -9,6 +9,7 @@ import {
 import { useWindowScroll } from "@mantine/hooks";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
+import { User } from "../models";
 import { LayoutDrawer } from "./LayoutDrawer";
 import { LayoutGoBack } from "./LayoutGoBack";
 import { MessagesIcon } from "./MessagesIcon";
@@ -16,9 +17,10 @@ import { SearchIcon } from "./SearchIcon";
 
 interface LayoutHeaderProps {
 	isAuthenticated: boolean;
+	user: User;
 }
 
-export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
+export const LayoutHeader = ({ user, isAuthenticated }: LayoutHeaderProps) => {
 	const [opened, setOpened] = useState(false);
 	const params = useParams();
 	const location = useLocation();
@@ -77,7 +79,7 @@ export const LayoutHeader = ({ isAuthenticated }: LayoutHeaderProps) => {
 				</Group>
 			</Header>
 			{isAuthenticated ? (
-				<LayoutDrawer isOpened={opened} setIsOpened={setOpened} />
+				<LayoutDrawer user={user} isOpened={opened} setIsOpened={setOpened} />
 			) : null}
 		</>
 	);

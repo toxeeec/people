@@ -2,7 +2,6 @@ import { Tabs } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { Users, Query } from "../components/Users";
 import { Wrapper } from "../components/Wrapper";
-import { QueryKey } from "../query-key";
 import { getUsersHandleFollowers, getUsersHandleFollowing } from "../spec.gen";
 
 export type FollowsPage = "followers" | "following";
@@ -34,14 +33,14 @@ const Follows = ({ value }: { value: FollowsPage }) => {
 
 				<Tabs.Panel value="following">
 					<Users
+						queryKey={["users", params.handle, "following"]}
 						query={queryFollowing}
-						queryKey={[QueryKey.USERS, QueryKey.FOLLOWING, params.handle!]}
 					/>
 				</Tabs.Panel>
 				<Tabs.Panel value="followers">
 					<Users
+						queryKey={["users", params.handle, "followers"]}
 						query={queryFollowers}
-						queryKey={[QueryKey.USERS, QueryKey.FOLLOWERS, params.handle!]}
 					/>
 				</Tabs.Panel>
 			</Tabs>

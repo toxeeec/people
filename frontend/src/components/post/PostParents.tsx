@@ -1,18 +1,12 @@
-import { useContext } from "react";
-import { PostsContext } from "../../context/PostsContext";
-import { UsersContext } from "../../context/UsersContext";
-import { QueryKey } from "../../query-key";
 import { useGetPostsPostID } from "../../spec.gen";
 import { Post } from "../Post";
+import { Post as PostType } from "../../models";
 
 interface PostParentsProps {
-	id: number;
+	post: PostType;
 	scroll: () => void;
 }
-export const PostParents = ({ id, scroll }: PostParentsProps) => {
-	const { posts, setPost } = useContext(PostsContext);
-	const { setUser } = useContext(UsersContext);
-	const post = posts[id];
+export const PostParents = ({ post, scroll }: PostParentsProps) => {
 	const enabled = !!post?.repliesTo;
 	const replyID = post?.repliesTo || 0;
 	const { data, isLoading } = useGetPostsPostID(replyID, {
@@ -21,20 +15,14 @@ export const PostParents = ({ id, scroll }: PostParentsProps) => {
 				if (!data.data.repliesTo) {
 					scroll();
 				}
-				setPost(data.data);
-				setUser(data.user);
 			},
 			enabled,
 		},
 	});
 	return enabled && !isLoading && data ? (
 		<>
-			<PostParents id={replyID} scroll={scroll} />
-			<Post
-				id={data.data.id}
-				handle={data.user.handle}
-				queryKey={[QueryKey.POSTS, data.data.id]}
-			/>
+			<PostParents post={data.data} scroll={scroll} />
+			<Post post={data.data} user={data.user} />
 		</>
 	) : null;
 };

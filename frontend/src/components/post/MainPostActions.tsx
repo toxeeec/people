@@ -7,10 +7,8 @@ import {
 } from "@mantine/core";
 import { IconHeart, IconMessageCircle2 } from "@tabler/icons";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useContext, useState } from "react";
-import { PostsContext } from "../../context/PostsContext";
-import { UsersContext } from "../../context/UsersContext";
-import { QueryKey } from "../../query-key";
+import { useCallback, useState } from "react";
+import { Post } from "../../models";
 import {
 	useDeletePostsPostIDLikes,
 	usePutPostsPostIDLikes,
@@ -19,15 +17,12 @@ import { PostLikes } from "./PostLikes";
 import { PostReplyModal } from "./PostReplyModal";
 
 interface MainPostActionsProps {
-	id: number;
+	post: Post;
 	handle: string;
 }
 
-export const MainPostActions = ({ id, handle }: MainPostActionsProps) => {
-	const { posts, setPost } = useContext(PostsContext);
-	const { setUser } = useContext(UsersContext);
+export const MainPostActions = ({ post, handle }: MainPostActionsProps) => {
 	const queryClient = useQueryClient();
-	const post = posts[id]!;
 	const [likesOpened, setLikesOpened] = useState(false);
 	const [replyOpened, setReplyOpened] = useState(false);
 
@@ -46,15 +41,12 @@ export const MainPostActions = ({ id, handle }: MainPostActionsProps) => {
 		fn(
 			{ postID: post.id },
 			{
-				onSuccess: (postResponse) => {
-					setPost(postResponse.data);
-					setUser(postResponse.user);
-					queryClient.resetQueries({ queryKey: [QueryKey.POSTS] });
-					queryClient.resetQueries({ queryKey: [QueryKey.USERS] });
+				onSuccess: () => {
+					queryClient.invalidateQueries();
 				},
 			}
 		);
-	}, [like, unlike, post, queryClient, setPost, setUser]);
+	}, [like, unlike, post, queryClient]);
 
 	return (
 		<>
@@ -79,13 +71,12 @@ export const MainPostActions = ({ id, handle }: MainPostActionsProps) => {
 					</ActionIcon>
 				</Group>
 			</Flex>
-			<PostLikes opened={likesOpened} setOpened={setLikesOpened} id={id} />
+			<PostLikes opened={likesOpened} setOpened={setLikesOpened} id={post.id} />
 			<PostReplyModal
 				opened={replyOpened}
 				setOpened={setReplyOpened}
-				id={id}
+				post={post}
 				handle={handle}
-				queryKey={[QueryKey.POSTS, QueryKey.REPLIES, id]}
 			/>
 		</>
 	);

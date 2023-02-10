@@ -4,7 +4,6 @@ import { useCallback, useContext, useState } from "react";
 import { Search } from "../components/Search";
 import { Query as UsersQuery, Users } from "../components/messages/Users";
 import { Messages as MessagesComponent } from "../components/messages/Messages";
-import { QueryKey } from "../query-key";
 import { getUsersSearch } from "../spec.gen";
 import { IconArrowLeft } from "@tabler/icons";
 import { useNavigate, useParams } from "react-router-dom";
@@ -56,9 +55,9 @@ const Messages = () => {
 					mih="calc(100% - 60px)"
 				>
 					<Users
+						queryKey={["users", debounced, "messages"]}
 						enabled={debounced.length > 0}
 						query={usersQuery}
-						queryKey={[QueryKey.USERS, QueryKey.MESSAGES, debounced]}
 						onClick={handleClick}
 					/>
 				</Container>
@@ -72,7 +71,7 @@ const Messages = () => {
 			</Tabs.List>
 			{[...newMessages.entries()].map(([to, messages]) => (
 				<Tabs.Panel key={to} value={to}>
-					<MessagesComponent messages={messages} currentUser={currentUser} />
+					<MessagesComponent messages={messages} to={to} />
 				</Tabs.Panel>
 			))}
 		</Tabs>

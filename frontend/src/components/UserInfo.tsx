@@ -1,16 +1,13 @@
 import { Avatar, Badge, Group, Text, UnstyledButton } from "@mantine/core";
-import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { UsersContext } from "../context/UsersContext";
+import { User } from "../models";
 
 interface UserInfoProps {
-	handle: string;
+	user: User;
 	children?: React.ReactNode;
 }
 
-export const UserInfo = ({ handle, children }: UserInfoProps) => {
-	const { users } = useContext(UsersContext);
-	const user = users[handle]!;
+export const UserInfo = ({ user, children }: UserInfoProps) => {
 	return (
 		<>
 			<Group align="start" position="apart">

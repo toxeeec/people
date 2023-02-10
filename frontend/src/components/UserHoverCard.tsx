@@ -1,27 +1,25 @@
 import { HoverCard, Paper } from "@mantine/core";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { UsersContext } from "../context/UsersContext";
+import { User } from "../models";
 import { FollowButton } from "./FollowButton";
 import { UserInfo } from "./UserInfo";
 
 interface UserHoverCardProps {
-	handle: string;
+	user: User;
 	children: React.ReactNode;
 }
 
-export const UserHoverCard = ({ handle, children }: UserHoverCardProps) => {
+export const UserHoverCard = ({ user, children }: UserHoverCardProps) => {
 	const { getAuth } = useContext(AuthContext);
-	const { users } = useContext(UsersContext);
-	const user = users[handle];
 	return (
 		<HoverCard>
 			<HoverCard.Target>{children}</HoverCard.Target>
 			<HoverCard.Dropdown p={0}>
 				<Paper p="md">
-					<UserInfo handle={handle}>
+					<UserInfo user={user}>
 						{user?.handle === getAuth().handle ? null : (
-							<FollowButton handle={handle} />
+							<FollowButton user={user} />
 						)}
 					</UserInfo>
 				</Paper>

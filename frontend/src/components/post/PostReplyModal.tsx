@@ -1,30 +1,25 @@
 import { Avatar, Group, Modal, Text } from "@mantine/core";
 import { useFocusTrap } from "@mantine/hooks";
-import { QueryKey } from "@tanstack/react-query";
-import { Dispatch, SetStateAction, useContext } from "react";
-import { PostsContext } from "../../context/PostsContext";
+import { Dispatch, SetStateAction } from "react";
+import { Post } from "../../models";
 import { postPostsPostIDReplies } from "../../spec.gen";
 import { MutationFn, CreatePost } from "./CreatePost";
 
 interface PostReplyModalProps {
 	opened: boolean;
 	setOpened: Dispatch<SetStateAction<boolean>>;
-	id: number;
+	post: Post;
 	handle: string;
-	queryKey: QueryKey;
 }
 
 export const PostReplyModal = ({
 	opened,
 	setOpened,
-	id,
+	post,
 	handle,
-	queryKey,
 }: PostReplyModalProps) => {
-	const { posts } = useContext(PostsContext);
-	const post = posts[id];
 	const mutationFn: MutationFn = (newPost) => {
-		return postPostsPostIDReplies(id, newPost);
+		return postPostsPostIDReplies(post.id, newPost);
 	};
 	const focusTrapRef = useFocusTrap(opened);
 	return (
@@ -45,7 +40,6 @@ export const PostReplyModal = ({
 			<Text my="xs">{post?.content}</Text>
 			<CreatePost
 				mutationFn={mutationFn}
-				queryKey={queryKey}
 				setOpened={setOpened}
 				ref={focusTrapRef}
 				placeholder={"Create reply"}

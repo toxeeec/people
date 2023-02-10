@@ -10,18 +10,15 @@ import {
 } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { IconPhoto } from "@tabler/icons";
-import { QueryKey, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
 	Dispatch,
 	forwardRef,
 	SetStateAction,
 	useCallback,
-	useContext,
 	useRef,
 	useState,
 } from "react";
-import { PostsContext } from "../../context/PostsContext";
-import { UsersContext } from "../../context/UsersContext";
 import { ErrorType } from "../../custom-instance";
 import { ImageResponse, NewPost, PostResponse } from "../../models";
 import { CreateImages } from "../images/CreateImages";
@@ -29,28 +26,23 @@ import { CreateImages } from "../images/CreateImages";
 export type MutationFn = (newPost: NewPost) => Promise<PostResponse>;
 interface CreatePostProps {
 	mutationFn: MutationFn;
-	queryKey: QueryKey;
 	setOpened?: Dispatch<SetStateAction<boolean>>;
 	placeholder: string;
 }
 
 export const CreatePost = forwardRef<HTMLTextAreaElement, CreatePostProps>(
-	({ mutationFn, queryKey, setOpened, placeholder }, ref) => {
+	({ mutationFn, setOpened, placeholder }, ref) => {
 		const [content, setContent] = useState("");
 		const [error, setError] = useState("");
 		const queryClient = useQueryClient();
-		const { setUser } = useContext(UsersContext);
-		const { setPost } = useContext(PostsContext);
 		const { mutate } = useMutation({
-			mutationFn,
-			retry: 1,
-			onSuccess: (postResponse) => {
-				setPost(postResponse.data);
-				setUser(postResponse.user);
+			onSuccess: () => {
 				setContent("");
-				queryClient.invalidateQueries({ queryKey, exact: true });
+				queryClient.invalidateQueries();
 				setOpened && setOpened(false);
 			},
+			mutationFn,
+			retry: 1,
 			onError: (error) => {
 				const err = (error as ErrorType<Error>).response?.data.message;
 				setError(err!);

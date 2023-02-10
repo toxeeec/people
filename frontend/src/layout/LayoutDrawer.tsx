@@ -3,19 +3,22 @@ import { Dispatch, SetStateAction, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserInfo } from "../components/UserInfo";
 import { AuthContext } from "../context/AuthContext";
-import { UsersContext } from "../context/UsersContext";
+import { User } from "../models";
 import { postLogout } from "../spec.gen";
 
 interface LayoutDrawerProps {
 	isOpened: boolean;
 	setIsOpened: Dispatch<SetStateAction<boolean>>;
+	user: User;
 }
 
-export const LayoutDrawer = ({ isOpened, setIsOpened }: LayoutDrawerProps) => {
+export const LayoutDrawer = ({
+	isOpened,
+	setIsOpened,
+	user,
+}: LayoutDrawerProps) => {
 	const navigate = useNavigate();
 	const { getAuth, clearAuth } = useContext(AuthContext);
-	const { users } = useContext(UsersContext);
-	const user = users[getAuth().handle!];
 	const handleLogout = () => {
 		const { refreshToken } = getAuth();
 		if (refreshToken) {
@@ -32,7 +35,7 @@ export const LayoutDrawer = ({ isOpened, setIsOpened }: LayoutDrawerProps) => {
 			size="md"
 			zIndex={9999}
 		>
-			<UserInfo handle={user!.handle} />
+			<UserInfo user={user} />
 			<Button
 				fullWidth
 				radius="xl"

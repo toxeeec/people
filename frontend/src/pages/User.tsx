@@ -15,8 +15,6 @@ import { FollowButton } from "../components/FollowButton";
 import { Posts, Query } from "../components/Posts";
 import { Wrapper } from "../components/Wrapper";
 import { AuthContext } from "../context/AuthContext";
-import { UsersContext } from "../context/UsersContext";
-import { QueryKey } from "../query-key";
 import {
 	getUsersHandleLikes,
 	getUsersHandlePosts,
@@ -31,7 +29,6 @@ interface UserProps {
 
 const User = ({ value }: UserProps) => {
 	const params = useParams();
-	const { users, setUser } = useContext(UsersContext);
 	const { isAuthenticated, getAuth } = useContext(AuthContext);
 	const navigate = useNavigate();
 
@@ -41,10 +38,7 @@ const User = ({ value }: UserProps) => {
 	const likesQuery: Query = (params) => {
 		return getUsersHandleLikes(user!.handle, params);
 	};
-	const { isLoading } = useGetUsersHandle(params.handle!, {
-		query: { onSuccess: (u) => setUser(u) },
-	});
-	const user = users[params.handle!];
+	const { data: user, isLoading } = useGetUsersHandle(params.handle!);
 
 	return isLoading || !user ? (
 		<CenterLoader />
@@ -56,7 +50,7 @@ const User = ({ value }: UserProps) => {
 					{isAuthenticated && getAuth().handle === user.handle ? (
 						<EditButton handle={user.handle} />
 					) : (
-						<FollowButton handle={user.handle} />
+						<FollowButton user={user} />
 					)}
 				</Group>
 				<Group>
@@ -89,12 +83,12 @@ const User = ({ value }: UserProps) => {
 				</Tabs.List>
 
 				<Tabs.Panel value="posts">
-					<Posts query={postsQuery} queryKey={[QueryKey.POSTS, user.handle]} />
+					<Posts query={postsQuery} queryKey={["posts", user.handle]} />
 				</Tabs.Panel>
 				<Tabs.Panel value="likes">
 					<Posts
 						query={likesQuery}
-						queryKey={[QueryKey.POSTS, QueryKey.LIKES, user.handle]}
+						queryKey={["posts", user.handle, "likes"]}
 					/>
 				</Tabs.Panel>
 			</Tabs>

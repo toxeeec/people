@@ -1,6 +1,5 @@
 import { Modal, Text } from "@mantine/core";
 import { Dispatch, SetStateAction } from "react";
-import { QueryKey } from "../../query-key";
 import { getPostsPostIDLikes } from "../../spec.gen";
 import { Users, Query } from "../Users";
 
@@ -23,7 +22,7 @@ export const PostLikes = ({ opened, setOpened, id }: PostLikesProps) => {
 			centered
 			title={<Text weight="bold">Liked by</Text>}
 		>
-			<Users query={query} queryKey={[QueryKey.USERS, QueryKey.LIKES, id]} />
+			<Users queryKey={["users", id, "likes"]} query={query} />
 		</Modal>
 	);
 };

@@ -1,11 +1,9 @@
 import { QueryKey, useInfiniteQuery } from "@tanstack/react-query";
-import { Fragment, useContext, useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import { PostsResponse } from "../models";
 import { Post } from "../components/Post";
 import { useInView } from "react-intersection-observer";
 import { CenterLoader } from "../components/CenterLoader";
-import { UsersContext } from "../context/UsersContext";
-import { PostsContext } from "../context/PostsContext";
 
 const queryLimit = 10;
 
@@ -29,8 +27,6 @@ interface QueryFunctionArgs {
 
 export const Posts = ({ query, queryKey, enabled = true }: PostsProps) => {
 	const { ref, inView } = useInView();
-	const { setUser } = useContext(UsersContext);
-	const { setPost } = useContext(PostsContext);
 
 	const queryFn = ({ pageParam }: QueryFunctionArgs) => {
 		pageParam = { ...pageParam, limit: queryLimit };
@@ -38,20 +34,12 @@ export const Posts = ({ query, queryKey, enabled = true }: PostsProps) => {
 	};
 
 	const { status, data, isFetchingNextPage, fetchNextPage } = useInfiniteQuery({
-		queryKey,
 		queryFn,
+		queryKey,
 		enabled,
 		getNextPageParam: (lastPage) => {
 			if (!lastPage.meta || lastPage.data.length < queryLimit) return undefined;
 			return { before: lastPage.meta?.oldest };
-		},
-		onSuccess: (data) => {
-			data.pages.forEach((postsResponse) =>
-				postsResponse.data.forEach((postResponse) => {
-					setPost(postResponse.data);
-					setUser(postResponse.user);
-				})
-			);
 		},
 	});
 
@@ -68,14 +56,8 @@ export const Posts = ({ query, queryKey, enabled = true }: PostsProps) => {
 			) : (
 				data?.pages?.map((page, i) => (
 					<Fragment key={i}>
-						{page.data?.map((postResponse) => (
-							<Post
-								key={postResponse.data.id}
-								ref={ref}
-								id={postResponse.data.id}
-								handle={postResponse.user.handle}
-								queryKey={queryKey}
-							/>
+						{page.data?.map(({ data, user }) => (
+							<Post key={data.id} ref={ref} post={data} user={user} />
 						))}
 					</Fragment>
 				))

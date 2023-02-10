@@ -4,11 +4,12 @@ import { UserHoverCard } from "./UserHoverCard";
 import { forwardRef, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { FollowButton } from "./FollowButton";
+import { User as UserType } from "../models";
 
 interface UserProps {
-	handle: string;
+	user: UserType;
 }
-export const User = forwardRef<HTMLDivElement, UserProps>(({ handle }, ref) => {
+export const User = forwardRef<HTMLDivElement, UserProps>(({ user }, ref) => {
 	const { isAuthenticated, getAuth } = useContext(AuthContext);
 	const navigate = useNavigate();
 	return (
@@ -20,25 +21,30 @@ export const User = forwardRef<HTMLDivElement, UserProps>(({ handle }, ref) => {
 				position="apart"
 				onClick={(e) => {
 					if (e.target === e.currentTarget) {
-						navigate(`/${handle}`);
+						navigate(`/${user.handle}`);
 					}
 				}}
 				style={{ cursor: "pointer" }}
 			>
 				<Group align="stretch">
-					<UserHoverCard handle={handle}>
-						<Avatar radius="xl" size="lg" component={Link} to={`/${handle}`} />
+					<UserHoverCard user={user}>
+						<Avatar
+							radius="xl"
+							size="lg"
+							component={Link}
+							to={`/${user.handle}`}
+						/>
 					</UserHoverCard>
 					<Stack>
-						<UserHoverCard handle={handle}>
-							<Text component={Link} to={`/${handle}`} weight="bold">
-								@{handle}
+						<UserHoverCard user={user}>
+							<Text component={Link} to={`/${user.handle}`} weight="bold">
+								@{user.handle}
 							</Text>
 						</UserHoverCard>
 					</Stack>
 				</Group>
-				{isAuthenticated && getAuth().handle !== handle ? (
-					<FollowButton handle={handle} />
+				{isAuthenticated && getAuth().handle !== user.handle ? (
+					<FollowButton user={user} />
 				) : null}
 			</Group>
 		</>

@@ -1,31 +1,26 @@
 import { Text, Paper, Group } from "@mantine/core";
-import { QueryKey } from "@tanstack/react-query";
-import { forwardRef, useContext } from "react";
+import { forwardRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { PostsContext } from "../context/PostsContext";
+import { Post as PostType, User } from "../models";
 import { Images } from "./images/Images";
 import { PostActions } from "./post/PostActions";
 import { PostAuthor } from "./post/PostAuthor";
 import { PostEdit } from "./post/PostEdit";
 
 interface PostProps {
-	id: number;
-	handle: string;
-	queryKey: QueryKey;
+	post: PostType;
+	user: User;
 }
 
 export const Post = forwardRef<HTMLDivElement, PostProps>(
-	({ id, handle, queryKey }, ref) => {
+	({ post, user }, ref) => {
 		const navigate = useNavigate();
-		const { posts } = useContext(PostsContext);
-		const post = posts[id]!;
-
 		return (
 			post && (
 				<Paper
 					onClick={(e) => {
 						if (e.target === e.currentTarget) {
-							navigate(`/${handle}/${id}`);
+							navigate(`/${user.handle}/${post.id}`);
 						}
 					}}
 					ref={ref}
@@ -36,19 +31,14 @@ export const Post = forwardRef<HTMLDivElement, PostProps>(
 					style={{ cursor: "pointer" }}
 				>
 					<Group position="apart">
-						<PostAuthor handle={handle} />
-						<PostEdit
-							id={id}
-							handle={handle}
-							queryKey={queryKey}
-							exact={true}
-						/>
+						<PostAuthor user={user} />
+						<PostEdit id={post.id} handle={user.handle} exact={true} />
 					</Group>
 					<Text my="xs" style={{ display: "inline-block" }}>
 						{post.content}
 					</Text>
 					<Images images={post.images} />
-					<PostActions id={id} handle={handle} queryKey={queryKey} />
+					<PostActions post={post} handle={user.handle} />
 				</Paper>
 			)
 		);

@@ -1,36 +1,22 @@
-import { useContext } from "react";
 import { Posts, Query } from "../components/Posts";
-import { UsersContext } from "../context/UsersContext";
 import { MainPost } from "../components/MainPost";
 import { useParams } from "react-router";
 import {
 	getPostsPostIDReplies,
-	useGetPostsPostID,
 	postPostsPostIDReplies,
+	useGetPostsPostID,
 } from "../spec.gen";
-import { QueryKey } from "../query-key";
-import { PostsContext } from "../context/PostsContext";
-import { CenterLoader } from "../components/CenterLoader";
 import { MutationFn, CreatePost } from "../components/post/CreatePost";
 import { Container } from "@mantine/core";
 import { PostParents } from "../components/post/PostParents";
 import { useScrollIntoView } from "@mantine/hooks";
 import { Wrapper } from "../components/Wrapper";
+import { CenterLoader } from "../components/CenterLoader";
 
 const Post = () => {
 	const params = useParams();
 	const postID = parseInt(params.postID!)!;
-	const { setUser } = useContext(UsersContext);
-	const { setPost } = useContext(PostsContext);
-
-	const { data, isLoading } = useGetPostsPostID(postID, {
-		query: {
-			onSuccess: (postResponse) => {
-				setPost(postResponse.data);
-				setUser(postResponse.user);
-			},
-		},
-	});
+	const { data, isLoading } = useGetPostsPostID(postID);
 
 	const mutationFn: MutationFn = (newPost) => {
 		return postPostsPostIDReplies(postID, newPost);
@@ -49,19 +35,12 @@ const Post = () => {
 		<CenterLoader />
 	) : (
 		<Wrapper>
-			<PostParents id={postID} scroll={scroll} />
-			<MainPost id={postID} handle={data.user.handle} ref={targetRef} />
+			<PostParents post={data.data} scroll={scroll} />
+			<MainPost post={data.data} user={data.user} ref={targetRef} />
 			<Container p="md" pos="relative">
-				<CreatePost
-					mutationFn={mutationFn}
-					queryKey={[QueryKey.POSTS, QueryKey.REPLIES, postID]}
-					placeholder={"Create reply"}
-				/>
+				<CreatePost mutationFn={mutationFn} placeholder={"Create reply"} />
 			</Container>
-			<Posts
-				query={query}
-				queryKey={[QueryKey.POSTS, QueryKey.REPLIES, postID]}
-			/>
+			<Posts query={query} queryKey={["posts", postID, "replies"]} />
 		</Wrapper>
 	);
 };

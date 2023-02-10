@@ -7,9 +7,9 @@ import { Message } from "./Message";
 
 interface MessagesProps {
 	messages: ServerMessage[];
-	currentUser: string | null;
+	to: string;
 }
-export const Messages = ({ messages, currentUser }: MessagesProps) => {
+export const Messages = ({ messages, to }: MessagesProps) => {
 	const { getAuth } = useContext(AuthContext);
 	const [message, setMessage] = useState("");
 	const handle = useMemo(() => getAuth().handle, [getAuth]);
@@ -40,7 +40,7 @@ export const Messages = ({ messages, currentUser }: MessagesProps) => {
 					/>
 				))}
 			</Flex>
-			<Input message={message} setMessage={setMessage} to={currentUser} />
+			<Input message={message} setMessage={setMessage} to={to} />
 		</Flex>
 	);
 };

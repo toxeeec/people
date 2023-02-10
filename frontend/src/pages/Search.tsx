@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { Posts, Query as PostsQuery } from "../components/Posts";
 import { Users, Query as UsersQuery } from "../components/Users";
 import { Search as SearchComponent } from "../components/Search";
-import { QueryKey } from "../query-key";
 import { getPostsSearch, getUsersSearch } from "../spec.gen";
 import { Wrapper } from "../components/Wrapper";
 
@@ -43,16 +42,16 @@ const Search = ({ value }: { value: SearchPage }) => {
 				<Box pt="78px">
 					<Tabs.Panel value="posts">
 						<Posts
+							queryKey={["posts", debounced]}
 							enabled={value === "posts" && debounced.length > 0}
 							query={postsQuery}
-							queryKey={[QueryKey.POSTS, QueryKey.SEARCH, debounced]}
 						/>
 					</Tabs.Panel>
 					<Tabs.Panel value="people">
 						<Users
+							queryKey={["users", debounced]}
 							enabled={value === "people" && debounced.length > 0}
 							query={usersQuery}
-							queryKey={[QueryKey.USERS, QueryKey.SEARCH, debounced]}
 						/>
 					</Tabs.Panel>
 				</Box>
