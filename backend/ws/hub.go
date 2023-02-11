@@ -40,6 +40,11 @@ func (h *Hub) Run() {
 				break
 			}
 			c.Send <- notif
+			c, ok = h.clients[notif.From]
+			if !ok {
+				break
+			}
+			c.Send <- notif
 		}
 	}
 }

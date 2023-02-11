@@ -25,19 +25,24 @@ func NewService(ur repository.User, ns notification.Service) Service {
 	}
 }
 
-func (s *chatService) ReadMessage(from uint, data []byte) error {
-	var msg people.UserMessage
-	if err := json.Unmarshal(data, &msg); err != nil {
+func (s *chatService) ReadMessage(fromID uint, data []byte) error {
+	var um people.UserMessage
+	if err := json.Unmarshal(data, &um); err != nil {
 		return err
 	}
-	msg = trim(msg)
-	if err := validate(msg); err != nil {
+	um = trim(um)
+	if err := validate(um); err != nil {
 		return err
 	}
-	to, err := s.ur.GetID(msg.To)
+	to, err := s.ur.GetID(um.To)
 	if err != nil {
 		return service.NewError(people.NotFoundError, "User not found")
 	}
+	from, err := s.ur.Get(fromID)
+	if err != nil {
+		return err
+	}
+	msg := &people.ServerMessage{Message: um.Message, From: from.Handle, To: um.To}
 	// TODO: save message
-	return s.ns.Notify(people.MessageNotification, from, to, &msg)
+	return s.ns.Notify(people.MessageNotification, from.ID, to, msg)
 }

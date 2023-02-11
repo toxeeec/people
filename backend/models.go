@@ -58,7 +58,13 @@ type Message struct {
 
 type UserMessage struct {
 	Message
-	To string
+	To string `json:"to"`
+}
+
+type ServerMessage struct {
+	Message
+	From string `json:"from"`
+	To   string `json:"to"`
 }
 
 type NotificationType string
@@ -69,7 +75,7 @@ const (
 
 type Notification struct {
 	Type    NotificationType `json:"type"`
-	From    string           `json:"from"`
+	From    uint             `json:"-"`
 	To      uint             `json:"-"`
-	Content *Message         `json:"content,omitempty"`
+	Content *ServerMessage   `json:"content,omitempty"`
 }

@@ -22,7 +22,7 @@ type AuthResponse struct {
 // AuthUser defines model for AuthUser.
 type AuthUser struct {
 	Handle   string `db:"handle" fake:"{lettern:10}" json:"handle"`
-	Password string `fake:"{password:true,true,true,true,false,12}" json:"password"`
+	Password string `fake:"{password:true,true,true,true,false,8}" json:"password"`
 }
 
 // Error defines model for Error.

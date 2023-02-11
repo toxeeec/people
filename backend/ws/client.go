@@ -1,6 +1,8 @@
 package ws
 
 import (
+	"io"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -18,9 +20,10 @@ type Client struct {
 }
 
 const (
-	writeWait  = 10 * time.Second
-	pongWait   = 60 * time.Second
-	pingPeriod = (pongWait * 9) / 10
+	writeWait        = 10 * time.Second
+	pongWait         = 60 * time.Second
+	pingPeriod       = (pongWait * 9) / 10
+	messageSizeLimit = 4096
 )
 
 func (c *Client) pongHandler(string) error {
@@ -38,10 +41,15 @@ func (c *Client) readPump(h *Hub) {
 	c.Conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.Conn.SetPongHandler(c.pongHandler)
 	for {
-		_, data, err := c.Conn.ReadMessage()
+		_, r, err := c.Conn.NextReader()
 		if err != nil {
 			break
 		}
+		data, err := ioutil.ReadAll(io.LimitReader(r, messageSizeLimit))
+		if err != nil {
+			break
+		}
+
 		msgType := gjson.Get(string(data), "type").String()
 		switch msgType {
 		case message:

@@ -45,6 +45,7 @@ CREATE TABLE post_like (
 
 CREATE TABLE image (
 	image_id SERIAL PRIMARY KEY,
+	-- TODO: remove / 
 	name VARCHAR(41) NOT NULL, -- / + 36 characters for UUID + 4 for file extension
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	user_id INTEGER REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
