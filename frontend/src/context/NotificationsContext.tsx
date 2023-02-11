@@ -1,9 +1,9 @@
+import { useInterval } from "@mantine/hooks";
 import {
 	createContext,
 	useCallback,
 	useContext,
 	useEffect,
-	useMemo,
 	useState,
 } from "react";
 import { wsURL } from "../custom-instance";
@@ -14,8 +14,7 @@ type NotificationType = typeof NotificationTypes[number];
 
 type Notification = {
 	type: NotificationType;
-	from: string;
-	content?: Message;
+	content?: ServerMessage;
 };
 
 export type Message = {
@@ -28,13 +27,13 @@ export type UserMessage = Message & {
 
 export type ServerMessage = Message & {
 	from: string;
+	to: string;
 };
 
 type Messages = Map<string, ServerMessage[]>;
 
 interface NotificationsContextType {
 	newMessages: Messages;
-	addNewMessage: (from: string, message: UserMessage) => void;
 	sendMessage: (message: UserMessage) => void;
 	addUser: (handle: string) => void;
 }
@@ -51,58 +50,67 @@ export const NotificationsContextProvider = ({
 	children,
 }: NotificationsContextProviderProps) => {
 	const { getAuth, isAuthenticated } = useContext(AuthContext);
-	const socket = useMemo(() => {
-		if (isAuthenticated)
-			return new WebSocket(`${wsURL}?access_token=${getAuth().accessToken}`);
-	}, [isAuthenticated, getAuth]);
+	const [socket, setSocket] = useState<WebSocket>();
+
+	const createConnection = useCallback(() => {
+		if (!isAuthenticated) return;
+		setSocket(new WebSocket(`${wsURL}?access_token=${getAuth().accessToken}`));
+	}, [getAuth, isAuthenticated]);
+
+	const interval = useInterval(() => createConnection(), 2000);
+
+	useEffect(() => {
+		createConnection();
+	}, [createConnection]);
+
 	const [newMessages, setNewMessages] = useState<Messages>(new Map());
 
 	const addNewMessage = useCallback(
-		(from: string, message: UserMessage) => {
-			const userMessages = newMessages.get(message.to);
+		(msg: ServerMessage) => {
+			const userMessages = newMessages.get(msg.to);
 			const messages = userMessages
-				? newMessages.set(message.to, [
-						...userMessages,
-						{ message: message.message, from },
-				  ])
-				: newMessages.set(message.to, [{ message: message.message, from }]);
+				? newMessages.set(msg.to, [...userMessages, msg])
+				: newMessages.set(msg.to, [msg]);
 			setNewMessages(new Map(messages));
 		},
 		[newMessages]
 	);
 
+	const handleOpen = useCallback(() => interval.stop(), [interval]);
+	const handleClose = useCallback(() => interval.start(), [interval]);
 	const handleMessage = useCallback(
 		(e: MessageEvent<string>) => {
-			const notif = JSON.parse(e.data) as Notification;
-			if (notif.type === "message" && notif.content) {
-				const message = { message: notif.content.message, to: notif.from };
-				addNewMessage(notif.from, message);
+			const { type, content } = JSON.parse(e.data) as Notification;
+			if (type === "message" && content) {
+				const handle = getAuth().handle!;
+				if (content.to === handle) {
+					content.to = content.from;
+				}
+				addNewMessage(content);
 			}
 		},
-		[addNewMessage]
+		[addNewMessage, getAuth]
 	);
 
 	useEffect(() => {
+		socket?.addEventListener("open", handleOpen);
 		socket?.addEventListener("message", handleMessage);
+		socket?.addEventListener("close", handleClose);
 		return () => {
+			socket?.removeEventListener("open", handleOpen);
 			socket?.removeEventListener("message", handleMessage);
+			socket?.removeEventListener("close", handleClose);
 		};
-	}, [getAuth, isAuthenticated, addNewMessage, handleMessage, socket]);
+	}, [handleClose, handleMessage, handleOpen, socket]);
 
 	const sendMessage = (msg: UserMessage) => {
 		if (!isAuthenticated) return;
 		const { message, to } = msg;
 		const userMessage: UserMessage = {
+			to,
 			message,
-			to,
 		};
-		socket?.send(JSON.stringify({ ...userMessage, type: "message" }));
-		const { handle } = getAuth();
-		if (handle === to) return;
-		addNewMessage(handle!, {
-			message: message,
-			to,
-		});
+		socket?.send(JSON.stringify({ type: "message", ...userMessage }));
 	};
 
 	const addUser = (handle: string) => {
@@ -113,7 +121,7 @@ export const NotificationsContextProvider = ({
 
 	return (
 		<NotificationsContext.Provider
-			value={{ newMessages, addNewMessage, sendMessage, addUser }}
+			value={{ newMessages, sendMessage, addUser }}
 		>
 			{children}
 		</NotificationsContext.Provider>

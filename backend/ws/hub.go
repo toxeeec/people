@@ -36,15 +36,15 @@ func (h *Hub) Run() {
 			}
 		case notif := <-h.notification:
 			c, ok := h.clients[notif.To]
-			if !ok {
-				break
+			if ok {
+				c.Send <- notif
 			}
-			c.Send <- notif
-			c, ok = h.clients[notif.From]
-			if !ok {
-				break
+			if notif.To != notif.From {
+				c, ok = h.clients[notif.From]
+				if ok {
+					c.Send <- notif
+				}
 			}
-			c.Send <- notif
 		}
 	}
 }
