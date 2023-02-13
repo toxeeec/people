@@ -18,7 +18,7 @@ type Notification = {
 };
 
 export type Message = {
-	message: string;
+	content: string;
 };
 
 export type UserMessage = Message & {
@@ -105,10 +105,10 @@ export const NotificationsContextProvider = ({
 
 	const sendMessage = (msg: UserMessage) => {
 		if (!isAuthenticated) return;
-		const { message, to } = msg;
+		const { content, to } = msg;
 		const userMessage: UserMessage = {
 			to,
-			message,
+			content,
 		};
 		socket?.send(JSON.stringify({ type: "message", ...userMessage }));
 	};

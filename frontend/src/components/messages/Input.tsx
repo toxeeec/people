@@ -14,7 +14,7 @@ export const Input = ({ message, setMessage, to }: InputProps) => {
 	const empty = useMemo(() => message.trim().length === 0, [message]);
 	const handleSubmit = () => {
 		if (empty) return;
-		sendMessage({ to, message: message.trim() });
+		sendMessage({ to, content: message.trim() });
 		setMessage("");
 	};
 

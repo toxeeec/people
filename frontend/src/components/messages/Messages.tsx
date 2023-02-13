@@ -31,7 +31,7 @@ export const Messages = ({ messages }: MessagesProps) => {
 			{messages.map((message, i) => (
 				<Message
 					key={i}
-					message={message.message}
+					message={message.content}
 					own={message.from === handle}
 				/>
 			))}
