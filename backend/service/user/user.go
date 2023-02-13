@@ -223,6 +223,7 @@ func (s *userService) ListMatches(ctx context.Context, query string, userID uint
 }
 
 func (s *userService) Delete(userID uint) error {
+	// TODO: mark images as unused
 	ids, err := s.lr.ListUserLikes(userID, nil)
 	if err != nil {
 		return err

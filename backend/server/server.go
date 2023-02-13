@@ -15,8 +15,8 @@ import (
 	peoplehttp "github.com/toxeeec/people/backend/http"
 	"github.com/toxeeec/people/backend/repository/postgres"
 	"github.com/toxeeec/people/backend/service/auth"
-	"github.com/toxeeec/people/backend/service/chat"
 	"github.com/toxeeec/people/backend/service/image"
+	"github.com/toxeeec/people/backend/service/message"
 	"github.com/toxeeec/people/backend/service/notification"
 	"github.com/toxeeec/people/backend/service/post"
 	"github.com/toxeeec/people/backend/service/user"
@@ -30,6 +30,7 @@ func New(db *sqlx.DB, v *validator.Validate) *echo.Echo {
 	fr := postgres.NewFollowRepository(db)
 	lr := postgres.NewLikeRepository(db)
 	ir := postgres.NewImageRepository(db)
+	mr := postgres.NewMessageRepository(db)
 
 	us := user.NewService(v, ur, fr, lr)
 	is := image.NewService(ir)
@@ -38,7 +39,7 @@ func New(db *sqlx.DB, v *validator.Validate) *echo.Echo {
 
 	notif := make(chan people.Notification)
 	ns := notification.NewService(notif, ur)
-	cs := chat.NewService(ur, ns)
+	cs := message.NewService(mr, ur, ns)
 
 	e := echo.New()
 	e.Use(echomiddleware.CORS())

@@ -1,4 +1,4 @@
-package chat
+package message
 
 import (
 	"strings"
@@ -8,13 +8,13 @@ import (
 )
 
 func trim(m people.UserMessage) people.UserMessage {
-	m.Message.Message = strings.TrimSpace(m.Message.Message)
+	m.Content = strings.TrimSpace(m.Content)
 	return m
 }
 
 func validate(m people.UserMessage) error {
-	if len(m.Message.Message) == 0 {
-		return service.NewError(people.ValidationError, "Message cannot be empty")
+	if len(m.Content) == 0 {
+		return service.NewError(people.ValidationError, "Content cannot be empty")
 	}
 	return nil
 }

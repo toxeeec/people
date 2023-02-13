@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"strings"
+	"time"
 
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/pagination"
@@ -35,7 +36,7 @@ func (r *postRepo) Create(np people.NewPost, userID uint, repliesTo *uint) (peop
 		r.m[*repliesTo] = p
 	}
 	id := r.newID()
-	r.m[id] = people.Post{ID: id, Content: np.Content, UserID: userID, RepliesTo: repliesTo}
+	r.m[id] = people.Post{ID: id, Content: np.Content, UserID: userID, RepliesTo: repliesTo, CreatedAt: time.Now()}
 	return r.m[id], nil
 }
 

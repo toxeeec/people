@@ -53,7 +53,15 @@ type Image struct {
 }
 
 type Message struct {
-	Message string `json:"message"`
+	Content string `db:"content" fake:"{sentence}" json:"content"`
+}
+
+type DBMessage struct {
+	Message
+	ID     uint      `db:"message_id" fake:"skip"`
+	From   uint      `db:"from_id" fake:"skip"`
+	To     uint      `db:"to_id" fake:"skip"`
+	SentAt time.Time `db:"sent_at" fake:"skip"`
 }
 
 type UserMessage struct {

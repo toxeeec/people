@@ -2,7 +2,7 @@ package ws
 
 import (
 	people "github.com/toxeeec/people/backend"
-	"github.com/toxeeec/people/backend/service/chat"
+	"github.com/toxeeec/people/backend/service/message"
 )
 
 type Hub struct {
@@ -10,10 +10,10 @@ type Hub struct {
 	register     chan *Client
 	unregister   chan *Client
 	notification chan people.Notification
-	cs           chat.Service
+	cs           message.Service
 }
 
-func NewHub(notification chan people.Notification, cs chat.Service) *Hub {
+func NewHub(notification chan people.Notification, cs message.Service) *Hub {
 	return &Hub{
 		clients:      make(map[uint]*Client),
 		register:     make(chan *Client),

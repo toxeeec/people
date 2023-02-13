@@ -1,4 +1,4 @@
-package chat_test
+package message_test
 
 import (
 	"encoding/json"
@@ -10,17 +10,18 @@ import (
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/repository"
 	"github.com/toxeeec/people/backend/repository/inmem"
-	"github.com/toxeeec/people/backend/service/chat"
+	"github.com/toxeeec/people/backend/service/message"
 	"github.com/toxeeec/people/backend/service/notification"
 )
 
-type ChatSuite struct {
+type MessageSuite struct {
 	suite.Suite
-	cs chat.Service
+	cs message.Service
+	mr repository.Message
 	ur repository.User
 }
 
-func (s *ChatSuite) TestReadMessage() {
+func (s *MessageSuite) TestReadMessage() {
 	var au1 people.AuthUser
 	var au2 people.AuthUser
 	gofakeit.Struct(&au1)
@@ -35,8 +36,8 @@ func (s *ChatSuite) TestReadMessage() {
 		valid   bool
 		kind    *people.ErrorKind
 	}{
-		"empty message": {people.UserMessage{Message: people.Message{Message: ""}, To: u2.Handle}, false, &validationError},
-		"valid":         {people.UserMessage{Message: people.Message{Message: gofakeit.SentenceSimple()}, To: u2.Handle}, true, nil},
+		"empty message": {people.UserMessage{Message: people.Message{Content: ""}, To: u2.Handle}, false, &validationError},
+		"valid":         {people.UserMessage{Message: people.Message{Content: gofakeit.SentenceSimple()}, To: u2.Handle}, true, nil},
 	}
 
 	for name, tc := range tests {
@@ -54,14 +55,16 @@ func (s *ChatSuite) TestReadMessage() {
 	}
 }
 
-func (s *ChatSuite) SetupTest() {
+func (s *MessageSuite) SetupTest() {
 	um := map[uint]people.User{}
+	mm := map[uint]people.DBMessage{}
+	s.mr = inmem.NewMessageRepository(mm)
 	s.ur = inmem.NewUserRepository(um)
 	ns := notification.NewService(make(chan people.Notification, 32), s.ur)
-	s.cs = chat.NewService(s.ur, ns)
+	s.cs = message.NewService(s.mr, s.ur, ns)
 
 }
 
 func TestUserSuite(t *testing.T) {
-	suite.Run(t, new(ChatSuite))
+	suite.Run(t, new(MessageSuite))
 }

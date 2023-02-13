@@ -110,6 +110,7 @@ func (s *postService) Get(ctx context.Context, postID uint, userID uint, auth bo
 }
 
 func (s *postService) Delete(postID, userID uint) error {
+	// TODO: mark images as unused
 	err := s.pr.Delete(postID, userID)
 	if err != nil {
 		return err

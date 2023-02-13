@@ -57,3 +57,11 @@ CREATE TABLE post_image (
 	image_id INTEGER REFERENCES image(image_id) ON DELETE CASCADE NOT NULL,
 	PRIMARY KEY (post_id, image_id)
 );
+
+CREATE TABLE message (
+	message_id SERIAL PRIMARY KEY,
+	from_id INTEGER REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
+	to_id INTEGER REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
+	content TEXT NOT NULL,
+	sent_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

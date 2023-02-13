@@ -1,4 +1,4 @@
-package chat
+package message
 
 import (
 	"encoding/json"
@@ -13,19 +13,17 @@ type Service interface {
 	ReadMessage(from uint, data []byte) error
 }
 
-type chatService struct {
+type messageService struct {
+	mr repository.Message
 	ur repository.User
 	ns notification.Service
 }
 
-func NewService(ur repository.User, ns notification.Service) Service {
-	return &chatService{
-		ur,
-		ns,
-	}
+func NewService(mr repository.Message, ur repository.User, ns notification.Service) Service {
+	return &messageService{mr, ur, ns}
 }
 
-func (s *chatService) ReadMessage(fromID uint, data []byte) error {
+func (s *messageService) ReadMessage(fromID uint, data []byte) error {
 	var um people.UserMessage
 	if err := json.Unmarshal(data, &um); err != nil {
 		return err
@@ -42,7 +40,12 @@ func (s *chatService) ReadMessage(fromID uint, data []byte) error {
 	if err != nil {
 		return err
 	}
-	msg := &people.ServerMessage{Message: um.Message, From: from.Handle, To: um.To}
-	// TODO: save message
-	return s.ns.Notify(people.MessageNotification, from.ID, to, msg)
+	msg := people.Message{Content: um.Content}
+	dbm, err := s.mr.Create(msg, fromID, to)
+	if err != nil {
+		println(err.Error())
+		return service.InternalServerError
+	}
+	sm := &people.ServerMessage{Message: dbm.Message, From: from.Handle, To: um.To}
+	return s.ns.Notify(people.MessageNotification, from.ID, to, sm)
 }
