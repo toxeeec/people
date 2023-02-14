@@ -7,6 +7,7 @@ import {
 	useState,
 } from "react";
 import { wsURL } from "../custom-instance";
+import { Message } from "../models";
 import { AuthContext } from "./AuthContext";
 
 const NotificationTypes = ["message"] as const;
@@ -17,17 +18,16 @@ type Notification = {
 	content?: ServerMessage;
 };
 
-export type Message = {
-	content: string;
-};
-
 export type UserMessage = Message & {
 	to: string;
 };
 
-export type ServerMessage = Message & {
+export type ServerMessage = {
+	message: Message;
+	id: number;
 	from: string;
 	to: string;
+	sentAt: Date;
 };
 
 type Messages = Map<string, ServerMessage[]>;

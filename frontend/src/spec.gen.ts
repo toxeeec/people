@@ -40,6 +40,8 @@ import type {
 	GetPostsPostIDLikesParams,
 	ImageResponse,
 	ImageBodyBody,
+	UserMessages,
+	GetMessagesHandleParams,
 } from "./models";
 import { customInstance } from "./custom-instance";
 import type { ErrorType } from "./custom-instance";
@@ -1569,4 +1571,68 @@ export const usePostImages = <
 		{ data: ImageBodyBody },
 		TContext
 	>(mutationFn, mutationOptions);
+};
+
+export const getMessagesHandle = (
+	handle: string,
+	params?: GetMessagesHandleParams,
+	options?: SecondParameter<typeof customInstance>,
+	signal?: AbortSignal
+) => {
+	return customInstance<UserMessages>(
+		{ url: `/messages/${handle}`, method: "get", params, signal },
+		options
+	);
+};
+
+export const getGetMessagesHandleQueryKey = (
+	handle: string,
+	params?: GetMessagesHandleParams
+) => [`/messages/${handle}`, ...(params ? [params] : [])];
+
+export type GetMessagesHandleQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getMessagesHandle>>
+>;
+export type GetMessagesHandleQueryError = ErrorType<Error>;
+
+export const useGetMessagesHandle = <
+	TData = Awaited<ReturnType<typeof getMessagesHandle>>,
+	TError = ErrorType<Error>
+>(
+	handle: string,
+	params?: GetMessagesHandleParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getMessagesHandle>>,
+			TError,
+			TData
+		>;
+		request?: SecondParameter<typeof customInstance>;
+	}
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey =
+		queryOptions?.queryKey ?? getGetMessagesHandleQueryKey(handle, params);
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getMessagesHandle>>
+	> = ({ signal }) => getMessagesHandle(handle, params, requestOptions, signal);
+
+	const query = useQuery<
+		Awaited<ReturnType<typeof getMessagesHandle>>,
+		TError,
+		TData
+	>(queryKey, queryFn, {
+		enabled: !!handle,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+	query.queryKey = queryKey;
+
+	return query;
 };
