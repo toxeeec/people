@@ -16,31 +16,29 @@ export const Post = forwardRef<HTMLDivElement, PostProps>(
 	({ post, user }, ref) => {
 		const navigate = useNavigate();
 		return (
-			post && (
-				<Paper
-					onClick={(e) => {
-						if (e.target === e.currentTarget) {
-							navigate(`/${user.handle}/${post.id}`);
-						}
-					}}
-					ref={ref}
-					p="xs"
-					m={-1}
-					withBorder
-					radius={0}
-					style={{ cursor: "pointer" }}
-				>
-					<Group position="apart">
-						<PostAuthor user={user} />
-						<PostEdit id={post.id} handle={user.handle} exact={true} />
-					</Group>
-					<Text my="xs" style={{ display: "inline-block" }}>
-						{post.content}
-					</Text>
-					<Images images={post.images} />
-					<PostActions post={post} handle={user.handle} />
-				</Paper>
-			)
+			<Paper
+				onClick={(e) => {
+					if (e.target === e.currentTarget) {
+						navigate(`/${user.handle}/${post.id}`);
+					}
+				}}
+				ref={ref}
+				p="xs"
+				m={-1}
+				withBorder
+				radius={0}
+				style={{ cursor: "pointer" }}
+			>
+				<Group position="apart">
+					<PostAuthor user={user} />
+					<PostEdit id={post.id} handle={user.handle} exact={true} />
+				</Group>
+				<Text my="xs" style={{ display: "inline-block" }}>
+					{post.content}
+				</Text>
+				<Images images={post.images} />
+				<PostActions post={post} handle={user.handle} />
+			</Paper>
 		);
 	}
 );

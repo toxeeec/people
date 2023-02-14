@@ -5,6 +5,7 @@ import { useInView } from "react-intersection-observer";
 import { CenterLoader } from "../../components/CenterLoader";
 import { Message } from "./Message";
 import { AuthContext } from "../../context/AuthContext";
+import { Header } from "./Header";
 
 const queryLimit = 20;
 
@@ -65,6 +66,7 @@ export const UserMessages = ({
 			) : (
 				data.pages.map((page, i) => (
 					<Fragment key={i}>
+						{i + 1 === data.pages.length && <Header user={page.user} />}
 						{page.data.data.map((message) => (
 							<Message
 								ref={ref}

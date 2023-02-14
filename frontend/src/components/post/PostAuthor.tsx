@@ -11,12 +11,17 @@ export const PostAuthor = ({ user }: PostAuthorProps) => {
 	return (
 		<Group align="center">
 			<UserHoverCard user={user}>
-				<Avatar radius="xl" size="md" component={Link} to={`/${user.handle}`} />
-			</UserHoverCard>
-			<UserHoverCard user={user}>
-				<Text component={Link} to={`/${user.handle}`} weight="bold">
-					{user.handle}
-				</Text>
+				<Group>
+					<Avatar
+						radius="xl"
+						size="md"
+						component={Link}
+						to={`/${user.handle}`}
+					/>
+					<Text component={Link} to={`/${user.handle}`} weight="bold">
+						{user.handle}
+					</Text>
+				</Group>
 			</UserHoverCard>
 		</Group>
 	);

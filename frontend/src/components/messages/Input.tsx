@@ -29,7 +29,7 @@ export const Input = ({ message, setMessage, to }: InputProps) => {
 
 	return (
 		<>
-			<Flex ref={ref} bottom={0} w="100%" align="center" mt="sm">
+			<Flex ref={ref} w="100%" align="center" mt="sm">
 				<Textarea
 					autosize
 					minRows={1}
