@@ -52,8 +52,13 @@ type Image struct {
 	InUse     bool      `db:"in_use"`
 }
 
-type Message struct {
-	Content string `db:"content" fake:"{sentence}" json:"content"`
+type UserMessage struct {
+	Message
+	To string `json:"to"`
+}
+
+func (m ServerMessage) Identify() uint {
+	return m.ID
 }
 
 type DBMessage struct {
@@ -64,15 +69,21 @@ type DBMessage struct {
 	SentAt time.Time `db:"sent_at" fake:"skip"`
 }
 
-type UserMessage struct {
-	Message
-	To string `json:"to"`
+func IntoServerMessage(m DBMessage, from string, to string) ServerMessage {
+	return ServerMessage{Message: m.Message, ID: m.ID, From: from, To: to, SentAt: m.SentAt}
 }
 
-type ServerMessage struct {
-	Message
-	From string `json:"from"`
-	To   string `json:"to"`
+func IntoServerMessages(ms []DBMessage, handles map[uint]string) []ServerMessage {
+	sms := make([]ServerMessage, len(ms))
+	for i, m := range ms {
+		sms[i] = ServerMessage{Message: m.Message, ID: m.ID, From: handles[m.From], To: handles[m.To], SentAt: m.SentAt}
+	}
+	return sms
+}
+
+type MessagesResponse struct {
+	PaginatedResults[ServerMessage, uint]
+	User User
 }
 
 type NotificationType string

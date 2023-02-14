@@ -69,5 +69,8 @@ paths:
   /images:
     $ref: './paths/images.yaml#/images'
 
+  /messages/{handle}:
+    $ref: './paths/messages.yaml#/messages'
+
 components: 
   $ref: './components/main.yaml#/components'

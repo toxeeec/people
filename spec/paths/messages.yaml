@@ -1,0 +1,27 @@
+components:
+  $ref: ../components/main.yaml#/components
+
+messages:
+  get:
+    tags:
+      - messages
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/handleParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/beforeParam'
+      - $ref: '#/components/parameters/afterParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserMessages'
+      404:
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'

@@ -16,6 +16,19 @@ const (
 	ModeBeforeAfter      = ModeBefore | ModeAfter
 )
 
+type HandleParams struct {
+	Limit  *uint
+	Before *string
+	After  *string
+}
+
+type IDParams struct {
+	Limit  *uint
+	Before *uint
+	After  *uint
+}
+
+// TODO: Remove pointers (use math.Min and math.Max if values are missing)
 type Pagination[T any] struct {
 	Before *T
 	After  *T
@@ -23,7 +36,7 @@ type Pagination[T any] struct {
 }
 
 type ID = Pagination[uint]
-type Handle Pagination[string]
+type Handle = Pagination[string]
 
 func New[T any](before, after *T, limit *uint) Pagination[T] {
 	const limitDefault, limitMax = 20, 100
@@ -56,7 +69,7 @@ func NewResults[T people.Identifier[U], U any](data []T) people.PaginatedResults
 
 type GetIDFn func(string) (uint, error)
 
-func (hp Handle) IDPagination(ctx context.Context, getIDfn GetIDFn) (ID, error) {
+func IntoID(ctx context.Context, hp Handle, getIDfn GetIDFn) (ID, error) {
 	p := ID{Limit: hp.Limit}
 	g, ctx := errgroup.WithContext(ctx)
 	if hp.Before != nil {

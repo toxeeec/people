@@ -54,6 +54,9 @@ type ServerInterface interface {
 	// (PUT /me/following/{handle})
 	PutMeFollowingHandle(ctx echo.Context, handle HandleParam) error
 
+	// (GET /messages/{handle})
+	GetMessagesHandle(ctx echo.Context, handle HandleParam, params GetMessagesHandleParams) error
+
 	// (POST /posts)
 	PostPosts(ctx echo.Context) error
 
@@ -297,6 +300,47 @@ func (w *ServerInterfaceWrapper) PutMeFollowingHandle(ctx echo.Context) error {
 
 	// Invoke the callback with all the unmarshalled arguments
 	err = w.Handler.PutMeFollowingHandle(ctx, handle)
+	return err
+}
+
+// GetMessagesHandle converts echo context to params.
+func (w *ServerInterfaceWrapper) GetMessagesHandle(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "handle" -------------
+	var handle HandleParam
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "handle", runtime.ParamLocationPath, ctx.Param("handle"), &handle)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter handle: %s", err))
+	}
+
+	ctx.Set(BearerAuthScopes, []string{""})
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetMessagesHandleParams
+	// ------------- Optional query parameter "limit" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter limit: %s", err))
+	}
+
+	// ------------- Optional query parameter "before" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "before", ctx.QueryParams(), &params.Before)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter before: %s", err))
+	}
+
+	// ------------- Optional query parameter "after" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "after", ctx.QueryParams(), &params.After)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter after: %s", err))
+	}
+
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetMessagesHandle(ctx, handle, params)
 	return err
 }
 
@@ -803,6 +847,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.GET(baseURL+"/me/following", wrapper.GetMeFollowing)
 	router.DELETE(baseURL+"/me/following/:handle", wrapper.DeleteMeFollowingHandle)
 	router.PUT(baseURL+"/me/following/:handle", wrapper.PutMeFollowingHandle)
+	router.GET(baseURL+"/messages/:handle", wrapper.GetMessagesHandle)
 	router.POST(baseURL+"/posts", wrapper.PostPosts)
 	router.GET(baseURL+"/posts/search", wrapper.GetPostsSearch)
 	router.DELETE(baseURL+"/posts/:postID", wrapper.DeletePostsPostID)
@@ -1077,6 +1122,33 @@ type PutMeFollowingHandle409JSONResponse Error
 func (response PutMeFollowingHandle409JSONResponse) VisitPutMeFollowingHandleResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(409)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMessagesHandleRequestObject struct {
+	Handle HandleParam `json:"handle"`
+	Params GetMessagesHandleParams
+}
+
+type GetMessagesHandleResponseObject interface {
+	VisitGetMessagesHandleResponse(w http.ResponseWriter) error
+}
+
+type GetMessagesHandle200JSONResponse UserMessages
+
+func (response GetMessagesHandle200JSONResponse) VisitGetMessagesHandleResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetMessagesHandle404JSONResponse Error
+
+func (response GetMessagesHandle404JSONResponse) VisitGetMessagesHandleResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1553,6 +1625,9 @@ type StrictServerInterface interface {
 	// (PUT /me/following/{handle})
 	PutMeFollowingHandle(ctx context.Context, request PutMeFollowingHandleRequestObject) (PutMeFollowingHandleResponseObject, error)
 
+	// (GET /messages/{handle})
+	GetMessagesHandle(ctx context.Context, request GetMessagesHandleRequestObject) (GetMessagesHandleResponseObject, error)
+
 	// (POST /posts)
 	PostPosts(ctx context.Context, request PostPostsRequestObject) (PostPostsResponseObject, error)
 
@@ -1882,6 +1957,32 @@ func (sh *strictHandler) PutMeFollowingHandle(ctx echo.Context, handle HandlePar
 		return err
 	} else if validResponse, ok := response.(PutMeFollowingHandleResponseObject); ok {
 		return validResponse.VisitPutMeFollowingHandleResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("Unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// GetMessagesHandle operation middleware
+func (sh *strictHandler) GetMessagesHandle(ctx echo.Context, handle HandleParam, params GetMessagesHandleParams) error {
+	var request GetMessagesHandleRequestObject
+
+	request.Handle = handle
+	request.Params = params
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetMessagesHandle(ctx.Request().Context(), request.(GetMessagesHandleRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetMessagesHandle")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetMessagesHandleResponseObject); ok {
+		return validResponse.VisitGetMessagesHandleResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("Unexpected response type: %T", response)
 	}
@@ -2340,41 +2441,43 @@ func (sh *strictHandler) GetUsersHandlePosts(ctx echo.Context, handle HandlePara
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xb3W/bOBL/VwzePdK1s9sFen5Lt5erb9NukOZwD4ERMNbY5kYiVZJqEgT63w8kRX1Y",
-	"37Kdc1u/BLA0ms/fjGaGygta8iDkDJiSaPaCQiJIAAqE+UVWCsRHwjwfrvQNfY0yNENfIxDPCCNGAkAz",
-	"S4cwkssNBERTqedQ35BKULZGcYwtTU8uAWU0iAI0m2LHkTIFa0P2NF7zcXI1okwZKfew4gI6qGwJW3S2",
-	"RH359Nd6U6FvSNQmE2MpEEYCvkZUgIdmSkRQEEueLoGt1QbNzn7DWgv38zdcYZtPA6oaTTMUaEuEtexs",
-	"OsWZnWdd7Qy5VPMPTXZaimY7e7vX2NVoqvtZL3XbgbElBqnec4+CSZfzSG3+I0G8596z/r3kTAFTJpPC",
-	"0KdLoihnk78kZ/paxvzvAlZohv42yZJxYu/KiWOaycwUjDGaB2QNFQKDyFc0JEJNVlwEY48o0l3mZ3g0",
-	"fGtkXvI1j1RvK0PBQxAqcZZvmFwIHpz7fs7D95z7QBgyglcC5OaGPwCrTtBMtdsi9aJa88/weMWl2muA",
-	"Ep41vrrOabWjx/btjtjhOwXvNciQMwll2UqzkW2uuLFUMUaRRmwLdYLqotqJoITDIsZpVhl3+f6fKzS7",
-	"bWZsyz+K8bYVSRXtVyx1UeEkpOMl92ANbAxPSpCxImvD07vPl+cVedCPvvigFAg2O5vGtvIRKR+58PQT",
-	"OiGJMqUvuVhQ4F1PBZxIx82Wrq0/K+JLwO/ibZTeZkosUrn8/i9YKhRr7/9TCC7KeHigzCtjsFh/zaN/",
-	"aMIYowCk1BWlFbeOUAu/4L7PH78ooiJZ1oFKex+8ivLRJWpU3q0cB62GY6jV2pFj4SXhTMvzx3n1ta0f",
-	"U2weB2a3dE+oM02vyJoyU7g+gaqoVgweQaqKeGPEfa/61pbMhA47Xosivooa3FomCy1A9xg9tWtqISo0",
-	"buk4hluhWVgb9Au4viBTr16bpKkxfVRJvU4w1rLvqJeBQz7QsALQFrqX9AHqk1Tf3SFDffN4RS5Zvgv7",
-	"VrftSlm6u5zW3HvKiGn1mqFnHyyXxLSFKMvKN19Zpv7ybjqwnkvQ/JZgXyBGIWuTgkB2Rm5Anub2gbep",
-	"HkQI8txRjerAO1u191u90b80uYdxjTOWAogC71wVQusRBWNFA0C48b2kSd7cWLoOulhZd0SVsgEfNgv1",
-	"LFSVhE1gyIrs8Fjr2fABOkKsiyGWXdkMAaFP9ynIMawVdcP3LuxO8Qp5Mi2HTY1qrnAmPfP8Q72Cej4Y",
-	"0zXjAtx8OkhxLUfjqqqcp1rgXBK6+GXuzRLQVYD6N5UbPZscYQeoHcYGIyQ3NGiGsl2nNH3alEtZbWeW",
-	"aW3bDSx1JJUGVLcG4F2DjHwlb/Oa4FHaKtykw1nRSrJcgpR182Lf+TrPDW+Plxi5Ea2oQtJfiz0mecay",
-	"nHariv59L+LsW2RbXNabD26/294idUm/89slqwJdq1VhGqusHdlIkXdaGi8HE7ljQtoKMCwRK4eXQcmo",
-	"tcCjdOrQboRlJKh6/qJlWbvugQgQ55FuBd2vC9ew/Pu/N269alfJ+m7WvGyUSlovylb2xUWVb3QBHvow",
-	"Or+aI4y+gZCUMzRDZ2+mb6ZmXAmBkZCiGfrVXMJmy2oUmmS9Q5g0bjoOxhdzT/PmUs0tTX7F+Vzn2MIW",
-	"dJKtI41Lbaky0n6ZTve2civORsZFHsiloKGynvjzDy3/7R5F2j1Ihaj3xBtdWx8UQGC2VPnw3y5iPU+Y",
-	"HLx1LdxCPzLx+Zqy5pBcGpIBESkspQ8ZlMICsSEmZ4ePyZx9Iz71Rr8L8IApSnxbsJzziQ5I6noeqVbf",
-	"a5oBzs9tysuuf2sKX0Hxz3z0e+IZ46tfD++rT8TXExR4I/sur/FTAFZbHxSUvfTBXP8EZR8N3HXn96XN",
-	"bUm2v6xewPd3+isC9Mop36NyBHYLF0ZVaI3UTkHot1/v5vH9VZjsGOzoKkuf2Nl0mqzArsXWUBHIf4H6",
-	"BBeaAhfO5Gsik5FMcue6MW6lzp9wdyDPHeJrsw4W6eL4VhPygW7PTyQNvs9NGYcPQP6Dha5hKDyzOHDa",
-	"yaa8e3v4vPvM1eiCR6xvpSyOHwUIJFNiGwTsEHOCwHcPAR3IMgQmL3Zojbu0NykiPrpBtx8uNq8Zrx8i",
-	"XE19zikag6KhJf7j8BK10SMqR8QXQLznUeGkfZfs1XNay/7CtA9D5rX890HxgfubY9xfvNLMecHFPfU8",
-	"YMddjSzScqibSCBiuWlqGwz0vliyvgUp951ihw7g1OgnEcMvzUF7sR+VdnjDG22u3Ceo/YKX/7a1wmUt",
-	"e4f+oMTNEDyMFa9fAY+qNnRF2iQ9QO+Mt8vkjPUUroOUchuQjlmzh1jg04w4vIRnwapr/k+J813MANr4",
-	"/AzgvuXrnbYVJTb38VCHlL5OP105uqT+CXoyF6tF8j9ADVPbHsO1OA2AgwbAY32HZyjS5SD5AKl5EZD8",
-	"982QVUDpH3cOCQf3jzP1QDiek2ABaypV8rFXg+cTqh/hk4X/w2ckFY6PdIPVYQVhGrGjXUH8JD1smKwg",
-	"TdAKAcwfODSG8LTWPtjoXh+VbufDufgMPyje9MuE06Hi0QGofLpcCaaWk+YSmIYcOZ/A9KOAKTvp2gJT",
-	"ulTsAKRhW5FXANH3Oe0eOYDya5It0KSnpR1A445NT6D5GUCTHl+Yp8Q3F+5I+GiGJiSkKF7E/wsAAP//",
-	"0p1rIiFIAAA=",
+	"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",
+	"O+Y+mqMpiShKFslfAQAA//8JJz11VE4AAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

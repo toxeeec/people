@@ -58,6 +58,14 @@ type LikeStatus struct {
 	IsLiked bool `db:"is_liked" json:"isLiked"`
 }
 
+// Message defines model for Message.
+type Message struct {
+	Content string `db:"content" fake:"{sentence}" json:"content"`
+}
+
+// MessageResults defines model for MessageResults.
+type MessageResults = PaginatedResults[ServerMessage, uint]
+
 // NewImage defines model for NewImage.
 type NewImage struct {
 	Image openapi_types.File `json:"image"`
@@ -91,6 +99,15 @@ type PostResponse struct {
 // PostsResponse defines model for PostsResponse.
 type PostsResponse = PaginatedResults[PostResponse, uint]
 
+// ServerMessage defines model for ServerMessage.
+type ServerMessage struct {
+	From    string    `fake:"skip" json:"from"`
+	ID      uint      `fake:"skip" json:"id"`
+	Message Message   `json:"message"`
+	SentAt  time.Time `fake:"skip" json:"sentAt"`
+	To      string    `fake:"skip" json:"to"`
+}
+
 // Tokens defines model for Tokens.
 type Tokens struct {
 	AccessToken  string `json:"accessToken"`
@@ -104,6 +121,12 @@ type User struct {
 	Handle    string        `db:"handle" json:"handle"`
 	ID        uint          `db:"user_id" json:"-"`
 	Status    *FollowStatus `json:"status,omitempty"`
+}
+
+// UserMessages defines model for UserMessages.
+type UserMessages struct {
+	Data MessageResults `json:"data"`
+	User User           `json:"user"`
 }
 
 // Users defines model for Users.
@@ -183,6 +206,13 @@ type GetMeFollowingParams struct {
 	Limit  *LimitParam        `form:"limit,omitempty" json:"limit,omitempty"`
 	Before *BeforeHandleParam `form:"before,omitempty" json:"before,omitempty"`
 	After  *AfterHandleParam  `form:"after,omitempty" json:"after,omitempty"`
+}
+
+// GetMessagesHandleParams defines parameters for GetMessagesHandle.
+type GetMessagesHandleParams struct {
+	Limit  *LimitParam  `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterParam  `form:"after,omitempty" json:"after,omitempty"`
 }
 
 // GetPostsSearchParams defines parameters for GetPostsSearch.

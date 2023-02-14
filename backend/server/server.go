@@ -36,16 +36,15 @@ func New(db *sqlx.DB, v *validator.Validate) *echo.Echo {
 	is := image.NewService(ir)
 	as := auth.NewService(ur, tr, us)
 	ps := post.NewService(v, pr, ur, fr, lr, us, is)
-
 	notif := make(chan people.Notification)
 	ns := notification.NewService(notif, ur)
-	cs := message.NewService(mr, ur, ns)
+	ms := message.NewService(mr, ur, ns, us)
 
 	e := echo.New()
 	e.Use(echomiddleware.CORS())
 	e.Static("/images", "images")
 
-	hub := ws.NewHub(notif, cs)
+	hub := ws.NewHub(notif, ms)
 	go hub.Run()
 	e.GET("/ws", ws.Serve(hub), peoplehttp.AuthMiddleware)
 
@@ -56,7 +55,7 @@ func New(db *sqlx.DB, v *validator.Validate) *echo.Echo {
 	e.GET("openapi.json", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, swagger)
 	})
-	h := peoplehttp.NewHandler(v, as, us, ps, is)
+	h := peoplehttp.NewHandler(v, as, us, ps, is, ms)
 	e.Use(middleware.OapiRequestValidatorWithOptions(swagger,
 		&middleware.Options{
 			Options: openapi3filter.Options{

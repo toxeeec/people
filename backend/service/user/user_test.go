@@ -10,6 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	people "github.com/toxeeec/people/backend"
+	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
 	"github.com/toxeeec/people/backend/repository/inmem"
 	"github.com/toxeeec/people/backend/service/user"
@@ -174,7 +175,7 @@ func (s *UserSuite) TestListFollowing() {
 
 	for name, tc := range tests {
 		s.Run(name, func() {
-			us, err := s.us.ListFollowing(context.Background(), tc.handle, tc.id, tc.id != 0, user.HandlePaginationParams{})
+			us, err := s.us.ListFollowing(context.Background(), tc.handle, tc.id, tc.id != 0, pagination.HandleParams{})
 			assert.NoError(s.T(), err)
 			assert.Len(s.T(), us.Data, len(users)-1)
 			if tc.id != 0 {
@@ -206,7 +207,7 @@ func (s *UserSuite) TestListFollowers() {
 
 	for name, tc := range tests {
 		s.Run(name, func() {
-			us, err := s.us.ListFollowers(context.Background(), tc.handle, tc.id, tc.id != 0, user.HandlePaginationParams{})
+			us, err := s.us.ListFollowers(context.Background(), tc.handle, tc.id, tc.id != 0, pagination.HandleParams{})
 			assert.NoError(s.T(), err)
 			assert.Len(s.T(), us.Data, len(users)-1)
 			if tc.id != 0 {
@@ -233,7 +234,7 @@ func (s *UserSuite) TestListPostLikes() {
 		s.lr.Create(p.ID, users[i].ID)
 	}
 
-	us, _ := s.us.ListPostLikes(context.Background(), p.ID, 0, false, user.HandlePaginationParams{})
+	us, _ := s.us.ListPostLikes(context.Background(), p.ID, 0, false, pagination.HandleParams{})
 	assert.Len(s.T(), us.Data, len(users))
 }
 

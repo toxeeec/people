@@ -12,25 +12,20 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type HandlePaginationParams struct {
-	Limit  *uint
-	Before *string
-	After  *string
-}
-
 type Service interface {
+	// TODO: GetUserFromContext
 	GetUserWithStatus(ctx context.Context, srcID, userID uint, auth bool) (people.User, error)
 	GetUser(ctx context.Context, handle string, userID uint, auth bool) (people.User, error)
 	Follow(ctx context.Context, handle string, userID uint) (people.User, error)
 	Unfollow(ctx context.Context, handle string, userID uint) (people.User, error)
-	ListFollowing(ctx context.Context, handle string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error)
-	ListFollowers(ctx context.Context, handle string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error)
-	ListCurrUserFollowing(ctx context.Context, userID uint, params HandlePaginationParams) (people.Users, error)
-	ListCurrUserFollowers(ctx context.Context, userID uint, params HandlePaginationParams) (people.Users, error)
-	ListPostLikes(ctx context.Context, postID, userID uint, auth bool, params HandlePaginationParams) (people.Users, error)
+	ListFollowing(ctx context.Context, handle string, userID uint, auth bool, params pagination.HandleParams) (people.Users, error)
+	ListFollowers(ctx context.Context, handle string, userID uint, auth bool, params pagination.HandleParams) (people.Users, error)
+	ListCurrUserFollowing(ctx context.Context, userID uint, params pagination.HandleParams) (people.Users, error)
+	ListCurrUserFollowers(ctx context.Context, userID uint, params pagination.HandleParams) (people.Users, error)
+	ListPostLikes(ctx context.Context, postID, userID uint, auth bool, params pagination.HandleParams) (people.Users, error)
 	ListStatus(ctx context.Context, userIDs []uint, srcID uint) (map[uint]people.FollowStatus, error)
 	ListUsersWithStatus(ctx context.Context, userIDs []uint, srcID uint, auth bool) ([]people.User, error)
-	ListMatches(ctx context.Context, query string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error)
+	ListMatches(ctx context.Context, query string, userID uint, auth bool, params pagination.HandleParams) (people.Users, error)
 	Delete(userID uint) error
 	Update(userID uint, handle string) (people.User, error)
 	Validate(u people.AuthUser) error
@@ -95,14 +90,14 @@ func (s *userService) Unfollow(ctx context.Context, handle string, userID uint) 
 	return u, nil
 }
 
-func (s *userService) ListFollowing(ctx context.Context, handle string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error) {
+func (s *userService) ListFollowing(ctx context.Context, handle string, userID uint, auth bool, params pagination.HandleParams) (people.Users, error) {
 	hp := pagination.New(params.Before, params.After, params.Limit)
 	var p pagination.ID
 	var id uint
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		var err error
-		p, err = pagination.Handle(hp).IDPagination(ctx, s.ur.GetID)
+		p, err = pagination.IntoID(ctx, hp, s.ur.GetID)
 		if err != nil {
 			return service.NewError(people.NotFoundError, "User not found")
 		}
@@ -128,14 +123,14 @@ func (s *userService) ListFollowing(ctx context.Context, handle string, userID u
 	return pagination.NewResults[people.User, string](us), nil
 }
 
-func (s *userService) ListFollowers(ctx context.Context, handle string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error) {
+func (s *userService) ListFollowers(ctx context.Context, handle string, userID uint, auth bool, params pagination.HandleParams) (people.Users, error) {
 	hp := pagination.New(params.Before, params.After, params.Limit)
 	var p pagination.ID
 	var id uint
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		var err error
-		p, err = pagination.Handle(hp).IDPagination(ctx, s.ur.GetID)
+		p, err = pagination.IntoID(ctx, hp, s.ur.GetID)
 		if err != nil {
 			return service.NewError(people.NotFoundError, "User not found")
 		}
@@ -161,7 +156,7 @@ func (s *userService) ListFollowers(ctx context.Context, handle string, userID u
 	return pagination.NewResults[people.User, string](us), nil
 }
 
-func (s *userService) ListCurrUserFollowing(ctx context.Context, userID uint, params HandlePaginationParams) (people.Users, error) {
+func (s *userService) ListCurrUserFollowing(ctx context.Context, userID uint, params pagination.HandleParams) (people.Users, error) {
 	u, err := s.ur.Get(userID)
 	if err != nil {
 		return people.Users{}, err
@@ -169,7 +164,7 @@ func (s *userService) ListCurrUserFollowing(ctx context.Context, userID uint, pa
 	return s.ListFollowing(ctx, u.Handle, userID, true, params)
 }
 
-func (s *userService) ListCurrUserFollowers(ctx context.Context, userID uint, params HandlePaginationParams) (people.Users, error) {
+func (s *userService) ListCurrUserFollowers(ctx context.Context, userID uint, params pagination.HandleParams) (people.Users, error) {
 	u, err := s.ur.Get(userID)
 	if err != nil {
 		return people.Users{}, err
@@ -177,9 +172,9 @@ func (s *userService) ListCurrUserFollowers(ctx context.Context, userID uint, pa
 	return s.ListFollowers(ctx, u.Handle, userID, true, params)
 }
 
-func (s *userService) ListPostLikes(ctx context.Context, postID, userID uint, auth bool, params HandlePaginationParams) (people.Users, error) {
+func (s *userService) ListPostLikes(ctx context.Context, postID, userID uint, auth bool, params pagination.HandleParams) (people.Users, error) {
 	hp := pagination.New(params.Before, params.After, params.Limit)
-	p, err := pagination.Handle(hp).IDPagination(ctx, s.ur.GetID)
+	p, err := pagination.IntoID(ctx, hp, s.ur.GetID)
 	if err != nil {
 		return people.Users{}, service.NewError(people.NotFoundError, "User not found")
 	}
@@ -202,9 +197,9 @@ func (s *userService) ListPostLikes(ctx context.Context, postID, userID uint, au
 	return pagination.NewResults[people.User, string](us), nil
 }
 
-func (s *userService) ListMatches(ctx context.Context, query string, userID uint, auth bool, params HandlePaginationParams) (people.Users, error) {
+func (s *userService) ListMatches(ctx context.Context, query string, userID uint, auth bool, params pagination.HandleParams) (people.Users, error) {
 	hp := pagination.New(params.Before, params.After, params.Limit)
-	p, err := pagination.Handle(hp).IDPagination(ctx, s.ur.GetID)
+	p, err := pagination.IntoID(ctx, hp, s.ur.GetID)
 	if err != nil {
 		return people.Users{}, service.NewError(people.NotFoundError, "User not found")
 	}

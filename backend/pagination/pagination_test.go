@@ -23,7 +23,7 @@ func TestIDPagination(t *testing.T) {
 
 	limit := uint(1)
 	hp := pagination.New(&users[0].Handle, &users[1].Handle, &limit)
-	p, err := pagination.Handle(hp).IDPagination(context.Background(), ur.GetID)
+	p, err := pagination.IntoID(context.Background(), hp, ur.GetID)
 	assert.NoError(t, err)
 	assert.Equal(t, users[0].ID, *p.Before)
 	assert.Equal(t, users[1].ID, *p.After)

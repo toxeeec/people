@@ -5,6 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	people "github.com/toxeeec/people/backend"
+	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
 )
 
@@ -28,4 +29,19 @@ func (r *messageRepo) Create(message people.Message, from uint, to uint) (people
 		return m, fmt.Errorf("Message.Create: %w", err)
 	}
 	return m, nil
+}
+
+func (r *messageRepo) ListUserMessages(user1ID, user2ID uint, p pagination.ID) ([]people.DBMessage, error) {
+	q, args, err := NewQuery(SelectMessage).
+		Where("((from_id = ? AND to_id = ?) OR (to_id = ? AND from_id = ?))", user1ID, user2ID, user1ID, user2ID).
+		Paginate(p, "message_id", "?").
+		Build()
+	if err != nil {
+		return nil, fmt.Errorf("Message.ListUserMessages: %w", err)
+	}
+	ms := make([]people.DBMessage, p.Limit)
+	if err := r.db.Select(&ms, q, args...); err != nil {
+		return nil, fmt.Errorf("Message.ListUserMessages: %w", err)
+	}
+	return ms, nil
 }

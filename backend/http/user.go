@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	people "github.com/toxeeec/people/backend"
-	"github.com/toxeeec/people/backend/service/user"
+	"github.com/toxeeec/people/backend/pagination"
 )
 
 func (h *handler) GetUsersHandle(ctx context.Context, r people.GetUsersHandleRequestObject) (people.GetUsersHandleResponseObject, error) {
@@ -60,7 +60,7 @@ func (h *handler) DeleteMeFollowingHandle(ctx context.Context, r people.DeleteMe
 
 func (h *handler) GetMeFollowing(ctx context.Context, r people.GetMeFollowingRequestObject) (people.GetMeFollowingResponseObject, error) {
 	userID, _ := people.FromContext(ctx, people.UserIDKey)
-	us, err := h.us.ListCurrUserFollowing(ctx, userID, user.HandlePaginationParams(r.Params))
+	us, err := h.us.ListCurrUserFollowing(ctx, userID, pagination.HandleParams(r.Params))
 	if err != nil {
 		var e *people.Error
 		if errors.As(err, &e) {
@@ -76,7 +76,7 @@ func (h *handler) GetMeFollowing(ctx context.Context, r people.GetMeFollowingReq
 
 func (h *handler) GetMeFollowers(ctx context.Context, r people.GetMeFollowersRequestObject) (people.GetMeFollowersResponseObject, error) {
 	userID, _ := people.FromContext(ctx, people.UserIDKey)
-	us, err := h.us.ListCurrUserFollowers(ctx, userID, user.HandlePaginationParams(r.Params))
+	us, err := h.us.ListCurrUserFollowers(ctx, userID, pagination.HandleParams(r.Params))
 	if err != nil {
 		var e *people.Error
 		if errors.As(err, &e) {
@@ -92,7 +92,7 @@ func (h *handler) GetMeFollowers(ctx context.Context, r people.GetMeFollowersReq
 
 func (h *handler) GetUsersHandleFollowing(ctx context.Context, r people.GetUsersHandleFollowingRequestObject) (people.GetUsersHandleFollowingResponseObject, error) {
 	userID, ok := people.FromContext(ctx, people.UserIDKey)
-	us, err := h.us.ListFollowing(ctx, r.Handle, userID, ok, user.HandlePaginationParams(r.Params))
+	us, err := h.us.ListFollowing(ctx, r.Handle, userID, ok, pagination.HandleParams(r.Params))
 	if err != nil {
 		var e *people.Error
 		if errors.As(err, &e) {
@@ -108,7 +108,7 @@ func (h *handler) GetUsersHandleFollowing(ctx context.Context, r people.GetUsers
 
 func (h *handler) GetUsersHandleFollowers(ctx context.Context, r people.GetUsersHandleFollowersRequestObject) (people.GetUsersHandleFollowersResponseObject, error) {
 	userID, ok := people.FromContext(ctx, people.UserIDKey)
-	us, err := h.us.ListFollowers(ctx, r.Handle, userID, ok, user.HandlePaginationParams(r.Params))
+	us, err := h.us.ListFollowers(ctx, r.Handle, userID, ok, pagination.HandleParams(r.Params))
 	if err != nil {
 		var e *people.Error
 		if errors.As(err, &e) {
@@ -124,7 +124,7 @@ func (h *handler) GetUsersHandleFollowers(ctx context.Context, r people.GetUsers
 
 func (h *handler) GetPostsPostIDLikes(ctx context.Context, r people.GetPostsPostIDLikesRequestObject) (people.GetPostsPostIDLikesResponseObject, error) {
 	userID, ok := people.FromContext(ctx, people.UserIDKey)
-	ur, err := h.us.ListPostLikes(ctx, r.PostID, userID, ok, user.HandlePaginationParams(r.Params))
+	ur, err := h.us.ListPostLikes(ctx, r.PostID, userID, ok, pagination.HandleParams(r.Params))
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (h *handler) GetPostsPostIDLikes(ctx context.Context, r people.GetPostsPost
 
 func (h *handler) GetUsersSearch(ctx context.Context, r people.GetUsersSearchRequestObject) (people.GetUsersSearchResponseObject, error) {
 	userID, ok := people.FromContext(ctx, people.UserIDKey)
-	ur, err := h.us.ListMatches(ctx, r.Params.Query, userID, ok, user.HandlePaginationParams{Limit: r.Params.Limit, Before: r.Params.Before, After: r.Params.After})
+	ur, err := h.us.ListMatches(ctx, r.Params.Query, userID, ok, pagination.HandleParams{Limit: r.Params.Limit, Before: r.Params.Before, After: r.Params.After})
 	if err != nil {
 		return nil, err
 	}

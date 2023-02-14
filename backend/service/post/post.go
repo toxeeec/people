@@ -20,23 +20,17 @@ func TrimContent(p people.NewPost) people.NewPost {
 	return p
 }
 
-type IDPaginationParams struct {
-	Limit  *uint
-	Before *uint
-	After  *uint
-}
-
 type Service interface {
 	Create(ctx context.Context, np people.NewPost, userID uint, repliesTo *uint) (people.PostResponse, error)
 	Get(ctx context.Context, postID, userID uint, auth bool) (people.PostResponse, error)
 	Delete(postID, userID uint) error
-	ListUserPosts(ctx context.Context, handle string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error)
-	ListFeed(ctx context.Context, userID uint, params IDPaginationParams) (people.PostsResponse, error)
-	ListReplies(ctx context.Context, postID, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error)
+	ListUserPosts(ctx context.Context, handle string, userID uint, auth bool, params pagination.IDParams) (people.PostsResponse, error)
+	ListFeed(ctx context.Context, userID uint, params pagination.IDParams) (people.PostsResponse, error)
+	ListReplies(ctx context.Context, postID, userID uint, auth bool, params pagination.IDParams) (people.PostsResponse, error)
 	Like(postID, userID uint) (people.PostResponse, error)
 	Unlike(postID, userID uint) (people.PostResponse, error)
-	ListUserLikes(ctx context.Context, handle string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error)
-	ListMatches(ctx context.Context, query string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error)
+	ListUserLikes(ctx context.Context, handle string, userID uint, auth bool, params pagination.IDParams) (people.PostsResponse, error)
+	ListMatches(ctx context.Context, query string, userID uint, auth bool, params pagination.IDParams) (people.PostsResponse, error)
 }
 
 type postService struct {
@@ -118,7 +112,7 @@ func (s *postService) Delete(postID, userID uint) error {
 	return nil
 }
 
-func (s *postService) ListUserPosts(ctx context.Context, handle string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error) {
+func (s *postService) ListUserPosts(ctx context.Context, handle string, userID uint, auth bool, params pagination.IDParams) (people.PostsResponse, error) {
 	p := pagination.New(params.Before, params.After, params.Limit)
 	id, err := s.ur.GetID(handle)
 	if err != nil {
@@ -150,7 +144,7 @@ func (s *postService) ListUserPosts(ctx context.Context, handle string, userID u
 	return pagination.NewResults[people.PostResponse, uint](prs), nil
 }
 
-func (s *postService) ListFeed(ctx context.Context, userID uint, params IDPaginationParams) (people.PostsResponse, error) {
+func (s *postService) ListFeed(ctx context.Context, userID uint, params pagination.IDParams) (people.PostsResponse, error) {
 	p := pagination.New(params.Before, params.After, params.Limit)
 	ids, err := s.fr.ListFollowing(userID, &p)
 	if err != nil {
@@ -182,7 +176,7 @@ func (s *postService) ListFeed(ctx context.Context, userID uint, params IDPagina
 	return s.postResponseResults(ps, us), nil
 }
 
-func (s *postService) ListReplies(ctx context.Context, postID uint, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error) {
+func (s *postService) ListReplies(ctx context.Context, postID uint, userID uint, auth bool, params pagination.IDParams) (people.PostsResponse, error) {
 	p := pagination.New(params.Before, params.After, params.Limit)
 	ps, err := s.pr.ListReplies(postID, p)
 	if err != nil {
@@ -235,7 +229,7 @@ func (s *postService) Unlike(postID uint, userID uint) (people.PostResponse, err
 	return pr, nil
 }
 
-func (s *postService) ListUserLikes(ctx context.Context, handle string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error) {
+func (s *postService) ListUserLikes(ctx context.Context, handle string, userID uint, auth bool, params pagination.IDParams) (people.PostsResponse, error) {
 	p := pagination.New(params.Before, params.After, params.Limit)
 	id, err := s.ur.GetID(handle)
 	if err != nil {
@@ -265,7 +259,7 @@ func (s *postService) ListUserLikes(ctx context.Context, handle string, userID u
 	return s.postResponseResults(ps, us), nil
 }
 
-func (s *postService) ListMatches(ctx context.Context, query string, userID uint, auth bool, params IDPaginationParams) (people.PostsResponse, error) {
+func (s *postService) ListMatches(ctx context.Context, query string, userID uint, auth bool, params pagination.IDParams) (people.PostsResponse, error) {
 	p := pagination.New(params.Before, params.After, params.Limit)
 	ps, err := s.pr.ListMatches(query, p)
 	if err != nil {

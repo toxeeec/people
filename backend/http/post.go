@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	people "github.com/toxeeec/people/backend"
-	"github.com/toxeeec/people/backend/service/post"
+	"github.com/toxeeec/people/backend/pagination"
 )
 
 func (h *handler) PostPosts(ctx context.Context, r people.PostPostsRequestObject) (people.PostPostsResponseObject, error) {
@@ -57,7 +57,7 @@ func (h *handler) DeletePostsPostID(ctx context.Context, r people.DeletePostsPos
 
 func (h *handler) GetUsersHandlePosts(ctx context.Context, r people.GetUsersHandlePostsRequestObject) (people.GetUsersHandlePostsResponseObject, error) {
 	userID, ok := people.FromContext(ctx, people.UserIDKey)
-	prs, err := h.ps.ListUserPosts(ctx, r.Handle, userID, ok, post.IDPaginationParams(r.Params))
+	prs, err := h.ps.ListUserPosts(ctx, r.Handle, userID, ok, pagination.IDParams(r.Params))
 	if err != nil {
 		var e *people.Error
 		if errors.As(err, &e) {
@@ -73,7 +73,7 @@ func (h *handler) GetUsersHandlePosts(ctx context.Context, r people.GetUsersHand
 
 func (h *handler) GetMeFeed(ctx context.Context, r people.GetMeFeedRequestObject) (people.GetMeFeedResponseObject, error) {
 	userID, _ := people.FromContext(ctx, people.UserIDKey)
-	prs, err := h.ps.ListFeed(ctx, userID, post.IDPaginationParams(r.Params))
+	prs, err := h.ps.ListFeed(ctx, userID, pagination.IDParams(r.Params))
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (h *handler) PostPostsPostIDReplies(ctx context.Context, r people.PostPosts
 
 func (h *handler) GetPostsPostIDReplies(ctx context.Context, r people.GetPostsPostIDRepliesRequestObject) (people.GetPostsPostIDRepliesResponseObject, error) {
 	userID, ok := people.FromContext(ctx, people.UserIDKey)
-	ps, err := h.ps.ListReplies(ctx, r.PostID, userID, ok, post.IDPaginationParams(r.Params))
+	ps, err := h.ps.ListReplies(ctx, r.PostID, userID, ok, pagination.IDParams(r.Params))
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func (h *handler) DeletePostsPostIDLikes(ctx context.Context, r people.DeletePos
 
 func (h *handler) GetUsersHandleLikes(ctx context.Context, r people.GetUsersHandleLikesRequestObject) (people.GetUsersHandleLikesResponseObject, error) {
 	userID, ok := people.FromContext(ctx, people.UserIDKey)
-	prs, err := h.ps.ListUserLikes(ctx, r.Handle, userID, ok, post.IDPaginationParams(r.Params))
+	prs, err := h.ps.ListUserLikes(ctx, r.Handle, userID, ok, pagination.IDParams(r.Params))
 	if err != nil {
 		var e *people.Error
 		if errors.As(err, &e) {
@@ -159,7 +159,7 @@ func (h *handler) GetUsersHandleLikes(ctx context.Context, r people.GetUsersHand
 
 func (h *handler) GetPostsSearch(ctx context.Context, r people.GetPostsSearchRequestObject) (people.GetPostsSearchResponseObject, error) {
 	userID, ok := people.FromContext(ctx, people.UserIDKey)
-	prs, err := h.ps.ListMatches(ctx, r.Params.Query, userID, ok, post.IDPaginationParams{Limit: r.Params.Limit, Before: r.Params.Before, After: r.Params.After})
+	prs, err := h.ps.ListMatches(ctx, r.Params.Query, userID, ok, pagination.IDParams{Limit: r.Params.Limit, Before: r.Params.Before, After: r.Params.After})
 	if err != nil {
 		return nil, err
 	}

@@ -182,6 +182,7 @@ components:
         - replies 
         - createdAt
 
+    # TODO: change to Post
     PostResponse:
       properties:
         data:
@@ -266,6 +267,69 @@ components:
             fake: skip
       required:
         - id
+
+    Message:
+      properties:
+        content:
+          type: string
+          x-oapi-codegen-extra-tags:
+            db: content
+            fake: '{sentence}'
+      required:
+        - content
+
+    ServerMessage:
+      properties:
+        message:
+          $ref: '#/components/schemas/Message'
+        id:
+          type: integer
+          x-go-name: ID
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            fake: skip
+        from:
+          type: string
+          x-oapi-codegen-extra-tags:
+            fake: skip
+        to:
+          type: string
+          x-oapi-codegen-extra-tags:
+            fake: skip
+        sentAt:
+          type: string
+          format: date-time
+          x-go-type: time.Time
+          x-oapi-codegen-extra-tags:
+            fake: skip
+      required:
+        - message
+        - id
+        - from
+        - to
+        - sentAt
+
+    MessageResults:
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServerMessage'
+        meta:
+          $ref: '#/components/schemas/IDPaginationMeta'
+      x-go-type: PaginatedResults[ServerMessage, uint]
+      required:
+        - data
+
+    UserMessages:
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        data:
+          $ref: '#/components/schemas/MessageResults'
+      required:
+        - user
+        - data
 
     Error:
       properties:

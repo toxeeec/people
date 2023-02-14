@@ -24,6 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	v := validator.New()
 	e := server.New(db, v)
 	port := os.Getenv("BACKEND_PORT")
