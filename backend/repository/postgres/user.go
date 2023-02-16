@@ -81,6 +81,23 @@ func (r *userRepo) List(ids []uint) ([]people.User, error) {
 	return us, nil
 }
 
+func (r *userRepo) ListIDs(handles ...string) ([]uint, error) {
+	if len(handles) == 0 {
+		return []uint{}, nil
+	}
+	q, args, err := NewQuery("SELECT user_id FROM user_profile").
+		Where("handle IN (?)", handles).
+		Build()
+	if err != nil {
+		return nil, fmt.Errorf("User.ListIDs: %w", err)
+	}
+	ids := make([]uint, len(handles))
+	if err := r.db.Select(&ids, q, args...); err != nil {
+		return nil, fmt.Errorf("User.ListIDs: %w", err)
+	}
+	return ids, nil
+}
+
 func (r *userRepo) ListMatches(query string, p pagination.ID) ([]people.User, error) {
 	q, args, err := NewQuery(SelectUser).
 		Where("handle ILIKE ?", "%"+query+"%").

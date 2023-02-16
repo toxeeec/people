@@ -1,7 +1,7 @@
 components:
   $ref: ../components/main.yaml#/components
 
-messages:
+userThread:
   get:
     tags:
       - messages
@@ -9,6 +9,28 @@ messages:
       - bearerAuth: []
     parameters:
       - $ref: '#/components/parameters/handleParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Thread'
+      404:
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+thread:
+  get:
+    tags:
+      - messages
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/threadIDParam'
       - $ref: '#/components/parameters/limitParam'
       - $ref: '#/components/parameters/beforeParam'
       - $ref: '#/components/parameters/afterParam'
@@ -18,7 +40,37 @@ messages:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserMessages'
+              $ref: '#/components/schemas/Messages'
+      403:
+        description: Forbidden
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      404:
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+threads:
+  get:
+    tags:
+      - messages
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/beforeParam'
+      - $ref: '#/components/parameters/afterParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Threads'
       404:
         description: Not Found
         content:

@@ -6,6 +6,13 @@ import (
 )
 
 type Message interface {
-	Create(message people.Message, from uint, to uint) (people.DBMessage, error)
-	ListUserMessages(user1ID, user2ID uint, p pagination.ID) ([]people.DBMessage, error)
+	Create(threadID uint, content string, fromID uint) (people.DBMessage, error)
+	CreateThread(userIDs ...uint) (uint, error)
+	GetThreadID(userIDs ...uint) (uint, error)
+	ListThreadIDs(userID uint, p pagination.ID) ([]uint, error)
+	GetThreadUsers(threadID uint) ([]uint, error)
+	ListThreadUsers(threadIDs ...uint) ([]people.ThreadUser, error)
+	GetLatestMessage(threadID uint) (people.DBMessage, error)
+	ListLatestMessages(threadIDs ...uint) ([]people.DBMessage, error)
+	ListThreadMessages(threadID uint, p pagination.ID) ([]people.DBMessage, error)
 }

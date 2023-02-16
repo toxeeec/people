@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,7 +16,7 @@ func TestValidateAccessToken(t *testing.T) {
 	assert.NoError(t, err)
 
 	malformedToken := []byte(at)
-	malformedToken[rand.Intn(len(malformedToken))] += 1
+	malformedToken[0] += 1
 
 	_, err = ValidateAccessToken(string(malformedToken))
 	assert.Error(t, err)

@@ -27,6 +27,15 @@ components:
         minimum: 0
         x-go-type: uint
 
+    threadIDParam:
+      name: threadID
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 0
+        x-go-type: uint
+
     queryParam:
       name: query
       in: query

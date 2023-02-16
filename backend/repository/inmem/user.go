@@ -8,6 +8,7 @@ import (
 	people "github.com/toxeeec/people/backend"
 	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
+	"golang.org/x/exp/slices"
 )
 
 type userRepo struct {
@@ -93,4 +94,13 @@ func (r *userRepo) Update(userID uint, handle string) (people.User, error) {
 	u.Handle = handle
 	r.m[userID] = u
 	return u, nil
+}
+func (r *userRepo) ListIDs(handles ...string) ([]uint, error) {
+	var ids []uint
+	for _, user := range r.m {
+		if slices.Contains(handles, user.Handle) {
+			ids = append(ids, user.ID)
+		}
+	}
+	return ids, nil
 }

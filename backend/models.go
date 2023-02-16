@@ -53,37 +53,16 @@ type Image struct {
 }
 
 type UserMessage struct {
-	Message
-	To string `json:"to"`
-}
-
-func (m ServerMessage) Identify() uint {
-	return m.ID
+	Content  string `fake:"{sentence}" json:"content"`
+	ThreadID uint   `fake:"skip" json:"threadID"`
 }
 
 type DBMessage struct {
-	Message
-	ID     uint      `db:"message_id" fake:"skip"`
-	From   uint      `db:"from_id" fake:"skip"`
-	To     uint      `db:"to_id" fake:"skip"`
-	SentAt time.Time `db:"sent_at" fake:"skip"`
-}
-
-func IntoServerMessage(m DBMessage, from string, to string) ServerMessage {
-	return ServerMessage{Message: m.Message, ID: m.ID, From: from, To: to, SentAt: m.SentAt}
-}
-
-func IntoServerMessages(ms []DBMessage, handles map[uint]string) []ServerMessage {
-	sms := make([]ServerMessage, len(ms))
-	for i, m := range ms {
-		sms[i] = ServerMessage{Message: m.Message, ID: m.ID, From: handles[m.From], To: handles[m.To], SentAt: m.SentAt}
-	}
-	return sms
-}
-
-type MessagesResponse struct {
-	PaginatedResults[ServerMessage, uint]
-	User User
+	ID       uint      `db:"message_id" fake:"skip"`
+	Content  string    `db:"content" fake:"{sentence}"`
+	FromID   uint      `db:"from_id" fake:"skip"`
+	ThreadID uint      `db:"thread_id" fake:"skip"`
+	SentAt   time.Time `db:"sent_at" fake:"skip"`
 }
 
 type NotificationType string
@@ -93,8 +72,12 @@ const (
 )
 
 type Notification struct {
-	Type    NotificationType `json:"type"`
-	From    uint             `json:"-"`
-	To      uint             `json:"-"`
-	Content *ServerMessage   `json:"content,omitempty"`
+	Type NotificationType `json:"type"`
+	Data any              `json:"data"`
+	To   uint             `json:"-"`
+}
+
+type ThreadUser struct {
+	ID     uint `db:"thread_id"`
+	UserID uint `db:"user_id"`
 }

@@ -8,18 +8,52 @@ import (
 	"github.com/toxeeec/people/backend/pagination"
 )
 
-func (h *handler) GetMessagesHandle(ctx context.Context, r people.GetMessagesHandleRequestObject) (people.GetMessagesHandleResponseObject, error) {
+func (h *handler) GetUsersHandleThread(ctx context.Context, r people.GetUsersHandleThreadRequestObject) (people.GetUsersHandleThreadResponseObject, error) {
 	userID, _ := people.FromContext(ctx, people.UserIDKey)
-	ums, err := h.ms.ListUserMessages(r.Handle, userID, pagination.IDParams{Limit: r.Params.Limit, Before: r.Params.Before, After: r.Params.After})
+	thread, err := h.ms.GetUsersThread(ctx, userID, r.Handle)
 	if err != nil {
 		var e *people.Error
 		if errors.As(err, &e) {
 			switch *e.Kind {
 			case people.NotFoundError:
-				return people.GetMessagesHandle404JSONResponse(*e), nil
+				return people.GetUsersHandleThread404JSONResponse(*e), nil
 			}
 		}
 		return nil, err
 	}
-	return people.GetMessagesHandle200JSONResponse(ums), nil
+	return people.GetUsersHandleThread200JSONResponse(thread), nil
+}
+
+func (h *handler) GetThreadsThreadID(ctx context.Context, r people.GetThreadsThreadIDRequestObject) (people.GetThreadsThreadIDResponseObject, error) {
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
+	msgs, err := h.ms.ListThreadMessages(ctx, r.ThreadID, userID, pagination.IDParams(r.Params))
+	if err != nil {
+		var e *people.Error
+		if errors.As(err, &e) {
+			switch *e.Kind {
+			case people.AuthError:
+				return people.GetThreadsThreadID403JSONResponse(*e), nil
+			case people.NotFoundError:
+				return people.GetThreadsThreadID404JSONResponse(*e), nil
+			}
+		}
+		return nil, err
+	}
+	return people.GetThreadsThreadID200JSONResponse(msgs), nil
+}
+
+func (h *handler) GetThreads(ctx context.Context, r people.GetThreadsRequestObject) (people.GetThreadsResponseObject, error) {
+	userID, _ := people.FromContext(ctx, people.UserIDKey)
+	is, err := h.ms.ListThreads(ctx, userID, pagination.IDParams(r.Params))
+	if err != nil {
+		var e *people.Error
+		if errors.As(err, &e) {
+			switch *e.Kind {
+			case people.NotFoundError:
+				return people.GetThreads404JSONResponse(*e), nil
+			}
+		}
+		return nil, err
+	}
+	return people.GetThreads200JSONResponse(is), nil
 }

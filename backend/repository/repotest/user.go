@@ -102,6 +102,19 @@ func (s *UserSuite) TestUpdate() {
 	assert.Equal(s.T(), u2.Handle, u3.Handle)
 }
 
+func (s *UserSuite) TestListIDs() {
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	u1, _ := s.repo.Create(au)
+	gofakeit.Struct(&au)
+	u2, _ := s.repo.Create(au)
+
+	ids, err := s.repo.ListIDs(u1.Handle, u2.Handle)
+	assert.NoError(s.T(), err)
+	assert.Contains(s.T(), ids, u1.ID)
+	assert.Contains(s.T(), ids, u2.ID)
+}
+
 func (s *UserSuite) SetupTest() {
 	if s.fns.SetupTest != nil {
 		s.fns.SetupTest()

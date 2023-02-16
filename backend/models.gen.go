@@ -60,11 +60,15 @@ type LikeStatus struct {
 
 // Message defines model for Message.
 type Message struct {
-	Content string `db:"content" fake:"{sentence}" json:"content"`
+	Content  string    `db:"content" fake:"{sentence}" json:"content"`
+	From     User      `json:"from"`
+	ID       uint      `fake:"skip" json:"id"`
+	SentAt   time.Time `fake:"skip" json:"sentAt"`
+	ThreadID uint      `fake:"skip" json:"threadID"`
 }
 
-// MessageResults defines model for MessageResults.
-type MessageResults = PaginatedResults[ServerMessage, uint]
+// Messages defines model for Messages.
+type Messages = PaginatedResults[Message, uint]
 
 // NewImage defines model for NewImage.
 type NewImage struct {
@@ -99,14 +103,15 @@ type PostResponse struct {
 // PostsResponse defines model for PostsResponse.
 type PostsResponse = PaginatedResults[PostResponse, uint]
 
-// ServerMessage defines model for ServerMessage.
-type ServerMessage struct {
-	From    string    `fake:"skip" json:"from"`
-	ID      uint      `fake:"skip" json:"id"`
-	Message Message   `json:"message"`
-	SentAt  time.Time `fake:"skip" json:"sentAt"`
-	To      string    `fake:"skip" json:"to"`
+// Thread defines model for Thread.
+type Thread struct {
+	ID     uint     `json:"id"`
+	Latest *Message `json:"latest,omitempty"`
+	Users  []User   `json:"users"`
 }
+
+// Threads defines model for Threads.
+type Threads = PaginatedResults[Thread, uint]
 
 // Tokens defines model for Tokens.
 type Tokens struct {
@@ -121,12 +126,6 @@ type User struct {
 	Handle    string        `db:"handle" json:"handle"`
 	ID        uint          `db:"user_id" json:"-"`
 	Status    *FollowStatus `json:"status,omitempty"`
-}
-
-// UserMessages defines model for UserMessages.
-type UserMessages struct {
-	Data MessageResults `json:"data"`
-	User User           `json:"user"`
 }
 
 // Users defines model for Users.
@@ -155,6 +154,9 @@ type PostIDParam = uint
 
 // QueryParam defines model for queryParam.
 type QueryParam = string
+
+// ThreadIDParam defines model for threadIDParam.
+type ThreadIDParam = uint
 
 // AuthUserBody defines model for AuthUserBody.
 type AuthUserBody = AuthUser
@@ -208,13 +210,6 @@ type GetMeFollowingParams struct {
 	After  *AfterHandleParam  `form:"after,omitempty" json:"after,omitempty"`
 }
 
-// GetMessagesHandleParams defines parameters for GetMessagesHandle.
-type GetMessagesHandleParams struct {
-	Limit  *LimitParam  `form:"limit,omitempty" json:"limit,omitempty"`
-	Before *BeforeParam `form:"before,omitempty" json:"before,omitempty"`
-	After  *AfterParam  `form:"after,omitempty" json:"after,omitempty"`
-}
-
 // GetPostsSearchParams defines parameters for GetPostsSearch.
 type GetPostsSearchParams struct {
 	Query  QueryParam   `form:"query" json:"query"`
@@ -240,6 +235,20 @@ type GetPostsPostIDRepliesParams struct {
 // PostRefreshJSONBody defines parameters for PostRefresh.
 type PostRefreshJSONBody struct {
 	RefreshToken string `json:"refreshToken"`
+}
+
+// GetThreadsParams defines parameters for GetThreads.
+type GetThreadsParams struct {
+	Limit  *LimitParam  `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterParam  `form:"after,omitempty" json:"after,omitempty"`
+}
+
+// GetThreadsThreadIDParams defines parameters for GetThreadsThreadID.
+type GetThreadsThreadIDParams struct {
+	Limit  *LimitParam  `form:"limit,omitempty" json:"limit,omitempty"`
+	Before *BeforeParam `form:"before,omitempty" json:"before,omitempty"`
+	After  *AfterParam  `form:"after,omitempty" json:"after,omitempty"`
 }
 
 // GetUsersSearchParams defines parameters for GetUsersSearch.

@@ -6,7 +6,7 @@ import (
 )
 
 type Service interface {
-	Notify(notifType people.NotificationType, from, to uint, content *people.ServerMessage) error
+	Notify(notifType people.NotificationType, data any, ids ...uint)
 }
 
 type notificationService struct {
@@ -18,13 +18,13 @@ func NewService(channel chan<- people.Notification, ur repository.User) Service 
 	return &notificationService{channel, ur}
 }
 
-func (s *notificationService) Notify(notifType people.NotificationType, from, to uint, content *people.ServerMessage) error {
-	notif := people.Notification{
-		Type:    notifType,
-		From:    from,
-		To:      to,
-		Content: content,
+func (s *notificationService) Notify(notifType people.NotificationType, data any, ids ...uint) {
+	for _, id := range ids {
+		notif := people.Notification{
+			Type: notifType,
+			Data: data,
+			To:   id,
+		}
+		s.channel <- notif
 	}
-	s.channel <- notif
-	return nil
 }

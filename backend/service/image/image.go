@@ -121,7 +121,7 @@ func (s *imageService) AddToPost(ids []uint, postID, userID uint) ([]string, err
 				continue
 			}
 			if img.UserID != userID {
-				return nil, service.NewError(people.AuthError, fmt.Sprintf("You don't have the permission to use this image: %v", id))
+				return nil, service.NewError(people.AuthError, fmt.Sprintf("You do not have permission to use this image: %v", id))
 			}
 			if isExpired(img) {
 				return nil, service.NewError(people.ResourceError, fmt.Sprintf("Image is expired: %v", id))

@@ -10,13 +10,21 @@ import (
 )
 
 func TestInmemMessageSuite(t *testing.T) {
-	mm := make(map[uint]people.DBMessage)
+	msgs := make(map[uint][]people.DBMessage)
+	threads := make(map[uint]struct{})
+	threadUsers := make(map[uint][]uint)
 	um := make(map[uint]people.User)
-	mr := inmem.NewMessageRepository(mm)
+	mr := inmem.NewMessageRepository(msgs, threads, threadUsers, um)
 	ur := inmem.NewUserRepository(um)
 	fns := repotest.TestFns{SetupTest: func() {
-		for k := range mm {
-			delete(mm, k)
+		for k := range msgs {
+			delete(msgs, k)
+		}
+		for k := range threads {
+			delete(threads, k)
+		}
+		for k := range threadUsers {
+			delete(threadUsers, k)
 		}
 		for k := range um {
 			delete(um, k)

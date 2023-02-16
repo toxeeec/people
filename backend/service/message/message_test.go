@@ -1,6 +1,7 @@
 package message_test
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 	"time"
@@ -26,12 +27,10 @@ type MessageSuite struct {
 }
 
 func (s *MessageSuite) TestReadMessage() {
-	var au1 people.AuthUser
-	var au2 people.AuthUser
-	gofakeit.Struct(&au1)
-	gofakeit.Struct(&au2)
-	u1, _ := s.ur.Create(au1)
-	u2, _ := s.ur.Create(au2)
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	u1, _ := s.ur.Create(au)
+	t1, _ := s.mr.CreateThread(u1.ID)
 
 	validationError := people.ValidationError
 
@@ -40,14 +39,15 @@ func (s *MessageSuite) TestReadMessage() {
 		valid   bool
 		kind    *people.ErrorKind
 	}{
-		"empty message": {people.UserMessage{Message: people.Message{Content: ""}, To: u2.Handle}, false, &validationError},
-		"valid":         {people.UserMessage{Message: people.Message{Content: gofakeit.SentenceSimple()}, To: u2.Handle}, true, nil},
+		"empty message":  {people.UserMessage{Content: "", ThreadID: t1}, false, &validationError},
+		"invalid thread": {people.UserMessage{Content: gofakeit.SentenceSimple(), ThreadID: 0}, false, &validationError},
+		"valid":          {people.UserMessage{Content: gofakeit.SentenceSimple(), ThreadID: t1}, true, nil},
 	}
 
 	for name, tc := range tests {
 		s.Run(name, func() {
 			msg, _ := json.Marshal(tc.message)
-			err := s.ms.ReadMessage(u1.ID, msg)
+			err := s.ms.ReadMessage(context.Background(), u1.ID, msg)
 			assert.Equal(s.T(), tc.valid, err == nil)
 			if !tc.valid {
 				var e *people.Error
@@ -59,53 +59,49 @@ func (s *MessageSuite) TestReadMessage() {
 	}
 }
 
-func (s *MessageSuite) TestListUserMessages() {
+func (s *MessageSuite) TestGetUsersThread() {
 	var unknownUser people.AuthUser
-	var au1 people.AuthUser
-	var au2 people.AuthUser
-	var au3 people.AuthUser
-	gofakeit.Struct(&au1)
-	gofakeit.Struct(&au2)
-	gofakeit.Struct(&au3)
+	var au people.AuthUser
 	gofakeit.Struct(&unknownUser)
-	u1, _ := s.ur.Create(au1)
-	u2, _ := s.ur.Create(au2)
-	u3, _ := s.ur.Create(au3)
-	userMessages := 5
-	var m people.Message
-	for i := 0; i < userMessages; i++ {
-		gofakeit.Struct(&m)
-		s.mr.Create(m, u1.ID, u2.ID)
-		gofakeit.Struct(&m)
-		s.mr.Create(m, u2.ID, u1.ID)
-		gofakeit.Struct(&m)
-		s.mr.Create(m, u3.ID, u1.ID)
+	gofakeit.Struct(&au)
+	u1, _ := s.ur.Create(au)
+	gofakeit.Struct(&au)
+	u2, _ := s.ur.Create(au)
 
-		gofakeit.Struct(&m)
-		s.mr.Create(m, u3.ID, u3.ID)
-	}
+	var m people.Message
+	t1, _ := s.mr.CreateThread(u1.ID, u2.ID)
+	t2, _ := s.mr.CreateThread(u1.ID)
+	gofakeit.Struct(&m)
+	s.mr.Create(t1, m.Content, u1.ID)
+	gofakeit.Struct(&m)
+	msg, _ := s.mr.Create(t1, m.Content, u2.ID)
+	t1Latest := message.IntoMessage(msg, u2)
+	gofakeit.Struct(&m)
+	s.mr.Create(t2, m.Content, u1.ID)
+	gofakeit.Struct(&m)
+	msg, _ = s.mr.Create(t2, m.Content, u1.ID)
+	t2Latest := message.IntoMessage(msg, u1)
 
 	notFoundError := people.NotFoundError
 
 	tests := map[string]struct {
-		handle   string
-		id       uint
-		messages uint
-		valid    bool
-		kind     *people.ErrorKind
+		handle string
+		latest *people.Message
+		valid  bool
+		kind   *people.ErrorKind
 	}{
-		"unknown handle": {unknownUser.Handle, u1.ID, 0, false, &notFoundError},
-		"valid":          {u2.Handle, u1.ID, 10, true, &notFoundError},
-		"valid(self)":    {u3.Handle, u3.ID, 5, true, &notFoundError},
+		"unknown handle": {unknownUser.Handle, nil, false, &notFoundError},
+		"valid":          {u2.Handle, &t1Latest, true, &notFoundError},
+		"valid(self)":    {u1.Handle, &t2Latest, true, &notFoundError},
 	}
 
 	for name, tc := range tests {
 		s.Run(name, func() {
-			ums, err := s.ms.ListUserMessages(tc.handle, tc.id, pagination.IDParams{})
+			t, err := s.ms.GetUsersThread(context.Background(), u1.ID, tc.handle)
 			assert.Equal(s.T(), tc.valid, err == nil)
 			if tc.valid {
-				assert.Equal(s.T(), tc.handle, ums.User.Handle)
-				assert.Len(s.T(), ums.Data.Data, int(tc.messages))
+				assert.Equal(s.T(), tc.latest.ThreadID, t.ID)
+				assert.Equal(s.T(), *t.Latest, *tc.latest)
 			} else {
 				var e *people.Error
 				assert.ErrorAs(s.T(), err, &e)
@@ -116,23 +112,77 @@ func (s *MessageSuite) TestListUserMessages() {
 	}
 }
 
+func (s *MessageSuite) TestListThreadMessages() {
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	u1, _ := s.ur.Create(au)
+	gofakeit.Struct(&au)
+	u2, _ := s.ur.Create(au)
+	t1, _ := s.mr.CreateThread(u1.ID, u2.ID)
+	t2, _ := s.mr.CreateThread(u1.ID)
+
+	var m people.Message
+	var messages [6]people.DBMessage
+	for i := 0; i < len(messages)/2; i++ {
+		gofakeit.Struct(&m)
+		messages[i*2], _ = s.mr.Create(t1, m.Content, u1.ID)
+		gofakeit.Struct(&m)
+		messages[i*2+1], _ = s.mr.Create(t1, m.Content, u2.ID)
+	}
+	gofakeit.Struct(&m)
+	s.mr.Create(t2, m.Content, u1.ID)
+
+	limit := uint(10)
+	res, err := s.ms.ListThreadMessages(context.Background(), t1, u1.ID, pagination.IDParams{Limit: &limit})
+	assert.NoError(s.T(), err)
+	assert.Len(s.T(), res.Data, len(messages))
+}
+
+func (s *MessageSuite) TestListThreads() {
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	u1, _ := s.ur.Create(au)
+	gofakeit.Struct(&au)
+	u2, _ := s.ur.Create(au)
+	gofakeit.Struct(&au)
+	u3, _ := s.ur.Create(au)
+	var threads [3]uint
+	threads[0], _ = s.mr.CreateThread(u1.ID)
+	threads[1], _ = s.mr.CreateThread(u1.ID, u2.ID)
+	threads[2], _ = s.mr.CreateThread(u1.ID, u2.ID, u3.ID)
+	var m people.Message
+	for _, t := range threads {
+		gofakeit.Struct(&m)
+		s.mr.Create(t, m.Content, u1.ID)
+	}
+
+	limit := uint(10)
+	actual, err := s.ms.ListThreads(context.Background(), u1.ID, pagination.IDParams{Limit: &limit})
+	assert.NoError(s.T(), err)
+	assert.Len(s.T(), actual.Data, len(threads))
+	for _, t := range actual.Data {
+		assert.Contains(s.T(), threads, t.ID)
+	}
+}
+
 func (s *MessageSuite) SetupTest() {
 	um := map[uint]people.User{}
-	mm := map[uint]people.DBMessage{}
 	fm := map[inmem.FollowKey]time.Time{}
 	lm := map[inmem.LikeKey]struct{}{}
 	pm := map[uint]people.Post{}
+	msgs := make(map[uint][]people.DBMessage)
+	threads := make(map[uint]struct{})
+	threadUsers := make(map[uint][]uint)
 	v := validator.New()
-	s.mr = inmem.NewMessageRepository(mm)
+	s.mr = inmem.NewMessageRepository(msgs, threads, threadUsers, um)
 	s.ur = inmem.NewUserRepository(um)
 	fr := inmem.NewFollowRepository(fm, um)
 	lr := inmem.NewLikeRepository(lm, pm, um)
 	ns := notification.NewService(make(chan people.Notification, 32), s.ur)
 	us := user.NewService(v, s.ur, fr, lr)
 	s.ms = message.NewService(s.mr, s.ur, ns, us)
-
 }
 
-func TestUserSuite(t *testing.T) {
+func TestMessageSuite(t *testing.T) {
 	suite.Run(t, new(MessageSuite))
 }

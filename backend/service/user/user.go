@@ -91,7 +91,7 @@ func (s *userService) Unfollow(ctx context.Context, handle string, userID uint) 
 }
 
 func (s *userService) ListFollowing(ctx context.Context, handle string, userID uint, auth bool, params pagination.HandleParams) (people.Users, error) {
-	hp := pagination.New(params.Before, params.After, params.Limit)
+	hp := pagination.New(params)
 	var p pagination.ID
 	var id uint
 	g, ctx := errgroup.WithContext(ctx)
@@ -124,7 +124,7 @@ func (s *userService) ListFollowing(ctx context.Context, handle string, userID u
 }
 
 func (s *userService) ListFollowers(ctx context.Context, handle string, userID uint, auth bool, params pagination.HandleParams) (people.Users, error) {
-	hp := pagination.New(params.Before, params.After, params.Limit)
+	hp := pagination.New(params)
 	var p pagination.ID
 	var id uint
 	g, ctx := errgroup.WithContext(ctx)
@@ -173,7 +173,7 @@ func (s *userService) ListCurrUserFollowers(ctx context.Context, userID uint, pa
 }
 
 func (s *userService) ListPostLikes(ctx context.Context, postID, userID uint, auth bool, params pagination.HandleParams) (people.Users, error) {
-	hp := pagination.New(params.Before, params.After, params.Limit)
+	hp := pagination.New(params)
 	p, err := pagination.IntoID(ctx, hp, s.ur.GetID)
 	if err != nil {
 		return people.Users{}, service.NewError(people.NotFoundError, "User not found")
@@ -198,7 +198,7 @@ func (s *userService) ListPostLikes(ctx context.Context, postID, userID uint, au
 }
 
 func (s *userService) ListMatches(ctx context.Context, query string, userID uint, auth bool, params pagination.HandleParams) (people.Users, error) {
-	hp := pagination.New(params.Before, params.After, params.Limit)
+	hp := pagination.New(params)
 	p, err := pagination.IntoID(ctx, hp, s.ur.GetID)
 	if err != nil {
 		return people.Users{}, service.NewError(people.NotFoundError, "User not found")

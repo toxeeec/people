@@ -140,6 +140,7 @@ func (r *postRepo) ListMatches(query string, p pagination.ID) ([]people.Post, er
 	return ps, nil
 }
 
+// TODO: use slices package
 func contains(s []uint, item uint) bool {
 	for _, v := range s {
 		if v == item {

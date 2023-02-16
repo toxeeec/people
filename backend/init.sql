@@ -58,10 +58,20 @@ CREATE TABLE post_image (
 	PRIMARY KEY (post_id, image_id)
 );
 
+CREATE TABLE thread (
+	thread_id SERIAL PRIMARY KEY
+);
+
 CREATE TABLE message (
 	message_id SERIAL PRIMARY KEY,
 	from_id INTEGER REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
-	to_id INTEGER REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
+	thread_id INTEGER REFERENCES thread(thread_id) ON DELETE CASCADE NOT NULL,
 	content TEXT NOT NULL,
 	sent_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE thread_user (
+	user_id INTEGER REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
+	thread_id INTEGER REFERENCES thread(thread_id) ON DELETE CASCADE NOT NULL,
+	PRIMARY KEY (user_id, thread_id)
 );

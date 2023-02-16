@@ -16,17 +16,14 @@ const (
 	ModeBeforeAfter      = ModeBefore | ModeAfter
 )
 
-type HandleParams struct {
+type Params[T any] struct {
 	Limit  *uint
-	Before *string
-	After  *string
+	Before *T
+	After  *T
 }
 
-type IDParams struct {
-	Limit  *uint
-	Before *uint
-	After  *uint
-}
+type HandleParams = Params[string]
+type IDParams = Params[uint]
 
 // TODO: Remove pointers (use math.Min and math.Max if values are missing)
 type Pagination[T any] struct {
@@ -38,17 +35,17 @@ type Pagination[T any] struct {
 type ID = Pagination[uint]
 type Handle = Pagination[string]
 
-func New[T any](before, after *T, limit *uint) Pagination[T] {
+func New[T any](params Params[T]) Pagination[T] {
 	const limitDefault, limitMax = 20, 100
 	p := Pagination[T]{Limit: limitDefault}
-	if limit != nil && *limit <= limitMax {
-		p.Limit = *limit
+	if params.Limit != nil && *params.Limit <= limitMax {
+		p.Limit = *params.Limit
 	}
-	if before != nil {
-		p.Before = before
+	if params.Before != nil {
+		p.Before = params.Before
 	}
-	if after != nil {
-		p.After = after
+	if params.After != nil {
+		p.After = params.After
 	}
 	return p
 }
@@ -67,33 +64,33 @@ func NewResults[T people.Identifier[U], U any](data []T) people.PaginatedResults
 	return res
 }
 
-type GetIDFn func(string) (uint, error)
+type GetIDFn[T any] func(T) (uint, error)
 
-func IntoID(ctx context.Context, hp Handle, getIDfn GetIDFn) (ID, error) {
-	p := ID{Limit: hp.Limit}
+func IntoID[T any](ctx context.Context, p Pagination[T], getIDfn GetIDFn[T]) (ID, error) {
+	res := ID{Limit: p.Limit}
 	g, ctx := errgroup.WithContext(ctx)
-	if hp.Before != nil {
+	if p.Before != nil {
 		g.Go(func() error {
-			id, err := getIDfn(*hp.Before)
+			id, err := getIDfn(*p.Before)
 			if err != nil {
 				return err
 			}
-			p.Before = &id
+			res.Before = &id
 			return nil
 		})
 	}
-	if hp.After != nil {
+	if p.After != nil {
 		g.Go(func() error {
-			id, err := getIDfn(*hp.After)
+			id, err := getIDfn(*p.After)
 			if err != nil {
 				return err
 			}
-			p.After = &id
+			res.After = &id
 			return nil
 		})
 	}
 	if err := g.Wait(); err != nil {
 		return ID{}, err
 	}
-	return p, nil
+	return res, nil
 }

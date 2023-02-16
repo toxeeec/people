@@ -69,8 +69,14 @@ paths:
   /images:
     $ref: './paths/images.yaml#/images'
 
-  /messages/{handle}:
-    $ref: './paths/messages.yaml#/messages'
+  /users/{handle}/thread:
+    $ref: './paths/messages.yaml#/userThread'
+
+  /threads/{threadID}:
+    $ref: './paths/messages.yaml#/thread'
+
+  /threads:
+    $ref: './paths/messages.yaml#/threads'
 
 components: 
   $ref: './components/main.yaml#/components'

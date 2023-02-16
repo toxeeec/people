@@ -182,7 +182,7 @@ components:
         - replies 
         - createdAt
 
-    # TODO: change to Post
+    # TODO: change to Posts
     PostResponse:
       properties:
         data:
@@ -270,30 +270,22 @@ components:
 
     Message:
       properties:
-        content:
-          type: string
-          x-oapi-codegen-extra-tags:
-            db: content
-            fake: '{sentence}'
-      required:
-        - content
-
-    ServerMessage:
-      properties:
-        message:
-          $ref: '#/components/schemas/Message'
         id:
           type: integer
           x-go-name: ID
           x-go-type: uint
           x-oapi-codegen-extra-tags:
             fake: skip
-        from:
+        content:
           type: string
           x-oapi-codegen-extra-tags:
-            fake: skip
-        to:
-          type: string
+            db: content
+            fake: '{sentence}'
+        from:
+          $ref: '#/components/schemas/User'
+        threadID:
+          type: integer
+          x-go-type: uint
           x-oapi-codegen-extra-tags:
             fake: skip
         sentAt:
@@ -303,32 +295,50 @@ components:
           x-oapi-codegen-extra-tags:
             fake: skip
       required:
-        - message
+        - content
         - id
         - from
-        - to
+        - threadID
         - sentAt
 
-    MessageResults:
+    Thread:
+      properties:
+        id:
+          type: integer
+          x-go-name: ID
+          x-go-type: uint
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        latest:
+          $ref: '#/components/schemas/Message'
+      required:
+        - id
+        - users
+
+    Threads:
       properties:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/ServerMessage'
+            $ref: '#/components/schemas/Thread'
         meta:
           $ref: '#/components/schemas/IDPaginationMeta'
-      x-go-type: PaginatedResults[ServerMessage, uint]
+      x-go-type: PaginatedResults[Thread, uint]
       required:
         - data
 
-    UserMessages:
+    Messages:
       properties:
-        user:
-          $ref: '#/components/schemas/User'
         data:
-          $ref: '#/components/schemas/MessageResults'
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+        meta:
+          $ref: '#/components/schemas/IDPaginationMeta'
+      x-go-type: PaginatedResults[Message, uint]
       required:
-        - user
         - data
 
     Error:

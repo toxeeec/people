@@ -9,6 +9,7 @@ func AddStatuses(us []people.User, fss map[uint]people.FollowStatus) {
 	}
 }
 
+// TODO: use people.IntoIDs instead
 func IDs(us []people.User) []uint {
 	ids := make([]uint, len(us))
 	for i, u := range us {
@@ -17,6 +18,7 @@ func IDs(us []people.User) []uint {
 	return ids
 }
 
+// TODO: use people.IntoMap instead
 func IntoMap(us []people.User) map[uint]people.User {
 	m := make(map[uint]people.User, len(us))
 	for _, v := range us {

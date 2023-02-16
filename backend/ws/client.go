@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"context"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -53,7 +54,7 @@ func (c *Client) readPump(h *Hub) {
 		msgType := gjson.Get(string(data), "type").String()
 		switch msgType {
 		case message:
-			if err := h.cs.ReadMessage(c.ID, data); err != nil {
+			if err := h.cs.ReadMessage(context.Background(), c.ID, data); err != nil {
 				c.Conn.WriteJSON(err)
 				continue
 			}

@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+// TODO: don't create slices with len for select
+
 var (
 	host     = "postgres"
 	port     = os.Getenv("POSTGRES_PORT")

@@ -36,7 +36,7 @@ func New(db *sqlx.DB, v *validator.Validate) *echo.Echo {
 	is := image.NewService(ir)
 	as := auth.NewService(ur, tr, us)
 	ps := post.NewService(v, pr, ur, fr, lr, us, is)
-	notif := make(chan people.Notification)
+	notif := make(chan people.Notification, 256)
 	ns := notification.NewService(notif, ur)
 	ms := message.NewService(mr, ur, ns, us)
 

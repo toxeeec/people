@@ -39,12 +39,6 @@ func (h *Hub) Run() {
 			if ok {
 				c.Send <- notif
 			}
-			if notif.To != notif.From {
-				c, ok = h.clients[notif.From]
-				if ok {
-					c.Send <- notif
-				}
-			}
 		}
 	}
 }

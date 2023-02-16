@@ -113,7 +113,7 @@ func (s *postService) Delete(postID, userID uint) error {
 }
 
 func (s *postService) ListUserPosts(ctx context.Context, handle string, userID uint, auth bool, params pagination.IDParams) (people.PostsResponse, error) {
-	p := pagination.New(params.Before, params.After, params.Limit)
+	p := pagination.New(params)
 	id, err := s.ur.GetID(handle)
 	if err != nil {
 		return people.PostsResponse{}, service.NewError(people.NotFoundError, "User not found")
@@ -145,7 +145,7 @@ func (s *postService) ListUserPosts(ctx context.Context, handle string, userID u
 }
 
 func (s *postService) ListFeed(ctx context.Context, userID uint, params pagination.IDParams) (people.PostsResponse, error) {
-	p := pagination.New(params.Before, params.After, params.Limit)
+	p := pagination.New(params)
 	ids, err := s.fr.ListFollowing(userID, &p)
 	if err != nil {
 		return people.PostsResponse{}, err
@@ -177,7 +177,7 @@ func (s *postService) ListFeed(ctx context.Context, userID uint, params paginati
 }
 
 func (s *postService) ListReplies(ctx context.Context, postID uint, userID uint, auth bool, params pagination.IDParams) (people.PostsResponse, error) {
-	p := pagination.New(params.Before, params.After, params.Limit)
+	p := pagination.New(params)
 	ps, err := s.pr.ListReplies(postID, p)
 	if err != nil {
 		return people.PostsResponse{}, service.NewError(people.NotFoundError, "Post not found")
@@ -185,7 +185,7 @@ func (s *postService) ListReplies(ctx context.Context, postID uint, userID uint,
 	var us []people.User
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
-		ids := UserIDs(ps)
+		ids := userIDs(ps)
 		var err error
 		us, err = s.us.ListUsersWithStatus(context.Background(), ids, userID, auth)
 		return err
@@ -230,7 +230,7 @@ func (s *postService) Unlike(postID uint, userID uint) (people.PostResponse, err
 }
 
 func (s *postService) ListUserLikes(ctx context.Context, handle string, userID uint, auth bool, params pagination.IDParams) (people.PostsResponse, error) {
-	p := pagination.New(params.Before, params.After, params.Limit)
+	p := pagination.New(params)
 	id, err := s.ur.GetID(handle)
 	if err != nil {
 		return people.PostsResponse{}, service.NewError(people.NotFoundError, "User not found")
@@ -244,7 +244,7 @@ func (s *postService) ListUserLikes(ctx context.Context, handle string, userID u
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		var err error
-		us, err = s.us.ListUsersWithStatus(ctx, UserIDs(ps), userID, auth)
+		us, err = s.us.ListUsersWithStatus(ctx, userIDs(ps), userID, auth)
 		if err != nil {
 			return err
 		}
@@ -260,7 +260,7 @@ func (s *postService) ListUserLikes(ctx context.Context, handle string, userID u
 }
 
 func (s *postService) ListMatches(ctx context.Context, query string, userID uint, auth bool, params pagination.IDParams) (people.PostsResponse, error) {
-	p := pagination.New(params.Before, params.After, params.Limit)
+	p := pagination.New(params)
 	ps, err := s.pr.ListMatches(query, p)
 	if err != nil {
 		return people.PostsResponse{}, err
@@ -269,7 +269,7 @@ func (s *postService) ListMatches(ctx context.Context, query string, userID uint
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		var err error
-		us, err = s.us.ListUsersWithStatus(ctx, UserIDs(ps), userID, auth)
+		us, err = s.us.ListUsersWithStatus(ctx, userIDs(ps), userID, auth)
 		if err != nil {
 			return err
 		}
