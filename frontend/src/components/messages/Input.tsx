@@ -8,15 +8,15 @@ import { NotificationsContext } from "../../context/NotificationsContext";
 interface InputProps {
 	message: string;
 	setMessage: Dispatch<SetStateAction<string>>;
-	to: string;
+	threadID: number;
 }
-export const Input = ({ message, setMessage, to }: InputProps) => {
+export const Input = ({ message, setMessage, threadID }: InputProps) => {
 	const { sendMessage } = useContext(NotificationsContext);
 	const [opened, setOpened] = useState(false);
 	const empty = useMemo(() => message.trim().length === 0, [message]);
 	const handleSubmit = () => {
 		if (empty) return;
-		sendMessage({ to, content: message.trim() });
+		sendMessage({ threadID, content: message.trim() });
 		setMessage("");
 	};
 
@@ -29,8 +29,9 @@ export const Input = ({ message, setMessage, to }: InputProps) => {
 
 	return (
 		<>
-			<Flex ref={ref} w="100%" align="center" mt="sm">
+			<Flex w="100%" align="flex-end" my="sm" pos="relative">
 				<Textarea
+					ref={ref}
 					autosize
 					minRows={1}
 					maxRows={5}

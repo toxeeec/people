@@ -75,7 +75,7 @@ const App = () => {
 							element: <Messages />,
 						},
 						{
-							path: "/messages/:handle",
+							path: "/messages/:thread",
 							element: <Messages />,
 						},
 						{

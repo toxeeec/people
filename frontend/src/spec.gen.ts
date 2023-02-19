@@ -40,8 +40,11 @@ import type {
 	GetPostsPostIDLikesParams,
 	ImageResponse,
 	ImageBodyBody,
-	UserMessages,
-	GetMessagesHandleParams,
+	Thread,
+	Messages,
+	GetThreadsThreadIDParams,
+	Threads,
+	GetThreadsParams,
 } from "./models";
 import { customInstance } from "./custom-instance";
 import type { ErrorType } from "./custom-instance";
@@ -1573,37 +1576,34 @@ export const usePostImages = <
 	>(mutationFn, mutationOptions);
 };
 
-export const getMessagesHandle = (
+export const getUsersHandleThread = (
 	handle: string,
-	params?: GetMessagesHandleParams,
 	options?: SecondParameter<typeof customInstance>,
 	signal?: AbortSignal
 ) => {
-	return customInstance<UserMessages>(
-		{ url: `/messages/${handle}`, method: "get", params, signal },
+	return customInstance<Thread>(
+		{ url: `/users/${handle}/thread`, method: "get", signal },
 		options
 	);
 };
 
-export const getGetMessagesHandleQueryKey = (
-	handle: string,
-	params?: GetMessagesHandleParams
-) => [`/messages/${handle}`, ...(params ? [params] : [])];
+export const getGetUsersHandleThreadQueryKey = (handle: string) => [
+	`/users/${handle}/thread`,
+];
 
-export type GetMessagesHandleQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getMessagesHandle>>
+export type GetUsersHandleThreadQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getUsersHandleThread>>
 >;
-export type GetMessagesHandleQueryError = ErrorType<Error>;
+export type GetUsersHandleThreadQueryError = ErrorType<Error>;
 
-export const useGetMessagesHandle = <
-	TData = Awaited<ReturnType<typeof getMessagesHandle>>,
+export const useGetUsersHandleThread = <
+	TData = Awaited<ReturnType<typeof getUsersHandleThread>>,
 	TError = ErrorType<Error>
 >(
 	handle: string,
-	params?: GetMessagesHandleParams,
 	options?: {
 		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getMessagesHandle>>,
+			Awaited<ReturnType<typeof getUsersHandleThread>>,
 			TError,
 			TData
 		>;
@@ -1613,14 +1613,14 @@ export const useGetMessagesHandle = <
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
 	const queryKey =
-		queryOptions?.queryKey ?? getGetMessagesHandleQueryKey(handle, params);
+		queryOptions?.queryKey ?? getGetUsersHandleThreadQueryKey(handle);
 
 	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getMessagesHandle>>
-	> = ({ signal }) => getMessagesHandle(handle, params, requestOptions, signal);
+		Awaited<ReturnType<typeof getUsersHandleThread>>
+	> = ({ signal }) => getUsersHandleThread(handle, requestOptions, signal);
 
 	const query = useQuery<
-		Awaited<ReturnType<typeof getMessagesHandle>>,
+		Awaited<ReturnType<typeof getUsersHandleThread>>,
 		TError,
 		TData
 	>(queryKey, queryFn, {
@@ -1631,6 +1631,131 @@ export const useGetMessagesHandle = <
 		retry: 1,
 		...queryOptions,
 	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+	query.queryKey = queryKey;
+
+	return query;
+};
+
+export const getThreadsThreadID = (
+	threadID: number,
+	params?: GetThreadsThreadIDParams,
+	options?: SecondParameter<typeof customInstance>,
+	signal?: AbortSignal
+) => {
+	return customInstance<Messages>(
+		{ url: `/threads/${threadID}`, method: "get", params, signal },
+		options
+	);
+};
+
+export const getGetThreadsThreadIDQueryKey = (
+	threadID: number,
+	params?: GetThreadsThreadIDParams
+) => [`/threads/${threadID}`, ...(params ? [params] : [])];
+
+export type GetThreadsThreadIDQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getThreadsThreadID>>
+>;
+export type GetThreadsThreadIDQueryError = ErrorType<Error>;
+
+export const useGetThreadsThreadID = <
+	TData = Awaited<ReturnType<typeof getThreadsThreadID>>,
+	TError = ErrorType<Error>
+>(
+	threadID: number,
+	params?: GetThreadsThreadIDParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getThreadsThreadID>>,
+			TError,
+			TData
+		>;
+		request?: SecondParameter<typeof customInstance>;
+	}
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey =
+		queryOptions?.queryKey ?? getGetThreadsThreadIDQueryKey(threadID, params);
+
+	const queryFn: QueryFunction<
+		Awaited<ReturnType<typeof getThreadsThreadID>>
+	> = ({ signal }) =>
+		getThreadsThreadID(threadID, params, requestOptions, signal);
+
+	const query = useQuery<
+		Awaited<ReturnType<typeof getThreadsThreadID>>,
+		TError,
+		TData
+	>(queryKey, queryFn, {
+		enabled: !!threadID,
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+	query.queryKey = queryKey;
+
+	return query;
+};
+
+export const getThreads = (
+	params?: GetThreadsParams,
+	options?: SecondParameter<typeof customInstance>,
+	signal?: AbortSignal
+) => {
+	return customInstance<Threads>(
+		{ url: `/threads`, method: "get", params, signal },
+		options
+	);
+};
+
+export const getGetThreadsQueryKey = (params?: GetThreadsParams) => [
+	`/threads`,
+	...(params ? [params] : []),
+];
+
+export type GetThreadsQueryResult = NonNullable<
+	Awaited<ReturnType<typeof getThreads>>
+>;
+export type GetThreadsQueryError = ErrorType<Error>;
+
+export const useGetThreads = <
+	TData = Awaited<ReturnType<typeof getThreads>>,
+	TError = ErrorType<Error>
+>(
+	params?: GetThreadsParams,
+	options?: {
+		query?: UseQueryOptions<
+			Awaited<ReturnType<typeof getThreads>>,
+			TError,
+			TData
+		>;
+		request?: SecondParameter<typeof customInstance>;
+	}
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetThreadsQueryKey(params);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getThreads>>> = ({
+		signal,
+	}) => getThreads(params, requestOptions, signal);
+
+	const query = useQuery<Awaited<ReturnType<typeof getThreads>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 

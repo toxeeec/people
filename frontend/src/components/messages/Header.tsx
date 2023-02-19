@@ -1,6 +1,6 @@
 import { User } from "../../models";
 import { Header as MantineHeader } from "@mantine/core";
-import { PostAuthor } from "../post/PostAuthor";
+import { UserInfo } from "./UserInfo";
 
 interface HeaderProps {
 	user: User;
@@ -15,7 +15,7 @@ export const Header = ({ user }: HeaderProps) => {
 			style={{ alignItems: "center" }}
 			zIndex={1}
 		>
-			{user && <PostAuthor user={user} />}
+			{user && <UserInfo user={user} />}
 		</MantineHeader>
 	);
 };

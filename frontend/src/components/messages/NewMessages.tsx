@@ -1,11 +1,11 @@
 import { useContext, useEffect, useMemo } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import { ServerMessage } from "../../context/NotificationsContext";
+import { Message as MessageType } from "../../models";
 import { Message } from "./Message";
 
 interface MessagesProps {
 	element: HTMLDivElement | null;
-	messages: ServerMessage[];
+	messages?: MessageType[];
 }
 export const NewMessages = ({ element, messages }: MessagesProps) => {
 	const { getAuth } = useContext(AuthContext);
@@ -20,13 +20,13 @@ export const NewMessages = ({ element, messages }: MessagesProps) => {
 	return (
 		<>
 			{messages
-				.slice()
+				?.slice()
 				.reverse()
 				.map((message, i) => (
 					<Message
 						key={i}
-						message={message.message}
-						own={message.from === handle}
+						message={message}
+						own={message.from.handle === handle}
 					/>
 				))}
 		</>

@@ -1,4 +1,5 @@
 import { Button } from "@mantine/core";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { User } from "../models";
 import {
@@ -11,6 +12,7 @@ interface FollowButtonProps {
 }
 
 export const FollowButton = ({ user }: FollowButtonProps) => {
+	const queryClient = useQueryClient();
 	const { mutate: follow, isLoading: isFollowLoading } =
 		usePutMeFollowingHandle({
 			mutation: { retry: 1 },
@@ -27,12 +29,12 @@ export const FollowButton = ({ user }: FollowButtonProps) => {
 		fn(
 			{ handle: user!.handle! },
 			{
-				onSuccess: (user) => {
-					// setUser(user);
+				onSuccess: () => {
+					queryClient.invalidateQueries();
 				},
 			}
 		);
-	}, [follow, unfollow, user]);
+	}, [follow, unfollow, user, queryClient]);
 
 	return (
 		<Button

@@ -44,10 +44,10 @@ export const Posts = ({ query, queryKey, enabled = true }: PostsProps) => {
 	});
 
 	useEffect(() => {
-		if (inView) {
+		if (inView && !isFetchingNextPage) {
 			fetchNextPage();
 		}
-	}, [fetchNextPage, inView]);
+	}, [fetchNextPage, inView, isFetchingNextPage]);
 
 	return (
 		<>

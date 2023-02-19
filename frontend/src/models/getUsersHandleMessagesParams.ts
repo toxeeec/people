@@ -8,7 +8,7 @@ import type { LimitParamParameter } from "./limitParamParameter";
 import type { BeforeHandleParamParameter } from "./beforeHandleParamParameter";
 import type { AfterHandleParamParameter } from "./afterHandleParamParameter";
 
-export type GetMessagesHandleParams = {
+export type GetUsersHandleMessagesParams = {
 	limit?: LimitParamParameter;
 	before?: BeforeHandleParamParameter;
 	after?: AfterHandleParamParameter;

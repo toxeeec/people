@@ -43,10 +43,10 @@ export const Users = ({ query, queryKey, enabled = true }: UsersProps) => {
 	});
 
 	useEffect(() => {
-		if (inView) {
+		if (inView && !isFetchingNextPage) {
 			fetchNextPage();
 		}
-	}, [fetchNextPage, inView]);
+	}, [fetchNextPage, inView, isFetchingNextPage]);
 
 	return (
 		<>

@@ -4,7 +4,12 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
+import type { User } from "./user";
 
 export interface Message {
+	id: number;
 	content: string;
+	from: User;
+	threadID: number;
+	sentAt: string;
 }

@@ -1,39 +1,49 @@
-import { Flex, Space } from "@mantine/core";
+import { Flex, Space, Tabs } from "@mantine/core";
 import { useRef, useState } from "react";
-import { ServerMessage } from "../../context/NotificationsContext";
-import { getMessagesHandle } from "../../spec.gen";
+import { Message, Thread } from "../../models";
+import { getThreadsThreadID } from "../../spec.gen";
 import { Input } from "./Input";
 import { NewMessages } from "./NewMessages";
 import { UserMessages, Query } from "./UserMessages";
 
 interface MessagesTabProps {
-	messages: ServerMessage[];
-	to: string;
+	thread: Thread;
+	newMessages?: Message[];
 }
 
-export const MessagesTab = ({ messages, to }: MessagesTabProps) => {
+export const MessagesTab = ({ thread, newMessages }: MessagesTabProps) => {
 	const [message, setMessage] = useState("");
 	const ref = useRef<HTMLDivElement>(null);
 
-	const messagesQuery: Query = async (params) => {
-		const u = await getMessagesHandle(to, params);
-		return u;
+	const messagesQuery: Query = (params) => {
+		return getThreadsThreadID(thread.id, params);
 	};
 
 	return (
-		<Flex direction="column" h="100%" pos="relative" justify="space-between">
+		<Tabs.Panel value={"" + thread.id}>
 			<Flex
-				ref={ref}
+				direction="column"
+				h="100%"
 				w="100%"
-				direction="column-reverse"
-				align="flex-start"
-				style={{ overflowY: "auto" }}
+				pos="relative"
+				justify="space-between"
 			>
-				<NewMessages messages={messages} element={ref.current} />
-				<UserMessages query={messagesQuery} queryKey={["messages", to]} />
-				<Space h={42} />
+				<Flex
+					ref={ref}
+					w="100%"
+					direction="column-reverse"
+					align="flex-start"
+					style={{ overflowY: "auto" }}
+				>
+					<NewMessages messages={newMessages} element={ref.current} />
+					<UserMessages
+						query={messagesQuery}
+						queryKey={["messages", thread.id]}
+					/>
+					<Space h={42} />
+				</Flex>
+				<Input message={message} setMessage={setMessage} threadID={thread.id} />
 			</Flex>
-			<Input message={message} setMessage={setMessage} to={to} />
-		</Flex>
+		</Tabs.Panel>
 	);
 };

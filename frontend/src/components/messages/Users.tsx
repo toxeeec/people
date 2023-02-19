@@ -49,10 +49,10 @@ export const Users = ({
 	});
 
 	useEffect(() => {
-		if (inView) {
+		if (inView && !isFetchingNextPage) {
 			fetchNextPage();
 		}
-	}, [fetchNextPage, inView]);
+	}, [fetchNextPage, inView, isFetchingNextPage]);
 
 	return (
 		<>
@@ -62,12 +62,7 @@ export const Users = ({
 				data?.pages.map((page, i) => (
 					<Fragment key={i}>
 						{page.data.map((user) => (
-							<User
-								key={user.handle}
-								handle={user.handle}
-								ref={ref}
-								onClick={onClick}
-							/>
+							<User key={user.handle} user={user} ref={ref} onClick={onClick} />
 						))}
 					</Fragment>
 				))

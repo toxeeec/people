@@ -7,7 +7,7 @@
 import type { Message } from "./message";
 import type { IDPaginationMeta } from "./iDPaginationMeta";
 
-export interface MessageResults {
+export interface Messages {
 	data: Message[];
 	meta?: IDPaginationMeta;
 }

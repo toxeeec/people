@@ -4,10 +4,10 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { Message } from "./message";
+import type { Thread } from "./thread";
 import type { IDPaginationMeta } from "./iDPaginationMeta";
 
-export interface MessageResults {
-	data: Message[];
+export interface Threads {
+	data: Thread[];
 	meta?: IDPaginationMeta;
 }
