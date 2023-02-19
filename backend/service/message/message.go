@@ -18,6 +18,7 @@ import (
 type Service interface {
 	ReadMessage(ctx context.Context, from uint, data []byte) error
 	GetUsersThread(ctx context.Context, userID uint, users ...string) (people.Thread, error)
+	GetThread(ctx context.Context, userID, threadID uint) (people.Thread, error)
 	ListThreadMessages(ctx context.Context, threadID uint, userID uint, params pagination.IDParams) (people.Messages, error)
 	ListThreads(ctx context.Context, userID uint, params pagination.IDParams) (people.Threads, error)
 }
@@ -119,6 +120,38 @@ func (s *messageService) GetUsersThread(ctx context.Context, userID uint, handle
 		return nil
 	})
 	if err := g.Wait(); err != nil {
+		return people.Thread{}, err
+	}
+	return thread, nil
+}
+
+func (s *messageService) GetThread(ctx context.Context, userID uint, threadID uint) (people.Thread, error) {
+	thread := people.Thread{ID: threadID}
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		var err error
+		thread.Users, err = s.getThreadUsers(threadID)
+		if err != nil {
+			return err
+		}
+		found := false
+		for _, u := range thread.Users {
+			if u.ID == userID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return service.NewError(people.AuthError, "You do not have permission to view this thread")
+		}
+		return nil
+	})
+	g.Go(func() error {
+		thread.Latest, _ = s.getLatestMessage(threadID)
+		return nil
+	})
+	if err := g.Wait(); err != nil {
+		println(err.Error())
 		return people.Thread{}, err
 	}
 	return thread, nil
@@ -241,25 +274,6 @@ func (s *messageService) ListThreads(ctx context.Context, userID uint, params pa
 		}
 	}
 	return pagination.NewResults[people.Thread, uint](threads), nil
-}
-
-func (s *messageService) getThread(ctx context.Context, threadID uint) (people.Thread, error) {
-	thread := people.Thread{ID: threadID}
-	g, ctx := errgroup.WithContext(ctx)
-	g.Go(func() error {
-		var err error
-		thread.Users, err = s.getThreadUsers(threadID)
-		return err
-	})
-	g.Go(func() error {
-		var err error
-		thread.Latest, err = s.getLatestMessage(threadID)
-		return err
-	})
-	if err := g.Wait(); err != nil {
-		return people.Thread{}, err
-	}
-	return thread, nil
 }
 
 func (s *messageService) getThreadUsers(threadID uint) ([]people.User, error) {

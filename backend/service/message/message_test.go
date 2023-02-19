@@ -59,6 +59,46 @@ func (s *MessageSuite) TestReadMessage() {
 	}
 }
 
+func (s *MessageSuite) TestGetThread() {
+	var unknownUser people.AuthUser
+	var au people.AuthUser
+	gofakeit.Struct(&unknownUser)
+	gofakeit.Struct(&au)
+	u1, _ := s.ur.Create(au)
+	gofakeit.Struct(&au)
+	u2, _ := s.ur.Create(au)
+
+	t1, _ := s.mr.CreateThread(u1.ID)
+	t2, _ := s.mr.CreateThread(u2.ID)
+
+	authError := people.AuthError
+	notFoundError := people.NotFoundError
+
+	tests := map[string]struct {
+		threadID uint
+		valid    bool
+		kind     *people.ErrorKind
+	}{
+		"no permission": {t2, false, &authError},
+		"valid":         {t1, true, &notFoundError},
+	}
+
+	for name, tc := range tests {
+		s.Run(name, func() {
+			t, err := s.ms.GetThread(context.Background(), u1.ID, tc.threadID)
+			assert.Equal(s.T(), tc.valid, err == nil)
+			if tc.valid {
+				assert.Equal(s.T(), tc.threadID, t.ID)
+			} else {
+				var e *people.Error
+				assert.ErrorAs(s.T(), err, &e)
+				assert.Equal(s.T(), *tc.kind, *e.Kind)
+			}
+
+		})
+	}
+}
+
 func (s *MessageSuite) TestGetUsersThread() {
 	var unknownUser people.AuthUser
 	var au people.AuthUser

@@ -244,8 +244,8 @@ type GetThreadsParams struct {
 	After  *AfterParam  `form:"after,omitempty" json:"after,omitempty"`
 }
 
-// GetThreadsThreadIDParams defines parameters for GetThreadsThreadID.
-type GetThreadsThreadIDParams struct {
+// GetThreadsThreadIDMessagesParams defines parameters for GetThreadsThreadIDMessages.
+type GetThreadsThreadIDMessagesParams struct {
 	Limit  *LimitParam  `form:"limit,omitempty" json:"limit,omitempty"`
 	Before *BeforeParam `form:"before,omitempty" json:"before,omitempty"`
 	After  *AfterParam  `form:"after,omitempty" json:"after,omitempty"`

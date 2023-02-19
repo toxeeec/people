@@ -75,6 +75,9 @@ paths:
   /threads/{threadID}:
     $ref: './paths/messages.yaml#/thread'
 
+  /threads/{threadID}/messages:
+    $ref: './paths/messages.yaml#/threadMessages'
+
   /threads:
     $ref: './paths/messages.yaml#/threads'
 

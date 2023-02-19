@@ -91,7 +91,10 @@ type ServerInterface interface {
 	GetThreads(ctx echo.Context, params GetThreadsParams) error
 
 	// (GET /threads/{threadID})
-	GetThreadsThreadID(ctx echo.Context, threadID ThreadIDParam, params GetThreadsThreadIDParams) error
+	GetThreadsThreadID(ctx echo.Context, threadID ThreadIDParam) error
+
+	// (GET /threads/{threadID}/messages)
+	GetThreadsThreadIDMessages(ctx echo.Context, threadID ThreadIDParam, params GetThreadsThreadIDMessagesParams) error
 
 	// (GET /users/search)
 	GetUsersSearch(ctx echo.Context, params GetUsersSearchParams) error
@@ -598,8 +601,26 @@ func (w *ServerInterfaceWrapper) GetThreadsThreadID(ctx echo.Context) error {
 
 	ctx.Set(BearerAuthScopes, []string{""})
 
+	// Invoke the callback with all the unmarshalled arguments
+	err = w.Handler.GetThreadsThreadID(ctx, threadID)
+	return err
+}
+
+// GetThreadsThreadIDMessages converts echo context to params.
+func (w *ServerInterfaceWrapper) GetThreadsThreadIDMessages(ctx echo.Context) error {
+	var err error
+	// ------------- Path parameter "threadID" -------------
+	var threadID ThreadIDParam
+
+	err = runtime.BindStyledParameterWithLocation("simple", false, "threadID", runtime.ParamLocationPath, ctx.Param("threadID"), &threadID)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Invalid format for parameter threadID: %s", err))
+	}
+
+	ctx.Set(BearerAuthScopes, []string{""})
+
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetThreadsThreadIDParams
+	var params GetThreadsThreadIDMessagesParams
 	// ------------- Optional query parameter "limit" -------------
 
 	err = runtime.BindQueryParameter("form", true, false, "limit", ctx.QueryParams(), &params.Limit)
@@ -622,7 +643,7 @@ func (w *ServerInterfaceWrapper) GetThreadsThreadID(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.GetThreadsThreadID(ctx, threadID, params)
+	err = w.Handler.GetThreadsThreadIDMessages(ctx, threadID, params)
 	return err
 }
 
@@ -918,6 +939,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 	router.POST(baseURL+"/register", wrapper.PostRegister)
 	router.GET(baseURL+"/threads", wrapper.GetThreads)
 	router.GET(baseURL+"/threads/:threadID", wrapper.GetThreadsThreadID)
+	router.GET(baseURL+"/threads/:threadID/messages", wrapper.GetThreadsThreadIDMessages)
 	router.GET(baseURL+"/users/search", wrapper.GetUsersSearch)
 	router.GET(baseURL+"/users/:handle", wrapper.GetUsersHandle)
 	router.GET(baseURL+"/users/:handle/followers", wrapper.GetUsersHandleFollowers)
@@ -1502,14 +1524,13 @@ func (response GetThreads404JSONResponse) VisitGetThreadsResponse(w http.Respons
 
 type GetThreadsThreadIDRequestObject struct {
 	ThreadID ThreadIDParam `json:"threadID"`
-	Params   GetThreadsThreadIDParams
 }
 
 type GetThreadsThreadIDResponseObject interface {
 	VisitGetThreadsThreadIDResponse(w http.ResponseWriter) error
 }
 
-type GetThreadsThreadID200JSONResponse Messages
+type GetThreadsThreadID200JSONResponse Thread
 
 func (response GetThreadsThreadID200JSONResponse) VisitGetThreadsThreadIDResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -1530,6 +1551,42 @@ func (response GetThreadsThreadID403JSONResponse) VisitGetThreadsThreadIDRespons
 type GetThreadsThreadID404JSONResponse Error
 
 func (response GetThreadsThreadID404JSONResponse) VisitGetThreadsThreadIDResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(404)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetThreadsThreadIDMessagesRequestObject struct {
+	ThreadID ThreadIDParam `json:"threadID"`
+	Params   GetThreadsThreadIDMessagesParams
+}
+
+type GetThreadsThreadIDMessagesResponseObject interface {
+	VisitGetThreadsThreadIDMessagesResponse(w http.ResponseWriter) error
+}
+
+type GetThreadsThreadIDMessages200JSONResponse Messages
+
+func (response GetThreadsThreadIDMessages200JSONResponse) VisitGetThreadsThreadIDMessagesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetThreadsThreadIDMessages403JSONResponse Error
+
+func (response GetThreadsThreadIDMessages403JSONResponse) VisitGetThreadsThreadIDMessagesResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(403)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetThreadsThreadIDMessages404JSONResponse Error
+
+func (response GetThreadsThreadIDMessages404JSONResponse) VisitGetThreadsThreadIDMessagesResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(404)
 
@@ -1784,6 +1841,9 @@ type StrictServerInterface interface {
 
 	// (GET /threads/{threadID})
 	GetThreadsThreadID(ctx context.Context, request GetThreadsThreadIDRequestObject) (GetThreadsThreadIDResponseObject, error)
+
+	// (GET /threads/{threadID}/messages)
+	GetThreadsThreadIDMessages(ctx context.Context, request GetThreadsThreadIDMessagesRequestObject) (GetThreadsThreadIDMessagesResponseObject, error)
 
 	// (GET /users/search)
 	GetUsersSearch(ctx context.Context, request GetUsersSearchRequestObject) (GetUsersSearchResponseObject, error)
@@ -2411,11 +2471,10 @@ func (sh *strictHandler) GetThreads(ctx echo.Context, params GetThreadsParams) e
 }
 
 // GetThreadsThreadID operation middleware
-func (sh *strictHandler) GetThreadsThreadID(ctx echo.Context, threadID ThreadIDParam, params GetThreadsThreadIDParams) error {
+func (sh *strictHandler) GetThreadsThreadID(ctx echo.Context, threadID ThreadIDParam) error {
 	var request GetThreadsThreadIDRequestObject
 
 	request.ThreadID = threadID
-	request.Params = params
 
 	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
 		return sh.ssi.GetThreadsThreadID(ctx.Request().Context(), request.(GetThreadsThreadIDRequestObject))
@@ -2430,6 +2489,32 @@ func (sh *strictHandler) GetThreadsThreadID(ctx echo.Context, threadID ThreadIDP
 		return err
 	} else if validResponse, ok := response.(GetThreadsThreadIDResponseObject); ok {
 		return validResponse.VisitGetThreadsThreadIDResponse(ctx.Response())
+	} else if response != nil {
+		return fmt.Errorf("Unexpected response type: %T", response)
+	}
+	return nil
+}
+
+// GetThreadsThreadIDMessages operation middleware
+func (sh *strictHandler) GetThreadsThreadIDMessages(ctx echo.Context, threadID ThreadIDParam, params GetThreadsThreadIDMessagesParams) error {
+	var request GetThreadsThreadIDMessagesRequestObject
+
+	request.ThreadID = threadID
+	request.Params = params
+
+	handler := func(ctx echo.Context, request interface{}) (interface{}, error) {
+		return sh.ssi.GetThreadsThreadIDMessages(ctx.Request().Context(), request.(GetThreadsThreadIDMessagesRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "GetThreadsThreadIDMessages")
+	}
+
+	response, err := handler(ctx, request)
+
+	if err != nil {
+		return err
+	} else if validResponse, ok := response.(GetThreadsThreadIDMessagesResponseObject); ok {
+		return validResponse.VisitGetThreadsThreadIDMessagesResponse(ctx.Response())
 	} else if response != nil {
 		return fmt.Errorf("Unexpected response type: %T", response)
 	}
@@ -2619,43 +2704,43 @@ func (sh *strictHandler) GetUsersHandleThread(ctx echo.Context, handle HandlePar
 var swaggerSpec = []string{
 
 	"H4sIAAAAAAAC/+xbX2/bOBL/KgbvHuna2e0CPb+lu5drbpNukOZwD4FRMNbY5kYStSTVNAj03RckRYmy",
-	"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",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

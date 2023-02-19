@@ -31,6 +31,34 @@ thread:
       - bearerAuth: []
     parameters:
       - $ref: '#/components/parameters/threadIDParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Thread'
+      403:
+        description: Forbidden
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      404:
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+threadMessages:
+  get:
+    tags:
+      - messages
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/threadIDParam'
       - $ref: '#/components/parameters/limitParam'
       - $ref: '#/components/parameters/beforeParam'
       - $ref: '#/components/parameters/afterParam'
