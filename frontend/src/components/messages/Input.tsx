@@ -68,6 +68,7 @@ export const Input = ({ message, setMessage, threadID }: InputProps) => {
 				</ActionIcon>
 				<ActionIcon
 					m={4}
+					mb={8}
 					onClick={handleSubmit}
 					disabled={empty}
 					style={{ background: "none", border: "none" }}

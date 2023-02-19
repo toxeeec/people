@@ -21,9 +21,10 @@ export const SearchUsers = forwardRef<HTMLDivElement, SearchUsersProps>(
 			<Container
 				ref={ref}
 				p={0}
-				w="100%"
 				hidden={hidden}
-				mih="calc(100% - 60px)"
+				w="100%"
+				h="100%"
+				style={{ overflowY: "auto" }}
 			>
 				<Users
 					queryKey={["users", debounced, "messages"]}

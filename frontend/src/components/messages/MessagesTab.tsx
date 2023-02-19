@@ -1,7 +1,9 @@
 import { Flex, Space, Tabs } from "@mantine/core";
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
+import { AuthContext } from "../../context/AuthContext";
 import { Message, Thread } from "../../models";
-import { getThreadsThreadID } from "../../spec.gen";
+import { getThreadsThreadIDMessages } from "../../spec.gen";
+import { Header } from "./Header";
 import { Input } from "./Input";
 import { NewMessages } from "./NewMessages";
 import { UserMessages, Query } from "./UserMessages";
@@ -14,10 +16,15 @@ interface MessagesTabProps {
 export const MessagesTab = ({ thread, newMessages }: MessagesTabProps) => {
 	const [message, setMessage] = useState("");
 	const ref = useRef<HTMLDivElement>(null);
-
 	const messagesQuery: Query = (params) => {
-		return getThreadsThreadID(thread.id, params);
+		return getThreadsThreadIDMessages(thread.id, params);
 	};
+	const { getAuth } = useContext(AuthContext);
+	const { handle } = getAuth();
+	const user =
+		thread.users.length > 1
+			? thread.users.filter((u) => u.handle !== handle)[0]
+			: thread.users[0];
 
 	return (
 		<Tabs.Panel value={"" + thread.id}>
@@ -40,6 +47,7 @@ export const MessagesTab = ({ thread, newMessages }: MessagesTabProps) => {
 						query={messagesQuery}
 						queryKey={["messages", thread.id]}
 					/>
+					<Header user={user} />
 					<Space h={42} />
 				</Flex>
 				<Input message={message} setMessage={setMessage} threadID={thread.id} />

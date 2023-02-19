@@ -49,8 +49,10 @@ export const createResponseInterceptor = (
 		(res) => {
 			return res;
 		},
-		(err: AxiosError) => {
-			if (err.response?.status === 403 && err.config?.url !== "/refresh") {
+		(error: AxiosError) => {
+			if (error.response?.status === 403 && error.config?.url !== "/refresh") {
+				const err = (error as ErrorType<Error>).response?.data.message;
+				if (!err?.includes("token")) return;
 				const { refreshToken } = getAuth();
 				if (refreshToken) {
 					postRefresh({ refreshToken: refreshToken })
@@ -64,7 +66,7 @@ export const createResponseInterceptor = (
 					clearAuth();
 				}
 			}
-			return Promise.reject(err);
+			return Promise.reject(error);
 		}
 	);
 };

@@ -3,19 +3,23 @@ import { Header as MantineHeader } from "@mantine/core";
 import { UserInfo } from "./UserInfo";
 
 interface HeaderProps {
-	user: User;
+	user?: User;
 }
 
 export const Header = ({ user }: HeaderProps) => {
 	return (
-		<MantineHeader
-			height={42}
-			pos="absolute"
-			display="flex"
-			style={{ alignItems: "center" }}
-			zIndex={1}
-		>
-			{user && <UserInfo user={user} />}
-		</MantineHeader>
+		<>
+			{user && (
+				<MantineHeader
+					height={42}
+					pos="absolute"
+					display="flex"
+					style={{ alignItems: "center" }}
+					zIndex={1}
+				>
+					{user && <UserInfo user={user} />}
+				</MantineHeader>
+			)}
+		</>
 	);
 };

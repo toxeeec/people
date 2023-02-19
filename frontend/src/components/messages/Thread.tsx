@@ -1,4 +1,5 @@
 import { Avatar, Flex, Stack, Text } from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import { forwardRef, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { Thread as ThreadType } from "../../models";
@@ -17,6 +18,7 @@ export const Thread = forwardRef<HTMLDivElement, ThreadProps>(
 				: thread.users[0];
 		const prefix = thread.latest?.from.handle === handle ? "You: " : "";
 		const content = thread.latest?.content;
+		const matches = useMediaQuery("(min-width: 900px)");
 		return (
 			<Flex w="100%" align="center" ref={ref}>
 				<Avatar radius="xl" size="lg" mr="sm" />

@@ -29,6 +29,7 @@ export * from "./getPostsPostIDLikesParams";
 export * from "./getPostsPostIDRepliesParams";
 export * from "./getPostsSearchParams";
 export * from "./getThreadsParams";
+export * from "./getThreadsThreadIDMessagesParams";
 export * from "./getThreadsThreadIDParams";
 export * from "./getUsersHandleFollowersParams";
 export * from "./getUsersHandleFollowingParams";

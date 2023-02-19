@@ -5,7 +5,6 @@ import { useInView } from "react-intersection-observer";
 import { CenterLoader } from "../../components/CenterLoader";
 import { Message } from "./Message";
 import { AuthContext } from "../../context/AuthContext";
-import { Header } from "./Header";
 
 const queryLimit = 20;
 
