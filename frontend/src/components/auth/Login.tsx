@@ -21,7 +21,7 @@ export const Login = ({
 		initialValues: { handle: "", password: "" },
 		validate: {
 			handle: (value) =>
-				value.length < 5 || value.length > 15 ? "Invalid Handle" : null,
+				value.length < 5 || value.length > 15 ? "Invalid Username" : null,
 			password: (value) => (value.length < 8 ? "Invalid Password" : null),
 		},
 	});

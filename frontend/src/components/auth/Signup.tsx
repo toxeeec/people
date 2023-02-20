@@ -22,9 +22,9 @@ export const Signup = ({
 		validate: {
 			handle: (value) =>
 				value.length < 5
-					? "Handle must have at least 5 characters"
+					? "Username must have at least 5 characters"
 					: value.length > 15
-					? "Handle cannot have more than 15 characters"
+					? "Username cannot have more than 15 characters"
 					: null,
 			password: (value) =>
 				value.length < 8 ? "Password must have at least 8 characters" : null,

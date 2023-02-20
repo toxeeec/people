@@ -39,13 +39,16 @@ export const AuthModal = ({
 			centered
 			title={title}
 			opened={opened}
-			onClose={() => setOpened(false)}
+			onClose={() => {
+				form.reset();
+				setOpened(false);
+			}}
 		>
 			<LoadingOverlay visible={isLoading} />
 			<form onSubmit={form.onSubmit(handleSubmit)}>
 				<TextInput
 					withAsterisk
-					label="Handle"
+					label="Username"
 					{...form.getInputProps("handle")}
 					mb="md"
 				/>

@@ -1,4 +1,4 @@
-import { UseFormReturnType } from "@mantine/form";
+import { FormErrors, UseFormReturnType } from "@mantine/form";
 import { UseMutateFunction } from "@tanstack/react-query";
 import { Dispatch, SetStateAction } from "react";
 import { SetAuthProps } from "../../context/AuthContext";
@@ -27,14 +27,17 @@ export const handleSubmit = (
 					setOpened(false);
 				},
 				onError: (error) => {
-					const err = error.response?.data.message;
-					if (err?.startsWith("Handle")) {
-						form.setErrors({ handle: err });
-					} else if (err?.startsWith("Password")) {
-						form.setErrors({ password: err });
-					} else {
-						form.setErrors({ handle: err, password: err });
+					const err = error.response?.data.message
+						.replaceAll("Handle", "Username")
+						.replaceAll("handle", "username");
+					const errors: SetStateAction<FormErrors> = {};
+					if (err?.toLowerCase().includes("username")) {
+						errors.handle = err;
 					}
+					if (err?.toLowerCase().includes("password")) {
+						errors.password = err;
+					}
+					form.setErrors(errors);
 				},
 			}
 		);
