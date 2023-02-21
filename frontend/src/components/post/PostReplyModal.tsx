@@ -1,7 +1,8 @@
-import { Avatar, Group, Modal, Text } from "@mantine/core";
+import { Group, Modal, Text } from "@mantine/core";
 import { useFocusTrap } from "@mantine/hooks";
 import { Dispatch, SetStateAction } from "react";
-import { Post } from "../../models";
+import { Avatar } from "../../Avatar";
+import { Post, User } from "../../models";
 import { postPostsPostIDReplies } from "../../spec.gen";
 import { MutationFn, CreatePost } from "./CreatePost";
 
@@ -9,14 +10,14 @@ interface PostReplyModalProps {
 	opened: boolean;
 	setOpened: Dispatch<SetStateAction<boolean>>;
 	post: Post;
-	handle: string;
+	user: User;
 }
 
 export const PostReplyModal = ({
 	opened,
 	setOpened,
 	post,
-	handle,
+	user,
 }: PostReplyModalProps) => {
 	const mutationFn: MutationFn = (newPost) => {
 		return postPostsPostIDReplies(post.id, newPost);
@@ -30,8 +31,8 @@ export const PostReplyModal = ({
 			}}
 			title={
 				<Group align="center">
-					<Avatar radius="xl" size="md" />
-					<Text weight="bold">{handle}</Text>
+					<Avatar user={user} size="md" />
+					<Text weight="bold">{user.handle}</Text>
 				</Group>
 			}
 			centered

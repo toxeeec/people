@@ -33,7 +33,7 @@ export const MainPost = forwardRef<HTMLDivElement, MainPostProps>(
 				</Group>
 				<Text my="xs">{post.content}</Text>
 				<Images images={post.images} />
-				<MainPostActions post={post} handle={user.handle} />
+				<MainPostActions post={post} user={user} />
 			</Paper>
 		);
 	}

@@ -1,6 +1,7 @@
-import { Avatar, Flex, Stack, Text } from "@mantine/core";
+import { Flex, Stack, Text } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { forwardRef, useContext } from "react";
+import { Avatar } from "../../Avatar";
 import { AuthContext } from "../../context/AuthContext";
 import { Thread as ThreadType } from "../../models";
 
@@ -21,7 +22,7 @@ export const Thread = forwardRef<HTMLDivElement, ThreadProps>(
 		const matches = useMediaQuery("(min-width: 900px)");
 		return (
 			<Flex w="100%" align="center" ref={ref}>
-				<Avatar radius="xl" size="lg" mr="sm" />
+				<Avatar size="lg" mr="sm" user={user} />
 				<Stack w="100%" spacing={0} style={{ overflow: "hidden" }}>
 					<Text weight="bold">{user.handle}</Text>
 					<Text

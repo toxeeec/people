@@ -1,10 +1,11 @@
-import { Avatar, Group, Stack, Text } from "@mantine/core";
+import { Group, Stack, Text } from "@mantine/core";
 import { Link, useNavigate } from "react-router-dom";
 import { UserHoverCard } from "./UserHoverCard";
 import { forwardRef, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { FollowButton } from "./FollowButton";
 import { User as UserType } from "../models";
+import { Avatar } from "../Avatar";
 
 interface UserProps {
 	user: UserType;
@@ -28,12 +29,9 @@ export const User = forwardRef<HTMLDivElement, UserProps>(({ user }, ref) => {
 			>
 				<Group align="stretch">
 					<UserHoverCard user={user}>
-						<Avatar
-							radius="xl"
-							size="lg"
-							component={Link}
-							to={`/${user.handle}`}
-						/>
+						<Link to={`/${user.handle}`}>
+							<Avatar size="lg" user={user} />
+						</Link>
 					</UserHoverCard>
 					<Stack>
 						<UserHoverCard user={user}>

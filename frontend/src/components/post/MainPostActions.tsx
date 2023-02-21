@@ -8,7 +8,7 @@ import {
 import { IconHeart, IconMessageCircle2 } from "@tabler/icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
-import { Post } from "../../models";
+import { Post, User } from "../../models";
 import {
 	useDeletePostsPostIDLikes,
 	usePutPostsPostIDLikes,
@@ -18,10 +18,10 @@ import { PostReplyModal } from "./PostReplyModal";
 
 interface MainPostActionsProps {
 	post: Post;
-	handle: string;
+	user: User;
 }
 
-export const MainPostActions = ({ post, handle }: MainPostActionsProps) => {
+export const MainPostActions = ({ post, user }: MainPostActionsProps) => {
 	const queryClient = useQueryClient();
 	const [likesOpened, setLikesOpened] = useState(false);
 	const [replyOpened, setReplyOpened] = useState(false);
@@ -76,7 +76,7 @@ export const MainPostActions = ({ post, handle }: MainPostActionsProps) => {
 				opened={replyOpened}
 				setOpened={setReplyOpened}
 				post={post}
-				handle={handle}
+				user={user}
 			/>
 		</>
 	);

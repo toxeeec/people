@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, Dispatch, SetStateAction, useState } from "react";
 import { Tokens } from "../models";
 
 export interface AuthValues {
@@ -17,6 +17,8 @@ interface AuthContextType {
 	setAuth: (props: SetAuthProps) => void;
 	clearAuth: () => void;
 	isAuthenticated: boolean;
+	isNewAccount: boolean;
+	setIsNewAccount: Dispatch<SetStateAction<boolean>>;
 }
 
 export const AuthContext = createContext<AuthContextType>(null!);
@@ -59,9 +61,18 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 		setIsAuthenticated(false);
 	};
 
+	const [isNewAccount, setIsNewAccount] = useState(false);
+
 	return (
 		<AuthContext.Provider
-			value={{ getAuth, setAuth, clearAuth, isAuthenticated }}
+			value={{
+				getAuth,
+				setAuth,
+				clearAuth,
+				isAuthenticated,
+				isNewAccount,
+				setIsNewAccount,
+			}}
 		>
 			{children}
 		</AuthContext.Provider>

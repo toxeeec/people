@@ -16,15 +16,17 @@ export const handleSubmit = (
 	>,
 	setOpened: Dispatch<SetStateAction<boolean>>,
 	setAuth: (props: SetAuthProps) => void,
-	form: UseFormReturnType<AuthUser, (values: AuthUser) => AuthUser>
+	form: UseFormReturnType<AuthUser, (values: AuthUser) => AuthUser>,
+	onSuccess?: () => void
 ) => {
 	return (user: AuthUser) => {
 		mutate(
 			{ data: user },
 			{
 				onSuccess: (res) => {
-					setAuth({ tokens: res.tokens, handle: res.user.handle });
+					onSuccess?.();
 					setOpened(false);
+					setAuth({ tokens: res.tokens, handle: res.user.handle });
 				},
 				onError: (error) => {
 					const err = error.response?.data.message

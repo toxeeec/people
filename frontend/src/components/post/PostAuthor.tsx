@@ -1,5 +1,6 @@
-import { Avatar, Group, Text } from "@mantine/core";
+import { Group, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
+import { Avatar } from "../../Avatar";
 import { User } from "../../models";
 import { UserHoverCard } from "../UserHoverCard";
 
@@ -12,12 +13,9 @@ export const PostAuthor = ({ user }: PostAuthorProps) => {
 		<Group align="center">
 			<UserHoverCard user={user}>
 				<Group>
-					<Avatar
-						radius="xl"
-						size="md"
-						component={Link}
-						to={`/${user.handle}`}
-					/>
+					<Link to={`/${user.handle}`}>
+						<Avatar user={user} size="md" />
+					</Link>
 					<Text component={Link} to={`/${user.handle}`} weight="bold">
 						{user.handle}
 					</Text>

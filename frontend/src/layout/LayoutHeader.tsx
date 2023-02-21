@@ -1,14 +1,8 @@
-import {
-	Avatar,
-	Header,
-	Space,
-	Group,
-	Text,
-	UnstyledButton,
-} from "@mantine/core";
+import { Header, Space, Group, Text, UnstyledButton } from "@mantine/core";
 import { useWindowScroll } from "@mantine/hooks";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router";
+import { Avatar } from "../Avatar";
 import { User } from "../models";
 import { LayoutDrawer } from "./LayoutDrawer";
 import { LayoutGoBack } from "./LayoutGoBack";
@@ -59,7 +53,7 @@ export const LayoutHeader = ({ user, isAuthenticated }: LayoutHeaderProps) => {
 					<Group>
 						{isHome && isAuthenticated ? (
 							<UnstyledButton onClick={() => setOpened(true)}>
-								<Avatar radius="xl" onClick={() => setOpened(true)} />
+								<Avatar user={user} onClick={() => setOpened(true)} />
 							</UnstyledButton>
 						) : (
 							<LayoutGoBack />

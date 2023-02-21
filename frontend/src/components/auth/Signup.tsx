@@ -1,5 +1,6 @@
+import { Modal } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Dispatch, SetStateAction, useContext } from "react";
+import { Dispatch, SetStateAction, useContext, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { AuthUser } from "../../models";
 import { usePostRegister } from "../../spec.gen";
@@ -30,24 +31,33 @@ export const Signup = ({
 				value.length < 8 ? "Password must have at least 8 characters" : null,
 		},
 	});
-	const { setAuth } = useContext(AuthContext);
+	const { setAuth, setIsNewAccount } = useContext(AuthContext);
 	const { mutate, isLoading } = usePostRegister();
 	const handleLogin = () => {
 		setSignupOpened(false);
 		setLoginOpened(true);
 	};
+	const [imagePickerOpened, setImagePickerOpened] = useState(false);
 
 	return (
-		<AuthModal
-			title="Sign up"
-			opened={signupOpened}
-			setOpened={setSignupOpened}
-			isLoading={isLoading}
-			form={form}
-			handleSubmit={handleSubmit(mutate, setLoginOpened, setAuth, form)}
-			text="Already have an account? "
-			handleChange={handleLogin}
-			buttonText="Log in"
-		/>
+		<>
+			<AuthModal
+				title="Sign up"
+				opened={signupOpened}
+				setOpened={setSignupOpened}
+				isLoading={isLoading}
+				form={form}
+				handleSubmit={handleSubmit(mutate, setLoginOpened, setAuth, form, () =>
+					setIsNewAccount(true)
+				)}
+				text="Already have an account? "
+				handleChange={handleLogin}
+				buttonText="Log in"
+			/>
+			<Modal
+				opened={imagePickerOpened}
+				onClose={() => setImagePickerOpened(false)}
+			/>
+		</>
 	);
 };

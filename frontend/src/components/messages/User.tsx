@@ -1,5 +1,6 @@
-import { Avatar, Group, Text } from "@mantine/core";
+import { Group, Text } from "@mantine/core";
 import { forwardRef } from "react";
+import { Avatar } from "../../Avatar";
 import { User as UserType } from "../../models";
 
 interface UserProps {
@@ -17,7 +18,7 @@ export const User = forwardRef<HTMLDivElement, UserProps>(
 				p="md"
 				style={{ cursor: "pointer" }}
 			>
-				<Avatar radius="xl" size="lg" />
+				<Avatar user={user} size="lg" />
 				<Text weight="bold">@{user.handle}</Text>
 			</Group>
 		);

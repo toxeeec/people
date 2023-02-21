@@ -21,7 +21,7 @@ import type {
 	RefreshTokenBodyBody,
 	LogoutBodyBody,
 	User,
-	Handle,
+	UpdatedUser,
 	DeleteMeBody,
 	PostsResponse,
 	GetMeFeedParams,
@@ -266,7 +266,7 @@ export const usePostLogout = <
 };
 
 export const putMe = (
-	handle: Handle,
+	updatedUser: UpdatedUser,
 	options?: SecondParameter<typeof customInstance>
 ) => {
 	return customInstance<User>(
@@ -274,7 +274,7 @@ export const putMe = (
 			url: `/me`,
 			method: "put",
 			headers: { "Content-Type": "application/json" },
-			data: handle,
+			data: updatedUser,
 		},
 		options
 	);
@@ -283,7 +283,7 @@ export const putMe = (
 export type PutMeMutationResult = NonNullable<
 	Awaited<ReturnType<typeof putMe>>
 >;
-export type PutMeMutationBody = Handle;
+export type PutMeMutationBody = UpdatedUser;
 export type PutMeMutationError = ErrorType<Error>;
 
 export const usePutMe = <
@@ -293,7 +293,7 @@ export const usePutMe = <
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof putMe>>,
 		TError,
-		{ data: Handle },
+		{ data: UpdatedUser },
 		TContext
 	>;
 	request?: SecondParameter<typeof customInstance>;
@@ -302,7 +302,7 @@ export const usePutMe = <
 
 	const mutationFn: MutationFunction<
 		Awaited<ReturnType<typeof putMe>>,
-		{ data: Handle }
+		{ data: UpdatedUser }
 	> = (props) => {
 		const { data } = props ?? {};
 
@@ -312,7 +312,7 @@ export const usePutMe = <
 	return useMutation<
 		Awaited<ReturnType<typeof putMe>>,
 		TError,
-		{ data: Handle },
+		{ data: UpdatedUser },
 		TContext
 	>(mutationFn, mutationOptions);
 };

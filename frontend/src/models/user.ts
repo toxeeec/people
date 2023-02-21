@@ -11,5 +11,6 @@ export interface User {
 	handle: string;
 	following: number;
 	followers: number;
+	image?: string;
 	status?: FollowStatus;
 }

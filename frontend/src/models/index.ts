@@ -89,6 +89,7 @@ export * from "./tokensBodyBody";
 export * from "./tokensResponse";
 export * from "./tokensResponseResponse";
 export * from "./unauthorizedResponse";
+export * from "./updatedUser";
 export * from "./user";
 export * from "./userAllOf";
 export * from "./userMessages";

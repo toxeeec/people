@@ -2,7 +2,7 @@ import { ActionIcon, Group, Text } from "@mantine/core";
 import { IconHeart, IconMessageCircle2 } from "@tabler/icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
-import { Post } from "../../models";
+import { Post, User } from "../../models";
 import {
 	useDeletePostsPostIDLikes,
 	usePutPostsPostIDLikes,
@@ -11,10 +11,10 @@ import { PostReplyModal } from "./PostReplyModal";
 
 interface PostActionsProps {
 	post: Post;
-	handle: string;
+	user: User;
 }
 
-export const PostActions = ({ post, handle }: PostActionsProps) => {
+export const PostActions = ({ post, user }: PostActionsProps) => {
 	const queryClient = useQueryClient();
 	const { mutate: like } = usePutPostsPostIDLikes({
 		mutation: { retry: 1 },
@@ -56,7 +56,7 @@ export const PostActions = ({ post, handle }: PostActionsProps) => {
 				post={post}
 				opened={opened}
 				setOpened={setOpened}
-				handle={handle}
+				user={user}
 			/>
 		</Group>
 	);

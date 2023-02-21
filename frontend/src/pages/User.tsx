@@ -1,14 +1,7 @@
-import {
-	Avatar,
-	Badge,
-	Box,
-	Group,
-	Tabs,
-	Text,
-	UnstyledButton,
-} from "@mantine/core";
+import { Badge, Box, Group, Tabs, Text, UnstyledButton } from "@mantine/core";
 import { useContext } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { Avatar } from "../Avatar";
 import { CenterLoader } from "../components/CenterLoader";
 import { EditButton } from "../components/EditButton";
 import { FollowButton } from "../components/FollowButton";
@@ -46,7 +39,7 @@ const User = ({ value }: UserProps) => {
 		<Wrapper>
 			<Box p="xs">
 				<Group align="center" position="apart">
-					<Avatar size="xl" radius={999} mb="xs" />
+					<Avatar user={user} size={120} mb="xs" />
 					{isAuthenticated && getAuth().handle === user.handle ? (
 						<EditButton handle={user.handle} />
 					) : (

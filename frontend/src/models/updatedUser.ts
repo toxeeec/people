@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface AuthUser {
-	handle: string;
-	password: string;
+export interface UpdatedUser {
+	handle?: string;
+	image?: number;
 }

@@ -1,5 +1,6 @@
-import { Avatar, Button, Group, Text } from "@mantine/core";
+import { Button, Group, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
+import { Avatar } from "../../Avatar";
 import { User } from "../../models";
 
 interface PostAuthorProps {
@@ -18,7 +19,7 @@ export const UserInfo = ({ user }: PostAuthorProps) => {
 			bg="none"
 		>
 			<Group>
-				<Avatar radius="xl" size="md" />
+				<Avatar user={user} size="md" />
 				<Text weight="bold">{user.handle}</Text>
 			</Group>
 		</Button>

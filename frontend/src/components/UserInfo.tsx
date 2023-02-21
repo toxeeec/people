@@ -1,5 +1,6 @@
-import { Avatar, Badge, Group, Text, UnstyledButton } from "@mantine/core";
+import { Badge, Group, Text, UnstyledButton } from "@mantine/core";
 import { Link } from "react-router-dom";
+import { Avatar } from "../Avatar";
 import { User } from "../models";
 
 interface UserInfoProps {
@@ -11,13 +12,9 @@ export const UserInfo = ({ user, children }: UserInfoProps) => {
 	return (
 		<>
 			<Group align="start" position="apart">
-				<Avatar
-					size="lg"
-					radius="xl"
-					mb="xs"
-					component={Link}
-					to={`/${user!.handle}`}
-				/>
+				<Link to={`/${user!.handle}`}>
+					<Avatar size="lg" mb="xs" user={user} />
+				</Link>
 				{children}
 			</Group>
 			<Text component={Link} to={`/${user!.handle}`} weight="bold">

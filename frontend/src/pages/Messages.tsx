@@ -70,7 +70,6 @@ const Messages = () => {
 	useEffect(() => {
 		if (params.thread) return;
 		if (matches && currentThread === null && threads.length > 0) {
-			console.log("change");
 			handleChange("" + threads[0].id);
 		} else if (!params.thread) {
 			setCurrentThread(null);

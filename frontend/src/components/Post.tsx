@@ -37,7 +37,7 @@ export const Post = forwardRef<HTMLDivElement, PostProps>(
 					{post.content}
 				</Text>
 				<Images images={post.images} />
-				<PostActions post={post} handle={user.handle} />
+				<PostActions post={post} user={user} />
 			</Paper>
 		);
 	}
