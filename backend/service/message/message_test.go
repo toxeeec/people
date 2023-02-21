@@ -14,6 +14,7 @@ import (
 	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
 	"github.com/toxeeec/people/backend/repository/inmem"
+	"github.com/toxeeec/people/backend/service/image"
 	"github.com/toxeeec/people/backend/service/message"
 	"github.com/toxeeec/people/backend/service/notification"
 	"github.com/toxeeec/people/backend/service/user"
@@ -141,7 +142,7 @@ func (s *MessageSuite) TestGetUsersThread() {
 			assert.Equal(s.T(), tc.valid, err == nil)
 			if tc.valid {
 				assert.Equal(s.T(), tc.latest.ThreadID, t.ID)
-				assert.Equal(s.T(), *t.Latest, *tc.latest)
+				assert.Equal(s.T(), t.Latest.Content, tc.latest.Content)
 			} else {
 				var e *people.Error
 				assert.ErrorAs(s.T(), err, &e)
@@ -210,6 +211,7 @@ func (s *MessageSuite) SetupTest() {
 	fm := map[inmem.FollowKey]time.Time{}
 	lm := map[inmem.LikeKey]struct{}{}
 	pm := map[uint]people.Post{}
+	im := map[uint]people.Image{}
 	msgs := make(map[uint][]people.DBMessage)
 	threads := make(map[uint]struct{})
 	threadUsers := make(map[uint][]uint)
@@ -219,7 +221,9 @@ func (s *MessageSuite) SetupTest() {
 	fr := inmem.NewFollowRepository(fm, um)
 	lr := inmem.NewLikeRepository(lm, pm, um)
 	ns := notification.NewService(make(chan people.Notification, 32), s.ur)
-	us := user.NewService(v, s.ur, fr, lr)
+	ir := inmem.NewImageRepository(im)
+	is := image.NewService(ir)
+	us := user.NewService(v, s.ur, fr, lr, is)
 	s.ms = message.NewService(s.mr, s.ur, ns, us)
 }
 

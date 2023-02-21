@@ -131,8 +131,7 @@ account:
       content:
         application/json:
           schema:
-            allOf:
-              - $ref: '#/components/schemas/Handle'
+            $ref: '#/components/schemas/UpdatedUser'
     responses:
       200:
         description: OK
@@ -142,6 +141,18 @@ account:
               $ref: '#/components/schemas/User'
       401:
         description: Invalid Credentials
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      404:
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+      422:
+        description: Unprocessable Entity
         content:
           application/json:
             schema:

@@ -142,13 +142,17 @@ func (h *handler) GetUsersSearch(ctx context.Context, r people.GetUsersSearchReq
 
 func (h *handler) PutMe(ctx context.Context, r people.PutMeRequestObject) (people.PutMeResponseObject, error) {
 	userID, _ := people.FromContext(ctx, people.UserIDKey)
-	u, err := h.us.Update(userID, r.Body.Handle)
+	u, err := h.us.Update(userID, *r.Body)
 	if err != nil {
 		var e *people.Error
 		if errors.As(err, &e) {
 			switch *e.Kind {
 			case people.ValidationError:
 				return people.PutMe401JSONResponse(*e), nil
+			case people.NotFoundError:
+				return people.PutMe404JSONResponse(*e), nil
+			case people.ResourceError:
+				return people.PutMe422JSONResponse(*e), nil
 			}
 		}
 		return nil, err

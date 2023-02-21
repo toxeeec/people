@@ -9,6 +9,7 @@ import (
 	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
 	"github.com/toxeeec/people/backend/service"
+	"github.com/toxeeec/people/backend/service/image"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -27,7 +28,7 @@ type Service interface {
 	ListUsersWithStatus(ctx context.Context, userIDs []uint, srcID uint, auth bool) ([]people.User, error)
 	ListMatches(ctx context.Context, query string, userID uint, auth bool, params pagination.HandleParams) (people.Users, error)
 	Delete(userID uint) error
-	Update(userID uint, handle string) (people.User, error)
+	Update(userID uint, updatedUser people.UpdatedUser) (people.User, error)
 	Validate(u people.AuthUser) error
 }
 
@@ -36,12 +37,11 @@ type userService struct {
 	ur repository.User
 	fr repository.Follow
 	lr repository.Like
+	is image.Service
 }
 
-func NewService(v *validator.Validate, ur repository.User, fr repository.Follow, lr repository.Like) Service {
-	return &userService{
-		v, ur, fr, lr,
-	}
+func NewService(v *validator.Validate, ur repository.User, fr repository.Follow, lr repository.Like, is image.Service) Service {
+	return &userService{v, ur, fr, lr, is}
 }
 
 func (s *userService) GetUser(ctx context.Context, handle string, userID uint, auth bool) (people.User, error) {
@@ -240,17 +240,29 @@ func (s *userService) Delete(userID uint) error {
 	return s.ur.Delete(userID)
 }
 
-func (s *userService) Update(userID uint, handle string) (people.User, error) {
+func (s *userService) Update(userID uint, updatedUser people.UpdatedUser) (people.User, error) {
 	u, err := s.ur.Get(userID)
 	if err != nil {
 		return people.User{}, err
 	}
-	if handle != u.Handle {
-		if err := s.Validate(people.AuthUser{Handle: handle}); err != nil {
-			return people.User{}, err
+	if updatedUser.Handle != nil {
+		handle := *updatedUser.Handle
+		if handle != u.Handle {
+			if err := s.Validate(people.AuthUser{Handle: handle}); err != nil {
+				return people.User{}, err
+			}
+			u, err = s.ur.Update(userID, handle)
+			if err != nil {
+				return people.User{}, err
+			}
 		}
 	}
-	return s.ur.Update(userID, handle)
+	img, err := s.is.UpdateUserImage(updatedUser.Image, userID)
+	if err != nil {
+		return people.User{}, err
+	}
+	u.Image = img
+	return u, nil
 }
 
 func (s *userService) Validate(u people.AuthUser) error {

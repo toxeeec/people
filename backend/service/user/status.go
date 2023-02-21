@@ -22,6 +22,20 @@ func (s *userService) GetUserWithStatus(ctx context.Context, srcID uint, userID 
 		}
 		return nil
 	})
+	g.Go(func() error {
+		path, err := s.is.GetUserImage(srcID)
+		if err != nil {
+			return err
+		}
+		select {
+		case u := <-uc:
+			u.Image = path
+			uc <- u
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+		return nil
+	})
 	if auth {
 		g.Go(func() error {
 			fs := s.status(srcID, userID)
@@ -80,6 +94,21 @@ func (s *userService) ListUsersWithStatus(ctx context.Context, userIDs []uint, s
 		}
 		select {
 		case usc <- us:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+		return nil
+	})
+	g.Go(func() error {
+		imgs, err := s.is.ListUsersImages(userIDs)
+		if err != nil {
+			println(err.Error())
+			return err
+		}
+		select {
+		case us := <-usc:
+			AddImages(us, imgs)
+			usc <- us
 		case <-ctx.Done():
 			return ctx.Err()
 		}

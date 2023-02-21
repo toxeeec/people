@@ -27,8 +27,11 @@ func path(t time.Time, name string) string {
 type Service interface {
 	Create(userID uint, r *multipart.Reader) (people.ImageResponse, error)
 	AddToPost(ids []uint, postID, userID uint) ([]string, error)
+	UpdateUserImage(id *uint, userID uint) (*string, error)
 	ListPostImages(postID uint) ([]string, error)
 	ListPostsImages(postIDs []uint) (map[uint][]string, error)
+	GetUserImage(userID uint) (*string, error)
+	ListUsersImages(userIDs []uint) (map[uint]*string, error)
 }
 
 type imageService struct {
@@ -48,13 +51,8 @@ func NewService(ir repository.Image) Service {
 }
 
 const (
-	baseDir      = "images/"
-	expiredAfter = time.Hour
+	baseDir = "images/"
 )
-
-func isExpired(img people.Image) bool {
-	return time.Now().Add(-expiredAfter).After(img.CreatedAt)
-}
 
 func (s *imageService) Create(userID uint, r *multipart.Reader) (people.ImageResponse, error) {
 	const MB = 1 << 20
@@ -120,11 +118,8 @@ func (s *imageService) AddToPost(ids []uint, postID, userID uint) ([]string, err
 			if img.ID != id {
 				continue
 			}
-			if img.UserID != userID {
-				return nil, service.NewError(people.AuthError, fmt.Sprintf("You do not have permission to use this image: %v", id))
-			}
-			if isExpired(img) {
-				return nil, service.NewError(people.ResourceError, fmt.Sprintf("Image is expired: %v", id))
+			if err := validate(img, userID); err != nil {
+				return nil, err
 			}
 			paths[i] = "/" + path(img.CreatedAt, img.Name)
 			found = true
@@ -143,6 +138,47 @@ func (s *imageService) AddToPost(ids []uint, postID, userID uint) ([]string, err
 		return nil, err
 	}
 	return paths, nil
+}
+
+func (s *imageService) UpdateUserImage(imgID *uint, userID uint) (*string, error) {
+	if imgID == nil {
+		s.ir.DeleteUserImage(userID)
+		return nil, nil
+
+	}
+	id := *imgID
+	img, err := s.ir.Get(id)
+	if err != nil {
+		return nil, service.NewError(people.NotFoundError, fmt.Sprintf("Image not found: %v", id))
+	}
+	if err := validate(img, userID); err != nil {
+		return nil, err
+	}
+	w, h, err := getDimensions(img)
+	if err != nil {
+		return nil, err
+	}
+	if w != h {
+		return nil, service.NewError(people.ResourceError, "Image must have a 1:1 aspect ratio")
+	}
+	// TODO: resize
+	prev, _ := s.ir.GetUserImage(userID)
+	if prev.ID == img.ID {
+		path := "/" + path(img.CreatedAt, img.Name)
+		return &path, nil
+	}
+	err = s.ir.CreateUserImage(id, userID)
+	if err != nil {
+		return nil, err
+	}
+	err = s.ir.MarkUsed([]uint{id})
+	if err != nil {
+		go s.ir.DeleteUserImage(id)
+		return nil, err
+	}
+	s.ir.DeleteMany([]uint{prev.ID})
+	path := "/" + path(img.CreatedAt, img.Name)
+	return &path, nil
 }
 
 func (s *imageService) ListPostImages(postID uint) ([]string, error) {
@@ -190,6 +226,47 @@ func (s *imageService) ListPostsImages(postIDs []uint) (map[uint][]string, error
 			paths = append(paths, "/"+path(imgsMap[id].CreatedAt, imgsMap[id].Name))
 		}
 		pathsMap[postID] = paths
+	}
+	return pathsMap, nil
+}
+
+func (s *imageService) GetUserImage(userID uint) (*string, error) {
+	img, err := s.ir.GetUserImage(userID)
+	if err != nil {
+		return nil, nil
+	}
+	path := "/" + path(img.CreatedAt, img.Name)
+	return &path, nil
+}
+
+func (s *imageService) ListUsersImages(userIDs []uint) (map[uint]*string, error) {
+	idsMap, err := s.ir.ListUsersImageIDs(userIDs)
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]uint, 0, len(idsMap))
+	for _, id := range idsMap {
+		if id != nil {
+			ids = append(ids, *id)
+		}
+	}
+	imgs, err := s.ir.List(ids)
+	if err != nil {
+		return nil, err
+	}
+	imgsMap := make(map[uint]people.Image, len(imgs))
+	for _, img := range imgs {
+		imgsMap[img.ID] = img
+	}
+	pathsMap := make(map[uint]*string, len(idsMap))
+	for userID, imgID := range idsMap {
+		if imgID == nil {
+			pathsMap[userID] = nil
+			continue
+		}
+		img := imgsMap[*imgID]
+		path := "/" + path(img.CreatedAt, img.Name)
+		pathsMap[userID] = &path
 	}
 	return pathsMap, nil
 }

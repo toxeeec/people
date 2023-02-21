@@ -207,3 +207,27 @@ func (s *ImageSuite) SetupTest() {
 		s.fns.SetupTest()
 	}
 }
+
+func (s *ImageSuite) TestCreateUserImage() {
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	u, _ := s.ur.Create(au)
+	ir, _ := s.repo.Create(gofakeit.LetterN(40), u.ID)
+
+	err := s.repo.CreateUserImage(ir.ID, u.ID)
+	assert.NoError(s.T(), err)
+	img, _ := s.repo.GetUserImage(u.ID)
+	assert.Equal(s.T(), ir.ID, img.ID)
+}
+
+func (s *ImageSuite) TestGetUserImage() {
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	u, _ := s.ur.Create(au)
+	ir, _ := s.repo.Create(gofakeit.LetterN(40), u.ID)
+
+	s.repo.CreateUserImage(ir.ID, u.ID)
+	img, err := s.repo.GetUserImage(u.ID)
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), ir.ID, img.ID)
+}

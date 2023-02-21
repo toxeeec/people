@@ -74,9 +74,9 @@ func (r *messageRepo) CreateThread(userIDs ...uint) (uint, error) {
 }
 
 func (r *messageRepo) GetThreadID(userIDs ...uint) (uint, error) {
-	q, args, err := NewQuery("SELECT thread_id FROM thread_user").
+	q, args, err := NewQuery("SELECT thread_id FROM thread_user tu").
 		Where("user_id IN (?)", userIDs).
-		GroupBy("thread_id").Having("COUNT(user_id) = ?", len(userIDs)).
+		GroupBy("thread_id").Having("COUNT(user_id) = (SELECT COUNT(user_id) FROM thread_user WHERE thread_id = tu.thread_id)").
 		Build()
 	if err != nil {
 		return 0, fmt.Errorf("Message.GetThreadID: %w", err)

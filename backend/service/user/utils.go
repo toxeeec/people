@@ -9,6 +9,13 @@ func AddStatuses(us []people.User, fss map[uint]people.FollowStatus) {
 	}
 }
 
+func AddImages(us []people.User, imgs map[uint]*string) {
+	for i, u := range us {
+		img := imgs[u.ID]
+		us[i].Image = img
+	}
+}
+
 // TODO: use people.IntoIDs instead
 func IDs(us []people.User) []uint {
 	ids := make([]uint, len(us))

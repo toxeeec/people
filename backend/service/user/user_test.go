@@ -13,6 +13,7 @@ import (
 	"github.com/toxeeec/people/backend/pagination"
 	"github.com/toxeeec/people/backend/repository"
 	"github.com/toxeeec/people/backend/repository/inmem"
+	"github.com/toxeeec/people/backend/service/image"
 	"github.com/toxeeec/people/backend/service/user"
 )
 
@@ -23,6 +24,7 @@ type UserSuite struct {
 	fr repository.Follow
 	lr repository.Like
 	pr repository.Post
+	is image.Service
 }
 
 func (s *UserSuite) TestGetUser() {
@@ -260,7 +262,7 @@ func (s *UserSuite) TestUpdate() {
 
 	for name, tc := range tests {
 		s.Run(name, func() {
-			u, err := s.us.Update(ar1.ID, tc.handle)
+			u, err := s.us.Update(ar1.ID, people.UpdatedUser{Handle: &tc.handle})
 			assert.Equal(s.T(), tc.valid, err == nil)
 			if tc.valid {
 				assert.Equal(s.T(), tc.handle, u.Handle)
@@ -279,12 +281,15 @@ func (s *UserSuite) SetupTest() {
 	fm := map[inmem.FollowKey]time.Time{}
 	lm := map[inmem.LikeKey]struct{}{}
 	pm := map[uint]people.Post{}
+	im := map[uint]people.Image{}
 	v := validator.New()
 	s.ur = inmem.NewUserRepository(um)
 	s.fr = inmem.NewFollowRepository(fm, um)
 	s.lr = inmem.NewLikeRepository(lm, pm, um)
 	s.pr = inmem.NewPostRepository(pm)
-	s.us = user.NewService(v, s.ur, s.fr, s.lr)
+	ir := inmem.NewImageRepository(im)
+	s.is = image.NewService(ir)
+	s.us = user.NewService(v, s.ur, s.fr, s.lr, s.is)
 }
 
 func TestUserSuite(t *testing.T) {

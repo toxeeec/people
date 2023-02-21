@@ -58,6 +58,12 @@ CREATE TABLE post_image (
 	PRIMARY KEY (post_id, image_id)
 );
 
+CREATE TABLE user_image (
+	user_id INTEGER REFERENCES user_profile(user_id) ON DELETE CASCADE NOT NULL,
+	image_id INTEGER REFERENCES image(image_id) ON DELETE CASCADE NOT NULL,
+	PRIMARY KEY (user_id, image_id)
+);
+
 CREATE TABLE thread (
 	thread_id SERIAL PRIMARY KEY
 );

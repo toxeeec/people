@@ -49,6 +49,10 @@ components:
           x-oapi-codegen-extra-tags:
             db: followers
             fake: skip
+        image:
+          type: string
+          x-oapi-codegen-extra-tags:
+            fake: skip
         status:
           $ref: '#/components/schemas/FollowStatus'
       required:
@@ -69,7 +73,7 @@ components:
       required:
         - data
 
-    Handle:
+    UpdatedUser:
       properties:
         handle:
           type: string
@@ -78,29 +82,30 @@ components:
           x-oapi-codegen-extra-tags:
             db: handle
             fake: '{lettern:10}'
-      required:
-        - handle
+        image:
+          type: integer
+          x-go-type: uint
+          x-oapi-codegen-extra-tags:
+            fake: skip
 
     AuthUser:
-      allOf:
-        - $ref: '#/components/schemas/Handle'
-        - type: object
-          properties:
-            handle:
-              type: string
-              minLength: 5
-              maxLength: 15
-              x-oapi-codegen-extra-tags:
-                db: handle
-                fake: '{lettern:10}'
-            password:
-              type: string
-              format: password
-              minLength: 8
-              x-oapi-codegen-extra-tags:
-                fake: '{password:true,true,true,true,false,8}'
-          required:
-            - password
+      properties:
+        handle:
+          type: string
+          minLength: 5
+          maxLength: 15
+          x-oapi-codegen-extra-tags:
+            db: handle
+            fake: '{lettern:10}'
+        password:
+          type: string
+          format: password
+          minLength: 8
+          x-oapi-codegen-extra-tags:
+            fake: '{password:true,true,true,true,false,8}'
+      required:
+        - handle
+        - password
 
     AuthResponse:
       properties:

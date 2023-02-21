@@ -141,6 +141,40 @@ func (s *ImageSuite) TestListPostsImages() {
 	}
 }
 
+func (s *ImageSuite) TestGetUserImage() {
+	var au people.AuthUser
+	gofakeit.Struct(&au)
+	u, _ := s.ur.Create(au)
+	ir, _ := s.ir.Create(gofakeit.LetterN(40), u.ID)
+	s.ir.CreateUserImage(ir.ID, u.ID)
+
+	_, err := s.is.GetUserImage(u.ID)
+	assert.NoError(s.T(), err)
+}
+
+func (s *ImageSuite) TestListUsersImages() {
+	var userIDs [3]uint
+	var ids [len(userIDs)]uint
+	var au people.AuthUser
+	for i := range ids {
+		gofakeit.Struct(&au)
+		u, _ := s.ur.Create(au)
+		userIDs[i] = u.ID
+		ir, _ := s.ir.Create(gofakeit.LetterN(40), u.ID)
+		ids[i] = ir.ID
+	}
+	for i := range userIDs {
+		s.ir.CreateUserImage(ids[i], userIDs[i])
+	}
+
+	pathMap, err := s.is.ListUsersImages(userIDs[:])
+	assert.NoError(s.T(), err)
+	assert.Len(s.T(), pathMap, len(ids))
+	for k := range pathMap {
+		assert.Contains(s.T(), userIDs, k)
+	}
+}
+
 func (s *ImageSuite) SetupTest() {
 	os.RemoveAll("images/")
 	um := map[uint]people.User{}

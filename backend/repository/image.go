@@ -15,6 +15,12 @@ type Image interface {
 	CreatePostImages(ids []uint, postID uint) error
 	ListPostImages(postID uint) ([]people.Image, error)
 	MarkUsed(ids []uint) error
+	// TODO: mark unused instead
 	DeleteManyPostImages(ids []uint)
 	ListPostsImageIDs(postIDs []uint) (map[uint][]uint, error)
+	CreateUserImage(id uint, userID uint) error
+	GetUserImage(userID uint) (people.Image, error)
+	// TODO: mark unused instead
+	DeleteUserImage(id uint)
+	ListUsersImageIDs(userIDs []uint) (map[uint]*uint, error)
 }

@@ -93,14 +93,14 @@ func (r *imageRepo) CreatePostImages(ids []uint, postID uint) error {
 	return nil
 }
 
-func (r *imageRepo) ListPostImages(postID uint) ([]people.Image, error) {
-	const query = "SELECT * FROM image WHERE image_id IN (SELECT image_id FROM post_image WHERE post_id = $1)"
-	var imgs []people.Image
-	err := r.db.Select(&imgs, query, postID)
+func (r *imageRepo) GetUserImage(userID uint) (people.Image, error) {
+	const query = "SELECT * FROM image WHERE image_id = (SELECT image_id FROM user_image WHERE user_id = $1)"
+	var img people.Image
+	err := r.db.Get(&img, query, userID)
 	if err != nil {
-		return nil, fmt.Errorf("Image.ListPostImages: %w", err)
+		return people.Image{}, fmt.Errorf("Image.GetUserImage: %w", err)
 	}
-	return imgs, nil
+	return img, nil
 }
 
 func (r *imageRepo) MarkUsed(ids []uint) error {
@@ -134,6 +134,7 @@ type postImage struct {
 	ImageID uint `db:"image_id"`
 }
 
+// TODO: return post images
 func (r *imageRepo) ListPostsImageIDs(postIDs []uint) (map[uint][]uint, error) {
 	if len(postIDs) == 0 {
 		return map[uint][]uint{}, nil
@@ -152,6 +153,60 @@ func (r *imageRepo) ListPostsImageIDs(postIDs []uint) (map[uint][]uint, error) {
 		postImgs := m[pimg.PostID]
 		postImgs = append(postImgs, pimg.ImageID)
 		m[pimg.PostID] = postImgs
+	}
+	return m, nil
+}
+
+func (r *imageRepo) ListPostImages(postID uint) ([]people.Image, error) {
+	const query = "SELECT * FROM image WHERE image_id IN (SELECT image_id FROM post_image WHERE post_id = $1)"
+	var imgs []people.Image
+	err := r.db.Select(&imgs, query, postID)
+	if err != nil {
+		return nil, fmt.Errorf("Image.ListPostImages: %w", err)
+	}
+	return imgs, nil
+}
+
+func (r *imageRepo) CreateUserImage(id uint, userID uint) error {
+	value := fmt.Sprintf("(%v, %v)", userID, id)
+	q, args, err := NewQuery("INSERT INTO user_image(user_id, image_id)").Values(value).Build()
+	if err != nil {
+		return fmt.Errorf("Image.CreateUserImage: %w", err)
+	}
+	_, err = r.db.Exec(q, args...)
+	if err != nil {
+		return fmt.Errorf("Image.CreateUserImage: %w", err)
+	}
+	return nil
+}
+
+func (r *imageRepo) DeleteUserImage(id uint) {
+	const query = "DELETE FROM user_image WHERE user_id = $1"
+	r.db.Exec(query, id)
+}
+
+type userImage struct {
+	UserID  uint `db:"user_id"`
+	ImageID uint `db:"image_id"`
+}
+
+// TODO: return user images
+func (r *imageRepo) ListUsersImageIDs(userIDs []uint) (map[uint]*uint, error) {
+	if len(userIDs) == 0 {
+		return map[uint]*uint{}, nil
+	}
+	q, args, err := NewQuery("SELECT user_id, image_id FROM user_image").Where("user_id IN (?)", userIDs).Build()
+	if err != nil {
+		return nil, fmt.Errorf("Image.ListUsersImageIDs: %w", err)
+	}
+	var uimgs []userImage
+	err = r.db.Select(&uimgs, q, args...)
+	if err != nil {
+		return nil, fmt.Errorf("Image.ListUsersImageIDs: %w", err)
+	}
+	m := make(map[uint]*uint, len(userIDs))
+	for _, uimg := range uimgs {
+		m[uimg.UserID] = &uimg.ImageID
 	}
 	return m, nil
 }

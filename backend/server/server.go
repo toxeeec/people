@@ -32,8 +32,8 @@ func New(db *sqlx.DB, v *validator.Validate) *echo.Echo {
 	ir := postgres.NewImageRepository(db)
 	mr := postgres.NewMessageRepository(db)
 
-	us := user.NewService(v, ur, fr, lr)
 	is := image.NewService(ir)
+	us := user.NewService(v, ur, fr, lr, is)
 	as := auth.NewService(ur, tr, us)
 	ps := post.NewService(v, pr, ur, fr, lr, us, is)
 	notif := make(chan people.Notification, 256)

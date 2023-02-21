@@ -67,7 +67,7 @@ func (s *messageService) ReadMessage(ctx context.Context, fromID uint, data []by
 		return nil
 	})
 	g.Go(func() error {
-		from, err := s.ur.Get(fromID)
+		from, err := s.us.GetUserWithStatus(ctx, fromID, fromID, true)
 		if err != nil {
 			return err
 		}
@@ -105,14 +105,14 @@ func (s *messageService) GetUsersThread(ctx context.Context, userID uint, handle
 	g, ctx := errgroup.WithContext(ctx)
 	thread := people.Thread{ID: threadID}
 	g.Go(func() error {
-		thread.Latest, err = s.getLatestMessage(threadID)
+		thread.Latest, err = s.getLatestMessage(ctx, threadID, userID)
 		if err != nil {
 			return err
 		}
 		return nil
 	})
 	g.Go(func() error {
-		users, err := s.getThreadUsers(threadID)
+		users, err := s.getThreadUsers(ctx, threadID, userID)
 		if err != nil {
 			return err
 		}
@@ -130,7 +130,7 @@ func (s *messageService) GetThread(ctx context.Context, userID uint, threadID ui
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		var err error
-		thread.Users, err = s.getThreadUsers(threadID)
+		thread.Users, err = s.getThreadUsers(ctx, threadID, userID)
 		if err != nil {
 			return err
 		}
@@ -147,11 +147,10 @@ func (s *messageService) GetThread(ctx context.Context, userID uint, threadID ui
 		return nil
 	})
 	g.Go(func() error {
-		thread.Latest, _ = s.getLatestMessage(threadID)
+		thread.Latest, _ = s.getLatestMessage(ctx, threadID, userID)
 		return nil
 	})
 	if err := g.Wait(); err != nil {
-		println(err.Error())
 		return people.Thread{}, err
 	}
 	return thread, nil
@@ -188,7 +187,7 @@ func (s *messageService) ListThreadMessages(ctx context.Context, threadID uint, 
 	}
 	dbmsgs := <-dbmsgsc
 	ids := userIDs(dbmsgs)
-	users, err := s.ur.List(ids)
+	users, err := s.us.ListUsersWithStatus(context.Background(), ids, userID, true)
 	if err != nil {
 		return people.Messages{}, err
 	}
@@ -242,7 +241,7 @@ func (s *messageService) ListThreads(ctx context.Context, userID uint, params pa
 		userIDs[i] = tu.UserID
 	}
 	userIDs = set.FromSlice(userIDs).Slice()
-	users, err := s.ur.List(userIDs)
+	users, err := s.us.ListUsersWithStatus(context.Background(), userIDs, userID, true)
 	if err != nil {
 		return people.Threads{}, err
 	}
@@ -276,20 +275,20 @@ func (s *messageService) ListThreads(ctx context.Context, userID uint, params pa
 	return pagination.NewResults[people.Thread, uint](threads), nil
 }
 
-func (s *messageService) getThreadUsers(threadID uint) ([]people.User, error) {
+func (s *messageService) getThreadUsers(ctx context.Context, threadID uint, userID uint) ([]people.User, error) {
 	ids, err := s.mr.GetThreadUsers(threadID)
 	if err != nil {
 		return nil, err
 	}
-	return s.ur.List(ids)
+	return s.us.ListUsersWithStatus(ctx, ids, userID, true)
 }
 
-func (s *messageService) getLatestMessage(threadID uint) (*people.Message, error) {
+func (s *messageService) getLatestMessage(ctx context.Context, threadID uint, userID uint) (*people.Message, error) {
 	dbmsg, err := s.mr.GetLatestMessage(threadID)
 	if err != nil {
 		return nil, nil
 	}
-	u, err := s.ur.Get(dbmsg.FromID)
+	u, err := s.us.GetUserWithStatus(ctx, dbmsg.FromID, userID, true)
 	if err != nil {
 		return nil, err
 	}

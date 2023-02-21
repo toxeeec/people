@@ -13,6 +13,7 @@ import (
 	"github.com/toxeeec/people/backend/repository"
 	"github.com/toxeeec/people/backend/repository/inmem"
 	"github.com/toxeeec/people/backend/service/auth"
+	"github.com/toxeeec/people/backend/service/image"
 	"github.com/toxeeec/people/backend/service/user"
 )
 
@@ -187,12 +188,15 @@ func (s *AuthSuite) SetupTest() {
 	fm := map[inmem.FollowKey]time.Time{}
 	lm := map[inmem.LikeKey]struct{}{}
 	pm := map[uint]people.Post{}
+	im := map[uint]people.Image{}
 	v := validator.New()
 	s.ur = inmem.NewUserRepository(um)
 	tr := inmem.NewTokenRepository(tsm)
 	fr := inmem.NewFollowRepository(fm, um)
 	lr := inmem.NewLikeRepository(lm, pm, um)
-	s.us = user.NewService(v, s.ur, fr, lr)
+	ir := inmem.NewImageRepository(im)
+	is := image.NewService(ir)
+	s.us = user.NewService(v, s.ur, fr, lr, is)
 	s.as = auth.NewService(s.ur, tr, s.us)
 }
 

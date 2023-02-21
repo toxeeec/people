@@ -15,14 +15,20 @@ type postImage struct {
 	imageID uint
 }
 
+type userImage struct {
+	userID  uint
+	imageID uint
+}
+
 type imageRepo struct {
 	m      map[uint]people.Image
 	pim    map[postImage]struct{}
+	uim    map[userImage]struct{}
 	lastID uint
 }
 
 func NewImageRepository(m map[uint]people.Image) repository.Image {
-	return &imageRepo{m: m, pim: map[postImage]struct{}{}}
+	return &imageRepo{m: m, pim: map[postImage]struct{}{}, uim: map[userImage]struct{}{}}
 }
 
 func (r *imageRepo) newID() uint {
@@ -128,6 +134,39 @@ func (r *imageRepo) ListPostsImageIDs(postIDs []uint) (map[uint][]uint, error) {
 				return imgs[i] < imgs[j]
 			})
 			m[k.postID] = imgs
+		}
+	}
+	return m, nil
+}
+
+func (r *imageRepo) CreateUserImage(id uint, userID uint) error {
+	r.uim[userImage{userID: userID, imageID: id}] = struct{}{}
+	return nil
+}
+
+func (r *imageRepo) GetUserImage(userID uint) (people.Image, error) {
+	for k := range r.uim {
+		if k.userID == userID {
+			return r.m[k.imageID], nil
+		}
+	}
+	return people.Image{}, fmt.Errorf("Image.GetUserImage: %w", errors.New("Image not found"))
+}
+
+func (r *imageRepo) DeleteUserImage(id uint) {
+	for k := range r.uim {
+		if k.imageID == id {
+			delete(r.uim, k)
+			return
+		}
+	}
+}
+
+func (r *imageRepo) ListUsersImageIDs(userIDs []uint) (map[uint]*uint, error) {
+	m := make(map[uint]*uint, len(userIDs))
+	for k := range r.uim {
+		if contains(userIDs, k.userID) {
+			m[k.userID] = &k.imageID
 		}
 	}
 	return m, nil
