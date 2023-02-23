@@ -6,7 +6,7 @@ import (
 )
 
 type Hub struct {
-	clients      map[uint]*Client
+	clients      map[uint][]*Client
 	register     chan *Client
 	unregister   chan *Client
 	notification chan people.Notification
@@ -15,7 +15,7 @@ type Hub struct {
 
 func NewHub(notification chan people.Notification, cs message.Service) *Hub {
 	return &Hub{
-		clients:      make(map[uint]*Client),
+		clients:      make(map[uint][]*Client),
 		register:     make(chan *Client),
 		unregister:   make(chan *Client),
 		notification: notification,
@@ -27,16 +27,24 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case c := <-h.register:
-			h.clients[c.ID] = c
+			clients := h.clients[c.ID]
+			clients = append(clients, c)
+			h.clients[c.ID] = clients
 		case c := <-h.unregister:
-			if _, ok := h.clients[c.ID]; ok {
-				c.Conn.Close()
-				close(c.Send)
-				delete(h.clients, c.ID)
+			c.Conn.Close()
+			close(c.Send)
+			clients := h.clients[c.ID]
+			for i := range clients {
+				if clients[i] == c {
+					clients = append(clients[:i], clients[i+1:]...)
+					break
+				}
 			}
+			h.clients[c.ID] = clients
+
 		case notif := <-h.notification:
-			c, ok := h.clients[notif.To]
-			if ok {
+			clients := h.clients[notif.To]
+			for _, c := range clients {
 				c.Send <- notif
 			}
 		}
