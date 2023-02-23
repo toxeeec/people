@@ -5,7 +5,8 @@ CREATE TABLE user_profile (
 	handle VARCHAR(15) NOT NULL,
 	hash TEXT NOT NULL,
 	following INTEGER NOT NULL DEFAULT 0,
-	followers INTEGER NOT NULL DEFAULT 0
+	followers INTEGER NOT NULL DEFAULT 0,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX user_profile_handle_idx ON user_profile USING GIN(handle gin_trgm_ops);
@@ -65,7 +66,8 @@ CREATE TABLE user_image (
 );
 
 CREATE TABLE thread (
-	thread_id SERIAL PRIMARY KEY
+	thread_id SERIAL PRIMARY KEY,
+	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE message (
