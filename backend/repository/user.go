@@ -13,6 +13,6 @@ type User interface {
 	Get(id uint) (people.User, error)
 	List(ids []uint) ([]people.User, error)
 	ListIDs(handles ...string) ([]uint, error)
-	ListMatches(query string, p pagination.ID) ([]people.User, error)
+	ListMatches(query string, p pagination.ID) ([]uint, error)
 	Update(userID uint, handle string) (people.User, error)
 }

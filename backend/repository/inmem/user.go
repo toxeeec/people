@@ -73,17 +73,17 @@ func (r *userRepo) List(ids []uint) ([]people.User, error) {
 	return us, nil
 }
 
-func (r *userRepo) ListMatches(query string, p pagination.ID) ([]people.User, error) {
-	us := make([]people.User, 0, p.Limit)
+func (r *userRepo) ListMatches(query string, p pagination.ID) ([]uint, error) {
+	ids := make([]uint, 0, p.Limit)
 	for _, v := range r.m {
 		if strings.Contains(strings.ToLower(v.Handle), strings.ToLower(query)) {
-			us = append(us, v)
-			if len(us) == int(p.Limit) {
+			ids = append(ids, v.ID)
+			if len(ids) == int(p.Limit) {
 				break
 			}
 		}
 	}
-	return us, nil
+	return ids, nil
 }
 
 func (r *userRepo) Update(userID uint, handle string) (people.User, error) {

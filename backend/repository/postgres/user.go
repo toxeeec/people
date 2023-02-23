@@ -98,19 +98,19 @@ func (r *userRepo) ListIDs(handles ...string) ([]uint, error) {
 	return ids, nil
 }
 
-func (r *userRepo) ListMatches(query string, p pagination.ID) ([]people.User, error) {
-	q, args, err := NewQuery(SelectUser).
+func (r *userRepo) ListMatches(query string, p pagination.ID) ([]uint, error) {
+	q, args, err := NewQuery("SELECT user_id FROM user_profile").
 		Where("handle ILIKE ?", "%"+query+"%").
 		Paginate(p, "user_id", "?").
 		Build()
 	if err != nil {
 		return nil, fmt.Errorf("User.ListMatches: %w", err)
 	}
-	us := make([]people.User, p.Limit)
-	if err := r.db.Select(&us, q, args...); err != nil {
+	ids := make([]uint, p.Limit)
+	if err := r.db.Select(&ids, q, args...); err != nil {
 		return nil, fmt.Errorf("User.ListMatches: %w", err)
 	}
-	return us, nil
+	return ids, nil
 }
 
 func (r *userRepo) Update(userID uint, handle string) (people.User, error) {

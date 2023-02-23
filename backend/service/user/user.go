@@ -203,16 +203,13 @@ func (s *userService) ListMatches(ctx context.Context, query string, userID uint
 	if err != nil {
 		return people.Users{}, service.NewError(people.NotFoundError, "User not found")
 	}
-	us, err := s.ur.ListMatches(query, p)
+	ids, err := s.ur.ListMatches(query, p)
 	if err != nil {
 		return people.Users{}, err
 	}
-	if auth {
-		fss, err := s.ListStatus(context.Background(), IDs(us), userID)
-		if err != nil {
-			return people.Users{}, err
-		}
-		AddStatuses(us, fss)
+	us, err := s.ListUsersWithStatus(ctx, ids, userID, auth)
+	if err != nil {
+		return people.Users{}, err
 	}
 	return pagination.NewResults[people.User, string](us), nil
 }
