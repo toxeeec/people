@@ -1,10 +1,40 @@
 components:
   $ref: ../components/main.yaml#/components
 
-likes:
+userLikes:
   get:
     tags:
+      - users
       - likes
+      - posts
+    security:
+      - bearerAuth: []
+      - {}
+    parameters:
+      - $ref: '#/components/parameters/handleParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/beforeParam'
+      - $ref: '#/components/parameters/afterParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostsResponse'
+      404:
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+postLikes:
+  get:
+    tags:
+      - posts
+      - likes
+      - users
     security:
       - bearerAuth: []
       - {}
@@ -22,6 +52,7 @@ likes:
               $ref: '#/components/schemas/Users'
   put:
     tags:
+      - posts
       - likes
     security:
       - bearerAuth: []
@@ -49,6 +80,7 @@ likes:
 
   delete:
     tags:
+      - posts
       - likes
     security:
       - bearerAuth: []

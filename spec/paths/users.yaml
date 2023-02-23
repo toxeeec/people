@@ -31,7 +31,7 @@ following:
       - {}
     tags:
       - users
-      - following
+      - follows
     parameters:
       - $ref: '#/components/parameters/handleParam'
       - $ref: '#/components/parameters/limitParam'
@@ -58,7 +58,7 @@ followers:
       - {}
     tags:
       - users
-      - followers
+      - follows
     parameters:
       - $ref: '#/components/parameters/handleParam'
       - $ref: '#/components/parameters/limitParam'
@@ -81,7 +81,6 @@ followers:
 search:
   get:
     tags:
-      - posts
       - users
     security:
       - bearerAuth: []

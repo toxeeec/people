@@ -5,6 +5,7 @@ userThread:
   get:
     tags:
       - messages
+      - users
     security:
       - bearerAuth: []
     parameters:
@@ -16,6 +17,30 @@ userThread:
           application/json:
             schema:
               $ref: '#/components/schemas/Thread'
+      404:
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+threads:
+  get:
+    tags:
+      - messages
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/beforeParam'
+      - $ref: '#/components/parameters/afterParam'
+    responses:
+      200:
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Threads'
       404:
         description: Not Found
         content:
@@ -75,30 +100,6 @@ threadMessages:
           application/json:
             schema:
               $ref: '#/components/schemas/Error'
-      404:
-        description: Not Found
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-
-threads:
-  get:
-    tags:
-      - messages
-    security:
-      - bearerAuth: []
-    parameters:
-      - $ref: '#/components/parameters/limitParam'
-      - $ref: '#/components/parameters/beforeParam'
-      - $ref: '#/components/parameters/afterParam'
-    responses:
-      200:
-        description: OK
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Threads'
       404:
         description: Not Found
         content:

@@ -23,7 +23,8 @@ followingByHandle:
   put:
     tags:
       - me
-      - following
+      - follows
+      - users
     security:
       - bearerAuth: []
     parameters:
@@ -51,7 +52,8 @@ followingByHandle:
   delete:
     tags:
       - me
-      - following
+      - follows
+      - users
     security:
       - bearerAuth: []
     parameters:
@@ -74,7 +76,8 @@ following:
   get:
     tags:
       - me
-      - following
+      - follows
+      - users
     security:
       - bearerAuth: []
     parameters:
@@ -99,7 +102,8 @@ followers:
   get:
     tags:
       - me
-      - followers
+      - follows
+      - users
     security:
       - bearerAuth: []
     parameters:
@@ -120,7 +124,7 @@ followers:
             schema:
               $ref: '#/components/schemas/Error'
 
-account:
+profile:
   put:
     tags:
       - me

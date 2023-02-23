@@ -19,7 +19,7 @@ paths:
     $ref: './paths/auth.yaml#/logout'
 
   /me:
-    $ref: './paths/me.yaml#/account'
+    $ref: './paths/me.yaml#/profile'
 
   /me/feed:
     $ref: './paths/me.yaml#/feed'
@@ -49,7 +49,7 @@ paths:
     $ref: './paths/posts.yaml#/userPosts'
 
   /users/{handle}/likes:
-    $ref: './paths/posts.yaml#/userLikes'
+    $ref: './paths/likes.yaml#/userLikes'
 
   /posts:
     $ref: './paths/posts.yaml#/posts'
@@ -64,7 +64,7 @@ paths:
     $ref: './paths/replies.yaml#/replies'
 
   /posts/{postID}/likes:
-    $ref: './paths/likes.yaml#/likes'
+    $ref: './paths/likes.yaml#/postLikes'
 
   /images:
     $ref: './paths/images.yaml#/images'
@@ -72,14 +72,14 @@ paths:
   /users/{handle}/thread:
     $ref: './paths/messages.yaml#/userThread'
 
+  /threads:
+    $ref: './paths/messages.yaml#/threads'
+
   /threads/{threadID}:
     $ref: './paths/messages.yaml#/thread'
 
   /threads/{threadID}/messages:
     $ref: './paths/messages.yaml#/threadMessages'
-
-  /threads:
-    $ref: './paths/messages.yaml#/threads'
 
 components: 
   $ref: './components/main.yaml#/components'
