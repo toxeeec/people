@@ -41,7 +41,7 @@ const User = ({ value }: UserProps) => {
 				<Group align="center" position="apart">
 					<Avatar user={user} size={120} mb="xs" />
 					{isAuthenticated && getAuth().handle === user.handle ? (
-						<EditButton handle={user.handle} />
+						<EditButton user={user} />
 					) : (
 						<FollowButton user={user} />
 					)}

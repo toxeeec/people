@@ -102,7 +102,6 @@ func (s *userService) ListUsersWithStatus(ctx context.Context, userIDs []uint, s
 	g.Go(func() error {
 		imgs, err := s.is.ListUsersImages(userIDs)
 		if err != nil {
-			println(err.Error())
 			return err
 		}
 		select {

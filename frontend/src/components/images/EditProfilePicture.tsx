@@ -9,14 +9,16 @@ import { Crop } from "./Crop";
 
 interface EditProfilePictureProps {
 	user: User;
-	setImage: (id: number | undefined) => void;
 	setCropOpened: (opened: boolean) => void;
+	setImage?: (id: number | undefined) => void;
+	removeImage?: () => void;
 }
 
 export const EditProfilePicture = ({
 	user: initialUser,
 	setImage,
 	setCropOpened,
+	removeImage,
 }: EditProfilePictureProps) => {
 	const [user, setUser] = useState(initialUser);
 	const [src, setSrc] = useState("");
@@ -48,8 +50,7 @@ export const EditProfilePicture = ({
 			.then((img) => {
 				setUser((user) => ({ ...user, image: src }));
 				resetRef.current?.();
-				setImage(img.id);
-				// set user
+				setImage?.(img.id);
 			})
 			.catch((e) => e);
 	};
@@ -69,7 +70,7 @@ export const EditProfilePicture = ({
 		>
 			{(props) => (
 				<Flex direction="column" align="center" gap="md">
-					<Avatar size={240} m="auto" user={user} />
+					<Avatar size={120} m="auto" user={user} />
 					<Group>
 						<Tooltip label="Add picture">
 							<ActionIcon {...props}>
@@ -81,7 +82,7 @@ export const EditProfilePicture = ({
 								onClick={() => {
 									setUser((user) => ({ ...user, image: undefined }));
 									resetRef.current?.();
-									setImage(undefined);
+									removeImage?.();
 								}}
 							>
 								<IconX />

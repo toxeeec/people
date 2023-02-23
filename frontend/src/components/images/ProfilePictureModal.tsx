@@ -1,7 +1,7 @@
 import { Button, Flex, Modal } from "@mantine/core";
 import { useState } from "react";
 import "react-image-crop/dist/ReactCrop.css";
-import { UpdatedUser, User } from "../../models";
+import { User } from "../../models";
 import { putMe } from "../../spec.gen";
 import { EditProfilePicture } from "./EditProfilePicture";
 

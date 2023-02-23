@@ -4,27 +4,42 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { Handle } from "../models";
+import { UpdatedUser, User } from "../models";
 import { usePutMe } from "../spec.gen";
+import { EditProfilePicture } from "./images/EditProfilePicture";
 
 interface EditButtonProps {
-	handle: string;
+	user: User;
 }
 
-export const EditButton = ({ handle }: EditButtonProps) => {
+export const EditButton = ({ user }: EditButtonProps) => {
 	const { setAuth } = useContext(AuthContext);
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
-	const form = useForm<Handle>({ initialValues: { handle } });
+	const form = useForm<UpdatedUser>({
+		initialValues: { handle: user.handle },
+		validate: {
+			handle: (value) =>
+				value!.length < 5
+					? "Username must have at least 5 characters"
+					: value!.length > 15
+					? "Username cannot have more than 15 characters"
+					: null,
+		},
+	});
 	const [opened, setOpened] = useState(false);
-	const { mutate } = usePutMe({
+	const [cropOpened, setCropOpened] = useState(false);
+	const { mutate, status } = usePutMe({
 		mutation: {
 			retry: 1,
-			onSuccess: (user) => {
-				queryClient.invalidateQueries();
+			onSuccess: (newUser) => {
 				setOpened(false);
-				navigate(`/${user.handle}`);
-				setAuth({ handle: user.handle });
+				if (newUser.handle !== user.handle) {
+					setAuth({ handle: newUser.handle });
+					navigate(`/${newUser.handle}`, { replace: true });
+				} else {
+					queryClient.invalidateQueries();
+				}
 			},
 			onError: (error) => {
 				const err = error.response?.data.message;
@@ -33,12 +48,8 @@ export const EditButton = ({ handle }: EditButtonProps) => {
 		},
 	});
 
-	const handleSubmit = (h: Handle) => {
-		if (h.handle !== handle) {
-			mutate({ data: h });
-		} else {
-			setOpened(false);
-		}
+	const handleSubmit = (u: UpdatedUser) => {
+		mutate({ data: u });
 	};
 
 	return (
@@ -51,13 +62,45 @@ export const EditButton = ({ handle }: EditButtonProps) => {
 				centered
 				title="Edit profile"
 				opened={opened}
-				onClose={() => setOpened(false)}
+				onClose={() => {
+					setOpened(false);
+					form.reset();
+				}}
 			>
 				<form onSubmit={form.onSubmit(handleSubmit)}>
-					<TextInput label="Handle" {...form.getInputProps("handle")} mb="md" />
-					<Button fullWidth radius="xl" type="submit" mb="xl">
-						Save
-					</Button>
+					<EditProfilePicture
+						user={user}
+						setImage={(image) => {
+							form.setValues({ ...form.values, image });
+						}}
+						removeImage={() => {
+							form.setValues({ ...form.values, image: undefined });
+							if (user.image) form.setDirty({ image: true });
+						}}
+						setCropOpened={setCropOpened}
+					/>
+					{!cropOpened && (
+						<>
+							<TextInput
+								label="Handle"
+								{...form.getInputProps("handle")}
+								mb="md"
+							/>
+							<Button
+								fullWidth
+								radius="xl"
+								type="submit"
+								mb="xl"
+								disabled={
+									!form.isValid() ||
+									(!form.isDirty("image") && !form.isDirty("handle"))
+								}
+								loading={status === "loading"}
+							>
+								Save
+							</Button>
+						</>
+					)}
 				</form>
 			</Modal>
 		</>
