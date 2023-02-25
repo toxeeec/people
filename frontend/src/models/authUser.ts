@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface AuthUser {
+export type AuthUser = {
 	handle: string;
 	password: string;
-}
+};

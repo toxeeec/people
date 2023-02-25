@@ -4,13 +4,13 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { FollowStatus } from "./followStatus";
+import type { FollowStatus } from "@/models/followStatus";
 
-export interface User {
+export type User = {
 	id: number;
 	handle: string;
 	following: number;
 	followers: number;
 	image?: string;
 	status?: FollowStatus;
-}
+};

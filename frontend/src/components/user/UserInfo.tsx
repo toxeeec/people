@@ -1,26 +1,27 @@
+import { Avatar } from "@/components/user";
+import { type User } from "@/models";
 import { Badge, Group, Text, UnstyledButton } from "@mantine/core";
 import { Link } from "react-router-dom";
-import { Avatar } from "../Avatar";
-import { User } from "../models";
 
-interface UserInfoProps {
+type UserInfoProps = {
 	user: User;
 	children?: React.ReactNode;
-}
+};
 
-export const UserInfo = ({ user, children }: UserInfoProps) => {
+export function UserInfo({ user, children }: UserInfoProps) {
+	// TODO: remove copy from pages/User
 	return (
 		<>
 			<Group align="start" position="apart">
-				<Link to={`/${user!.handle}`}>
+				<Link to={`/${user.handle}`}>
 					<Avatar size="lg" mb="xs" user={user} />
 				</Link>
 				{children}
 			</Group>
-			<Text component={Link} to={`/${user!.handle}`} weight="bold">
+			<Text component={Link} to={`/${user.handle}`} weight="bold">
 				{user.handle}
 			</Text>
-			{user.status?.isFollowing ? <Badge ml="xs">follows you</Badge> : null}
+			{user.status?.isFollowing && <Badge ml="xs">follows you</Badge>}
 			<Group mt="xs">
 				<UnstyledButton component={Link} to={`/${user.handle}/following`}>
 					<b>{user.following}</b> Following
@@ -32,4 +33,4 @@ export const UserInfo = ({ user, children }: UserInfoProps) => {
 			</Group>
 		</>
 	);
-};
+}

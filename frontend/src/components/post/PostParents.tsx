@@ -1,24 +1,23 @@
-import { useGetPostsPostID } from "../../spec.gen";
-import { Post } from "../Post";
-import { Post as PostType } from "../../models";
+import { useGetPostsPostID } from "@/spec.gen";
+import { Post } from "@/components/post";
 
-interface PostParentsProps {
-	post: PostType;
+type PostParentsProps = {
+	parentID: number | undefined;
 	scroll: () => void;
-}
-export const PostParents = ({ post, scroll }: PostParentsProps) => {
-	const enabled = !!post?.repliesTo;
-	const replyID = post?.repliesTo || 0;
-	const { data, isLoading } = useGetPostsPostID(replyID, {
+};
+
+export function PostParents({ parentID, scroll }: PostParentsProps) {
+	const enabled = !!parentID;
+	const { data: post, isLoading } = useGetPostsPostID(parentID ?? 0, {
 		query: {
 			onSuccess: (data) => !data.data.repliesTo && scroll(),
 			enabled,
 		},
 	});
-	return enabled && !isLoading && data ? (
+	return enabled && !isLoading && post ? (
 		<>
-			<PostParents post={data.data} scroll={scroll} />
-			<Post post={data.data} user={data.user} />
+			<PostParents parentID={post.data.repliesTo} scroll={scroll} />
+			<Post post={post.data} user={post.user} />
 		</>
 	) : null;
-};
+}

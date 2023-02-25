@@ -4,7 +4,7 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { FollowStatus } from "./followStatus";
+import type { FollowStatus } from "@/models/followStatus";
 
 export type UserAllOf = {
 	handle: string;

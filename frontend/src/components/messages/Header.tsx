@@ -1,12 +1,12 @@
-import { User } from "../../models";
+import { type User } from "@/models";
 import { Header as MantineHeader } from "@mantine/core";
-import { UserInfo } from "./UserInfo";
+import { UserInfo } from "@/components/messages/UserInfo";
 
-interface HeaderProps {
+type HeaderProps = {
 	user?: User;
-}
+};
 
-export const Header = ({ user }: HeaderProps) => {
+export function Header({ user }: HeaderProps) {
 	return (
 		<>
 			{user && (
@@ -22,4 +22,4 @@ export const Header = ({ user }: HeaderProps) => {
 			)}
 		</>
 	);
-};
+}

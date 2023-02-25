@@ -1,12 +1,12 @@
 import { TextInput } from "@mantine/core";
 import { IconSearch } from "@tabler/icons";
-import { Dispatch, SetStateAction } from "react";
+import { type Dispatch, type SetStateAction } from "react";
 
-interface SearchProps {
+type SearchProps = {
 	value: string;
 	setValue: Dispatch<SetStateAction<string>>;
-}
-export const Search = ({ value, setValue }: SearchProps) => {
+};
+export function SearchBar({ value, setValue }: SearchProps) {
 	return (
 		<TextInput
 			value={value}
@@ -20,4 +20,4 @@ export const Search = ({ value, setValue }: SearchProps) => {
 			style={{ zIndex: 1 }}
 		/>
 	);
-};
+}

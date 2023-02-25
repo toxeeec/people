@@ -4,6 +4,6 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { NewImage } from "./newImage";
+import type { NewImage } from "@/models/newImage";
 
 export type ImageBodyBody = NewImage;

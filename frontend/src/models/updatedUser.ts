@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface UpdatedUser {
+export type UpdatedUser = {
 	handle?: string;
 	image?: number;
-}
+};

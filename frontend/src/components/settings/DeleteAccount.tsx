@@ -1,17 +1,17 @@
 import { Button, Modal, PasswordInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useContext, useState } from "react";
-import { AuthContext } from "../../context/AuthContext";
-import { useDeleteMe } from "../../spec.gen";
-import { DangerButton } from "../DangerButton";
+import { AuthContext } from "@/context/AuthContext";
+import { useDeleteMe } from "@/spec.gen";
+import { DangerButton } from "@/components/buttons";
 
-export const DeleteAccount = () => {
+export function DeleteAccount() {
 	const { clearAuth } = useContext(AuthContext);
 	const [opened, setOpened] = useState(false);
 	const form = useForm<{ password: string }>({
 		initialValues: { password: "" },
 	});
-	const { mutate } = useDeleteMe({
+	const { mutate, isLoading } = useDeleteMe({
 		mutation: {
 			retry: 1,
 			onSuccess: clearAuth,
@@ -22,12 +22,8 @@ export const DeleteAccount = () => {
 		},
 	});
 
-	const handleDelete = ({ password }: { password: string }) => {
-		password &&
-			mutate({
-				data: { password },
-			});
-	};
+	const handleDelete = ({ password }: { password: string }) => mutate({ data: { password } });
+
 	return (
 		<>
 			<DangerButton onClick={() => setOpened(true)} text="Delete Account" />
@@ -44,11 +40,11 @@ export const DeleteAccount = () => {
 						{...form.getInputProps("password")}
 						mb="xl"
 					/>
-					<Button fullWidth radius="xl" type="submit" mb="xl">
+					<Button fullWidth radius="xl" type="submit" mb="xl" loading={isLoading}>
 						Delete Account
 					</Button>
 				</form>
 			</Modal>
 		</>
 	);
-};
+}

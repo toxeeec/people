@@ -1,43 +1,44 @@
-import { QueryKey, useInfiniteQuery } from "@tanstack/react-query";
+import { type PostsResponse } from "@/models";
+import { type QueryKey, useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useEffect } from "react";
-import { Users as UsersType } from "../models";
 import { useInView } from "react-intersection-observer";
-import { CenterLoader } from "../components/CenterLoader";
-import { User } from "./User";
+import { CenterLoader } from "@/components/utils";
+import { Post } from "@/components/post";
 
-const queryLimit = 10;
+const LIMIT = 10;
 
-interface PaginationParams {
+type PaginationParams = {
 	limit?: number;
-	before?: string;
-	after?: string;
-}
+	before?: number;
+	after?: number;
+};
 
-export type Query = (params: PaginationParams) => Promise<UsersType>;
+export type PostsQuery = (params: PaginationParams) => Promise<PostsResponse>;
 
-interface UsersProps {
-	query: Query;
-	queryKey: QueryKey;
+type PostsProps = {
 	enabled?: boolean;
-}
+	query: PostsQuery;
+	queryKey: QueryKey;
+};
 
-interface QueryFunctionArgs {
+type QueryFunctionArgs = {
 	pageParam?: PaginationParams;
-}
+};
 
-export const Users = ({ query, queryKey, enabled = true }: UsersProps) => {
+export function InfinitePosts({ query, queryKey, enabled = true }: PostsProps) {
 	const { ref, inView } = useInView();
+
 	const queryFn = ({ pageParam }: QueryFunctionArgs) => {
-		pageParam = { ...pageParam, limit: queryLimit };
+		pageParam = { ...pageParam, limit: LIMIT };
 		return query(pageParam);
 	};
 
 	const { status, data, isFetchingNextPage, fetchNextPage } = useInfiniteQuery({
-		queryKey,
 		queryFn,
+		queryKey,
 		enabled,
 		getNextPageParam: (lastPage) => {
-			if (!lastPage.meta || lastPage.data.length < queryLimit) return undefined;
+			if (!lastPage.meta || lastPage.data.length < LIMIT) return undefined;
 			return { before: lastPage.meta?.oldest };
 		},
 	});
@@ -53,10 +54,10 @@ export const Users = ({ query, queryKey, enabled = true }: UsersProps) => {
 			{enabled && status === "loading" ? (
 				<CenterLoader />
 			) : (
-				data?.pages.map((page, i) => (
+				data?.pages?.map((page, i) => (
 					<Fragment key={i}>
-						{page.data.map((user) => (
-							<User key={user.handle} user={user} ref={ref} />
+						{page.data?.map(({ data, user }) => (
+							<Post key={data.id} ref={ref} post={data} user={user} />
 						))}
 					</Fragment>
 				))
@@ -64,4 +65,4 @@ export const Users = ({ query, queryKey, enabled = true }: UsersProps) => {
 			{isFetchingNextPage && <CenterLoader />}
 		</>
 	);
-};
+}

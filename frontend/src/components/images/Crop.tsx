@@ -1,20 +1,18 @@
 import { Box, Button, Flex, Group } from "@mantine/core";
-import { SyntheticEvent, useRef, useState } from "react";
-import ReactCrop, {
-	centerCrop,
-	Crop as CropType,
-	makeAspectCrop,
-} from "react-image-crop";
-import { User } from "../../models";
+import { type SyntheticEvent, useRef, useState } from "react";
+import ReactCrop, { centerCrop, type Crop as CropType, makeAspectCrop } from "react-image-crop";
+import { type User } from "@/models";
 
-interface CropProps {
+const MAX_WIDTH = 240;
+
+type CropProps = {
 	user: User;
 	src: string;
-	handleCancel: () => void;
+	handleClose: () => void;
 	handleChange: (file: File | null) => void;
-}
+};
 
-export const Crop = ({ user, src, handleCancel, handleChange }: CropProps) => {
+export function Crop({ user, src, handleClose, handleChange }: CropProps) {
 	const [crop, setCrop] = useState<CropType>();
 	const imgRef = useRef<HTMLImageElement>(null);
 	const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -37,24 +35,13 @@ export const Crop = ({ user, src, handleCancel, handleChange }: CropProps) => {
 		if (!ctx) return;
 
 		const width = Math.round((dimensions.width * crop.width) / 100);
-		const maxWidth = 240;
-		const scale = maxWidth / width;
+		const scale = MAX_WIDTH / width;
 		canvas.width = width * scale;
 		canvas.height = canvas.width;
 		const x = (dimensions.width * crop.x) / 100;
 		const y = (dimensions.height * crop.y) / 100;
 		ctx.imageSmoothingQuality = "high";
-		ctx.drawImage(
-			imgRef.current,
-			x,
-			y,
-			width,
-			width,
-			0,
-			0,
-			width * scale,
-			width * scale
-		);
+		ctx.drawImage(imgRef.current, x, y, width, width, 0, 0, width * scale, width * scale);
 
 		canvas.toBlob((blob) => {
 			if (!blob) return;
@@ -62,14 +49,14 @@ export const Crop = ({ user, src, handleCancel, handleChange }: CropProps) => {
 				type: "image/webp",
 			});
 			handleChange(file);
-			handleCancel();
+			handleClose();
 		});
 	};
 
 	return (
 		<Flex direction="column" align="flex-end" mah="inherit">
 			<Group mb="md">
-				<Button variant="outline" onClick={handleCancel}>
+				<Button variant="outline" onClick={handleClose}>
 					Cancel
 				</Button>
 				<Button onClick={handleApply}>Apply</Button>
@@ -93,4 +80,4 @@ export const Crop = ({ user, src, handleCancel, handleChange }: CropProps) => {
 			</Box>
 		</Flex>
 	);
-};
+}

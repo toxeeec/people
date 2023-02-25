@@ -1,30 +1,26 @@
 import { Grid } from "@mantine/core";
-import { Dispatch, SetStateAction } from "react";
-import { ImageResponse } from "../../models";
-import { CreateImage } from "./CreateImage";
+import { type Dispatch, type SetStateAction } from "react";
+import { type ImageResponse } from "@/models";
+import { CreateImage } from "@/components/images/CreateImage";
 
-interface CreateImagesProps {
+type CreateImagesProps = {
 	files: File[];
 	setFiles: Dispatch<SetStateAction<File[]>>;
 	setImageResponses: Dispatch<SetStateAction<Promise<ImageResponse>[]>>;
-}
+};
 
-export const CreateImages = ({
-	files,
-	setFiles,
-	setImageResponses,
-}: CreateImagesProps) => {
+export function CreateImages({ files, setFiles, setImageResponses }: CreateImagesProps) {
 	return (
 		<Grid>
 			{files.map((file, i) => (
 				<Grid.Col span={6} key={`${file.name}-${i}`}>
 					<CreateImage
-						file={file}
-						setFiles={setFiles}
+						image={file}
+						handleRemove={() => setFiles((files) => files.filter((f) => file !== f))}
 						setImageResponses={setImageResponses}
 					/>
 				</Grid.Col>
 			))}
 		</Grid>
 	);
-};
+}

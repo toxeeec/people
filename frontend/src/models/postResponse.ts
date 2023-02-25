@@ -4,10 +4,10 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { Post } from "./post";
-import type { User } from "./user";
+import type { Post } from "@/models/post";
+import type { User } from "@/models/user";
 
-export interface PostResponse {
+export type PostResponse = {
 	data: Post;
 	user: User;
-}
+};

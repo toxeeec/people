@@ -4,6 +4,6 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { AuthUser } from "./authUser";
+import type { AuthUser } from "@/models/authUser";
 
 export type AuthUserBodyBody = AuthUser;

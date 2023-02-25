@@ -1,41 +1,37 @@
-import { QueryKey, useInfiniteQuery } from "@tanstack/react-query";
+import { type QueryKey, useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useContext, useEffect, useMemo } from "react";
-import { Messages } from "../../models";
+import { type Messages } from "@/models";
 import { useInView } from "react-intersection-observer";
-import { CenterLoader } from "../../components/CenterLoader";
-import { Message } from "./Message";
-import { AuthContext } from "../../context/AuthContext";
+import { CenterLoader } from "@/components/utils";
+import { Message } from "@/components/messages/Message";
+import { AuthContext } from "@/context/AuthContext";
 
-const queryLimit = 20;
+const LIMIT = 20;
 
-interface PaginationParams {
+type PaginationParams = {
 	limit?: number;
 	before?: number;
 	after?: number;
-}
+};
 
 export type Query = (params: PaginationParams) => Promise<Messages>;
 
-interface UserMessagesProps {
+type UserMessagesProps = {
 	query: Query;
 	queryKey: QueryKey;
 	enabled?: boolean;
-}
+};
 
-interface QueryFunctionArgs {
+type QueryFunctionArgs = {
 	pageParam?: PaginationParams;
-}
+};
 
-export const UserMessages = ({
-	query,
-	queryKey,
-	enabled = true,
-}: UserMessagesProps) => {
+export function UserMessages({ query, queryKey, enabled = true }: UserMessagesProps) {
 	const { ref, inView } = useInView();
 	const { getAuth } = useContext(AuthContext);
 	const handle = useMemo(() => getAuth().handle, [getAuth]);
 	const queryFn = ({ pageParam }: QueryFunctionArgs) => {
-		pageParam = { ...pageParam, limit: queryLimit };
+		pageParam = { ...pageParam, limit: LIMIT };
 		return query(pageParam);
 	};
 
@@ -44,7 +40,7 @@ export const UserMessages = ({
 		queryFn,
 		enabled,
 		getNextPageParam: (lastPage) => {
-			if (!lastPage.meta || lastPage.data.length < queryLimit) return undefined;
+			if (!lastPage.meta || lastPage.data.length < LIMIT) return undefined;
 			return { before: lastPage.meta?.oldest };
 		},
 		refetchOnMount: false,
@@ -78,4 +74,4 @@ export const UserMessages = ({
 			{isFetchingNextPage && <CenterLoader />}
 		</>
 	);
-};
+}

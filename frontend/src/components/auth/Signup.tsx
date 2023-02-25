@@ -1,43 +1,37 @@
 import { Modal } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Dispatch, SetStateAction, useContext, useState } from "react";
-import { AuthContext } from "../../context/AuthContext";
-import { AuthUser } from "../../models";
-import { usePostRegister } from "../../spec.gen";
-import { AuthModal } from "./AuthModal";
-import { handleSubmit } from "./handleSubmit";
+import { type Dispatch, type SetStateAction, useContext, useState } from "react";
+import { AuthContext } from "@/context/AuthContext";
+import { type AuthUser } from "@/models";
+import { usePostRegister } from "@/spec.gen";
+import { AuthModal } from "@/components/auth/AuthModal";
 
-interface SignupProps {
+type SignupProps = {
 	signupOpened: boolean;
 	setSignupOpened: Dispatch<SetStateAction<boolean>>;
 	setLoginOpened: Dispatch<SetStateAction<boolean>>;
-}
+};
 
-export const Signup = ({
-	signupOpened,
-	setSignupOpened,
-	setLoginOpened,
-}: SignupProps) => {
+export function Signup({ signupOpened, setSignupOpened, setLoginOpened }: SignupProps) {
 	const form = useForm<AuthUser>({
 		initialValues: { handle: "", password: "" },
 		validate: {
-			handle: (value) =>
-				value.length < 5
-					? "Username must have at least 5 characters"
-					: value.length > 15
-					? "Username cannot have more than 15 characters"
-					: null,
-			password: (value) =>
-				value.length < 8 ? "Password must have at least 8 characters" : null,
+			handle: (value) => {
+				if (value.length < 5) return "Username must contain at least 5 characters";
+				if (value.length > 15) return "Username cannot contain more than 15 characters";
+			},
+			password: (value) => {
+				if (value.length < 8) return "Password must contain at least 8 characters";
+			},
 		},
 	});
-	const { setAuth, setIsNewAccount } = useContext(AuthContext);
+	const { setIsNewAccount } = useContext(AuthContext);
+	const [imagePickerOpened, setImagePickerOpened] = useState(false);
 	const { mutate, isLoading } = usePostRegister();
 	const handleLogin = () => {
 		setSignupOpened(false);
 		setLoginOpened(true);
 	};
-	const [imagePickerOpened, setImagePickerOpened] = useState(false);
 
 	return (
 		<>
@@ -47,17 +41,13 @@ export const Signup = ({
 				setOpened={setSignupOpened}
 				isLoading={isLoading}
 				form={form}
-				handleSubmit={handleSubmit(mutate, setLoginOpened, setAuth, form, () =>
-					setIsNewAccount(true)
-				)}
-				text="Already have an account? "
+				text="Already have an account?"
 				handleChange={handleLogin}
 				buttonText="Log in"
+				mutate={mutate}
+				onSuccess={() => setIsNewAccount(true)}
 			/>
-			<Modal
-				opened={imagePickerOpened}
-				onClose={() => setImagePickerOpened(false)}
-			/>
+			<Modal opened={imagePickerOpened} onClose={() => setImagePickerOpened(false)} />
 		</>
 	);
-};
+}

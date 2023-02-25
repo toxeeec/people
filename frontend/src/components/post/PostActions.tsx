@@ -2,19 +2,16 @@ import { ActionIcon, Group, Text } from "@mantine/core";
 import { IconHeart, IconMessageCircle2 } from "@tabler/icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
-import { Post, User } from "../../models";
-import {
-	useDeletePostsPostIDLikes,
-	usePutPostsPostIDLikes,
-} from "../../spec.gen";
-import { PostReplyModal } from "./PostReplyModal";
+import { type Post, type User } from "@/models";
+import { useDeletePostsPostIDLikes, usePutPostsPostIDLikes } from "@/spec.gen";
+import { PostReplyModal } from "@/components/post/PostReplyModal";
 
-interface PostActionsProps {
+type PostActionsProps = {
 	post: Post;
 	user: User;
-}
+};
 
-export const PostActions = ({ post, user }: PostActionsProps) => {
+export function PostActions({ post, user }: PostActionsProps) {
 	const queryClient = useQueryClient();
 	const { mutate: like } = usePutPostsPostIDLikes({
 		mutation: { retry: 1 },
@@ -22,15 +19,15 @@ export const PostActions = ({ post, user }: PostActionsProps) => {
 	const { mutate: unlike } = useDeletePostsPostIDLikes({
 		mutation: { retry: 1 },
 	});
+	const isLiked = post.status?.isLiked;
 	const handleLike = useCallback(() => {
-		const fn = post.status?.isLiked ? unlike : like;
-		fn(
+		(isLiked ? unlike : like)(
 			{ postID: post.id },
 			{ onSuccess: () => queryClient.invalidateQueries() }
 		);
-	}, [post, like, unlike, queryClient]);
-
+	}, [isLiked, post, like, unlike, queryClient]);
 	const [opened, setOpened] = useState(false);
+
 	const handleOpen = () => {
 		setOpened(true);
 	};
@@ -45,19 +42,16 @@ export const PostActions = ({ post, user }: PostActionsProps) => {
 			</Group>
 			<Group align="center" spacing="xs">
 				<ActionIcon onClick={handleLike}>
-					<IconHeart
-						size={18}
-						fill={post.status?.isLiked ? "currentColor" : "none"}
-					/>
+					<IconHeart size={18} fill={isLiked ? "currentColor" : "none"} />
 				</ActionIcon>
 				<Text size="sm">{post.likes}</Text>
 			</Group>
 			<PostReplyModal
 				post={post}
 				opened={opened}
-				setOpened={setOpened}
+				handleClose={() => setOpened(false)}
 				user={user}
 			/>
 		</Group>
 	);
-};
+}

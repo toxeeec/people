@@ -4,7 +4,7 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { Posts } from "./posts";
+import type { Posts } from "@/models/posts";
 
 /**
  * OK

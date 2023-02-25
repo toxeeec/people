@@ -23,13 +23,17 @@
         "react",
 		"react-hooks",
         "@typescript-eslint",
-		"prettier"
+		"prettier",
+		"no-relative-import-paths"
     ], 
     "rules": {
     	"prettier/prettier": "warn",
-		"@typescript-eslint/no-non-null-assertion": "off",
 		"no-unused-vars": "off",
-		"@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
+		"@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+		"@typescript-eslint/consistent-type-definitions": ["warn", "type"],
+		"@typescript-eslint/consistent-type-imports": ["warn", {"prefer": "type-imports", "fixStyle": "inline-type-imports"}],
+		"react/function-component-definition": ["warn", {"namedComponents": "function-declaration"}],
+		"no-relative-import-paths/no-relative-import-paths": ["warn", {"rootDir": "src", "prefix": "@"}]
     },
 	"settings": {
 		"react": {

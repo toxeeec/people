@@ -4,10 +4,10 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { User } from "./user";
-import type { MessageResults } from "./messageResults";
+import type { User } from "@/models/user";
+import type { MessageResults } from "@/models/messageResults";
 
-export interface UserMessages {
+export type UserMessages = {
 	user: User;
 	data: MessageResults;
-}
+};

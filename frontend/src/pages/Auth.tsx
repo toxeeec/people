@@ -1,20 +1,14 @@
+import { Login, Signup } from "@/components/auth";
 import { Button, Center, Group } from "@mantine/core";
 import { useState } from "react";
-import { Login } from "../components/auth/Login";
-import { Signup } from "../components/auth/Signup";
 
-const Auth = () => {
+export default function Auth() {
 	const [loginOpened, setLoginOpened] = useState(false);
 	const [signupOpened, setSignupOpened] = useState(false);
 	return (
 		<Center w="100%" h="100%">
 			<Group position="center">
-				<Button
-					onClick={() => setLoginOpened(true)}
-					variant="outline"
-					fullWidth
-					radius="xl"
-				>
+				<Button onClick={() => setLoginOpened(true)} variant="outline" fullWidth radius="xl">
 					Log in
 				</Button>
 				<Button onClick={() => setSignupOpened(true)} fullWidth radius="xl">
@@ -33,6 +27,4 @@ const Auth = () => {
 			/>
 		</Center>
 	);
-};
-
-export default Auth;
+}

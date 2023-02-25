@@ -45,9 +45,9 @@ import type {
 	GetThreadsParams,
 	Messages,
 	GetThreadsThreadIDMessagesParams,
-} from "./models";
-import { customInstance } from "./custom-instance";
-import type { ErrorType } from "./custom-instance";
+} from "@/models";
+import { customInstance } from "@/custom-instance";
+import type { ErrorType } from "@/custom-instance";
 
 // eslint-disable-next-line
 type SecondParameter<T extends (...args: any) => any> = T extends (
@@ -72,16 +72,11 @@ export const postRegister = (
 	);
 };
 
-export type PostRegisterMutationResult = NonNullable<
-	Awaited<ReturnType<typeof postRegister>>
->;
+export type PostRegisterMutationResult = NonNullable<Awaited<ReturnType<typeof postRegister>>>;
 export type PostRegisterMutationBody = AuthUserBodyBody;
 export type PostRegisterMutationError = ErrorType<Error>;
 
-export const usePostRegister = <
-	TError = ErrorType<Error>,
-	TContext = unknown
->(options?: {
+export const usePostRegister = <TError = ErrorType<Error>, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof postRegister>>,
 		TError,
@@ -124,16 +119,11 @@ export const postLogin = (
 	);
 };
 
-export type PostLoginMutationResult = NonNullable<
-	Awaited<ReturnType<typeof postLogin>>
->;
+export type PostLoginMutationResult = NonNullable<Awaited<ReturnType<typeof postLogin>>>;
 export type PostLoginMutationBody = AuthUserBodyBody;
 export type PostLoginMutationError = ErrorType<Error>;
 
-export const usePostLogin = <
-	TError = ErrorType<Error>,
-	TContext = unknown
->(options?: {
+export const usePostLogin = <TError = ErrorType<Error>, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof postLogin>>,
 		TError,
@@ -176,16 +166,11 @@ export const postRefresh = (
 	);
 };
 
-export type PostRefreshMutationResult = NonNullable<
-	Awaited<ReturnType<typeof postRefresh>>
->;
+export type PostRefreshMutationResult = NonNullable<Awaited<ReturnType<typeof postRefresh>>>;
 export type PostRefreshMutationBody = RefreshTokenBodyBody;
 export type PostRefreshMutationError = ErrorType<Error>;
 
-export const usePostRefresh = <
-	TError = ErrorType<Error>,
-	TContext = unknown
->(options?: {
+export const usePostRefresh = <TError = ErrorType<Error>, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof postRefresh>>,
 		TError,
@@ -228,16 +213,11 @@ export const postLogout = (
 	);
 };
 
-export type PostLogoutMutationResult = NonNullable<
-	Awaited<ReturnType<typeof postLogout>>
->;
+export type PostLogoutMutationResult = NonNullable<Awaited<ReturnType<typeof postLogout>>>;
 export type PostLogoutMutationBody = LogoutBodyBody;
 export type PostLogoutMutationError = ErrorType<Error>;
 
-export const usePostLogout = <
-	TError = ErrorType<Error>,
-	TContext = unknown
->(options?: {
+export const usePostLogout = <TError = ErrorType<Error>, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof postLogout>>,
 		TError,
@@ -280,16 +260,11 @@ export const putMe = (
 	);
 };
 
-export type PutMeMutationResult = NonNullable<
-	Awaited<ReturnType<typeof putMe>>
->;
+export type PutMeMutationResult = NonNullable<Awaited<ReturnType<typeof putMe>>>;
 export type PutMeMutationBody = UpdatedUser;
 export type PutMeMutationError = ErrorType<Error>;
 
-export const usePutMe = <
-	TError = ErrorType<Error>,
-	TContext = unknown
->(options?: {
+export const usePutMe = <TError = ErrorType<Error>, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof putMe>>,
 		TError,
@@ -300,21 +275,18 @@ export const usePutMe = <
 }) => {
 	const { mutation: mutationOptions, request: requestOptions } = options ?? {};
 
-	const mutationFn: MutationFunction<
-		Awaited<ReturnType<typeof putMe>>,
-		{ data: UpdatedUser }
-	> = (props) => {
+	const mutationFn: MutationFunction<Awaited<ReturnType<typeof putMe>>, { data: UpdatedUser }> = (
+		props
+	) => {
 		const { data } = props ?? {};
 
 		return putMe(data, requestOptions);
 	};
 
-	return useMutation<
-		Awaited<ReturnType<typeof putMe>>,
-		TError,
-		{ data: UpdatedUser },
-		TContext
-	>(mutationFn, mutationOptions);
+	return useMutation<Awaited<ReturnType<typeof putMe>>, TError, { data: UpdatedUser }, TContext>(
+		mutationFn,
+		mutationOptions
+	);
 };
 
 export const deleteMe = (
@@ -332,16 +304,11 @@ export const deleteMe = (
 	);
 };
 
-export type DeleteMeMutationResult = NonNullable<
-	Awaited<ReturnType<typeof deleteMe>>
->;
+export type DeleteMeMutationResult = NonNullable<Awaited<ReturnType<typeof deleteMe>>>;
 export type DeleteMeMutationBody = DeleteMeBody;
 export type DeleteMeMutationError = ErrorType<Error>;
 
-export const useDeleteMe = <
-	TError = ErrorType<Error>,
-	TContext = unknown
->(options?: {
+export const useDeleteMe = <TError = ErrorType<Error>, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof deleteMe>>,
 		TError,
@@ -374,10 +341,7 @@ export const getMeFeed = (
 	options?: SecondParameter<typeof customInstance>,
 	signal?: AbortSignal
 ) => {
-	return customInstance<PostsResponse>(
-		{ url: `/me/feed`, method: "get", params, signal },
-		options
-	);
+	return customInstance<PostsResponse>({ url: `/me/feed`, method: "get", params, signal }, options);
 };
 
 export const getGetMeFeedQueryKey = (params?: GetMeFeedParams) => [
@@ -385,9 +349,7 @@ export const getGetMeFeedQueryKey = (params?: GetMeFeedParams) => [
 	...(params ? [params] : []),
 ];
 
-export type GetMeFeedQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getMeFeed>>
->;
+export type GetMeFeedQueryResult = NonNullable<Awaited<ReturnType<typeof getMeFeed>>>;
 export type GetMeFeedQueryError = ErrorType<unknown>;
 
 export const useGetMeFeed = <
@@ -396,11 +358,7 @@ export const useGetMeFeed = <
 >(
 	params?: GetMeFeedParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getMeFeed>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getMeFeed>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
@@ -408,21 +366,16 @@ export const useGetMeFeed = <
 
 	const queryKey = queryOptions?.queryKey ?? getGetMeFeedQueryKey(params);
 
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeFeed>>> = ({
-		signal,
-	}) => getMeFeed(params, requestOptions, signal);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeFeed>>> = ({ signal }) =>
+		getMeFeed(params, requestOptions, signal);
 
-	const query = useQuery<Awaited<ReturnType<typeof getMeFeed>>, TError, TData>(
-		queryKey,
-		queryFn,
-		{
-			refetchOnWindowFocus: false,
-			refetchOnMount: false,
-			refetchOnReconnect: false,
-			retry: 1,
-			...queryOptions,
-		}
-	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getMeFeed>>, TError, TData>(queryKey, queryFn, {
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -433,10 +386,7 @@ export const putMeFollowingHandle = (
 	handle: string,
 	options?: SecondParameter<typeof customInstance>
 ) => {
-	return customInstance<User>(
-		{ url: `/me/following/${handle}`, method: "put" },
-		options
-	);
+	return customInstance<User>({ url: `/me/following/${handle}`, method: "put" }, options);
 };
 
 export type PutMeFollowingHandleMutationResult = NonNullable<
@@ -445,10 +395,7 @@ export type PutMeFollowingHandleMutationResult = NonNullable<
 
 export type PutMeFollowingHandleMutationError = ErrorType<Error>;
 
-export const usePutMeFollowingHandle = <
-	TError = ErrorType<Error>,
-	TContext = unknown
->(options?: {
+export const usePutMeFollowingHandle = <TError = ErrorType<Error>, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof putMeFollowingHandle>>,
 		TError,
@@ -480,10 +427,7 @@ export const deleteMeFollowingHandle = (
 	handle: string,
 	options?: SecondParameter<typeof customInstance>
 ) => {
-	return customInstance<User>(
-		{ url: `/me/following/${handle}`, method: "delete" },
-		options
-	);
+	return customInstance<User>({ url: `/me/following/${handle}`, method: "delete" }, options);
 };
 
 export type DeleteMeFollowingHandleMutationResult = NonNullable<
@@ -528,10 +472,7 @@ export const getMeFollowing = (
 	options?: SecondParameter<typeof customInstance>,
 	signal?: AbortSignal
 ) => {
-	return customInstance<Users>(
-		{ url: `/me/following`, method: "get", params, signal },
-		options
-	);
+	return customInstance<Users>({ url: `/me/following`, method: "get", params, signal }, options);
 };
 
 export const getGetMeFollowingQueryKey = (params?: GetMeFollowingParams) => [
@@ -539,9 +480,7 @@ export const getGetMeFollowingQueryKey = (params?: GetMeFollowingParams) => [
 	...(params ? [params] : []),
 ];
 
-export type GetMeFollowingQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getMeFollowing>>
->;
+export type GetMeFollowingQueryResult = NonNullable<Awaited<ReturnType<typeof getMeFollowing>>>;
 export type GetMeFollowingQueryError = ErrorType<Error>;
 
 export const useGetMeFollowing = <
@@ -550,11 +489,7 @@ export const useGetMeFollowing = <
 >(
 	params?: GetMeFollowingParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getMeFollowing>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getMeFollowing>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
@@ -562,21 +497,20 @@ export const useGetMeFollowing = <
 
 	const queryKey = queryOptions?.queryKey ?? getGetMeFollowingQueryKey(params);
 
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeFollowing>>> = ({
-		signal,
-	}) => getMeFollowing(params, requestOptions, signal);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeFollowing>>> = ({ signal }) =>
+		getMeFollowing(params, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getMeFollowing>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getMeFollowing>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -588,10 +522,7 @@ export const getMeFollowers = (
 	options?: SecondParameter<typeof customInstance>,
 	signal?: AbortSignal
 ) => {
-	return customInstance<Users>(
-		{ url: `/me/followers`, method: "get", params, signal },
-		options
-	);
+	return customInstance<Users>({ url: `/me/followers`, method: "get", params, signal }, options);
 };
 
 export const getGetMeFollowersQueryKey = (params?: GetMeFollowersParams) => [
@@ -599,9 +530,7 @@ export const getGetMeFollowersQueryKey = (params?: GetMeFollowersParams) => [
 	...(params ? [params] : []),
 ];
 
-export type GetMeFollowersQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getMeFollowers>>
->;
+export type GetMeFollowersQueryResult = NonNullable<Awaited<ReturnType<typeof getMeFollowers>>>;
 export type GetMeFollowersQueryError = ErrorType<Error>;
 
 export const useGetMeFollowers = <
@@ -610,11 +539,7 @@ export const useGetMeFollowers = <
 >(
 	params?: GetMeFollowersParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getMeFollowers>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getMeFollowers>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
@@ -622,21 +547,20 @@ export const useGetMeFollowers = <
 
 	const queryKey = queryOptions?.queryKey ?? getGetMeFollowersQueryKey(params);
 
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeFollowers>>> = ({
-		signal,
-	}) => getMeFollowers(params, requestOptions, signal);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeFollowers>>> = ({ signal }) =>
+		getMeFollowers(params, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getMeFollowers>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getMeFollowers>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -648,19 +572,12 @@ export const getUsersHandle = (
 	options?: SecondParameter<typeof customInstance>,
 	signal?: AbortSignal
 ) => {
-	return customInstance<User>(
-		{ url: `/users/${handle}`, method: "get", signal },
-		options
-	);
+	return customInstance<User>({ url: `/users/${handle}`, method: "get", signal }, options);
 };
 
-export const getGetUsersHandleQueryKey = (handle: string) => [
-	`/users/${handle}`,
-];
+export const getGetUsersHandleQueryKey = (handle: string) => [`/users/${handle}`];
 
-export type GetUsersHandleQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getUsersHandle>>
->;
+export type GetUsersHandleQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersHandle>>>;
 export type GetUsersHandleQueryError = ErrorType<Error>;
 
 export const useGetUsersHandle = <
@@ -669,11 +586,7 @@ export const useGetUsersHandle = <
 >(
 	handle: string,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getUsersHandle>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getUsersHandle>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
@@ -681,22 +594,21 @@ export const useGetUsersHandle = <
 
 	const queryKey = queryOptions?.queryKey ?? getGetUsersHandleQueryKey(handle);
 
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersHandle>>> = ({
-		signal,
-	}) => getUsersHandle(handle, requestOptions, signal);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersHandle>>> = ({ signal }) =>
+		getUsersHandle(handle, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getUsersHandle>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!handle,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getUsersHandle>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			enabled: !!handle,
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -732,37 +644,30 @@ export const useGetUsersHandleFollowing = <
 	handle: string,
 	params?: GetUsersHandleFollowingParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getUsersHandleFollowing>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getUsersHandleFollowing>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
-	const queryKey =
-		queryOptions?.queryKey ??
-		getGetUsersHandleFollowingQueryKey(handle, params);
+	const queryKey = queryOptions?.queryKey ?? getGetUsersHandleFollowingQueryKey(handle, params);
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getUsersHandleFollowing>>
-	> = ({ signal }) =>
-		getUsersHandleFollowing(handle, params, requestOptions, signal);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersHandleFollowing>>> = ({
+		signal,
+	}) => getUsersHandleFollowing(handle, params, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getUsersHandleFollowing>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!handle,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getUsersHandleFollowing>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			enabled: !!handle,
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -798,37 +703,30 @@ export const useGetUsersHandleFollowers = <
 	handle: string,
 	params?: GetUsersHandleFollowersParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getUsersHandleFollowers>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getUsersHandleFollowers>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
-	const queryKey =
-		queryOptions?.queryKey ??
-		getGetUsersHandleFollowersQueryKey(handle, params);
+	const queryKey = queryOptions?.queryKey ?? getGetUsersHandleFollowersQueryKey(handle, params);
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getUsersHandleFollowers>>
-	> = ({ signal }) =>
-		getUsersHandleFollowers(handle, params, requestOptions, signal);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersHandleFollowers>>> = ({
+		signal,
+	}) => getUsersHandleFollowers(handle, params, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getUsersHandleFollowers>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!handle,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getUsersHandleFollowers>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			enabled: !!handle,
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -840,10 +738,7 @@ export const getUsersSearch = (
 	options?: SecondParameter<typeof customInstance>,
 	signal?: AbortSignal
 ) => {
-	return customInstance<Users>(
-		{ url: `/users/search`, method: "get", params, signal },
-		options
-	);
+	return customInstance<Users>({ url: `/users/search`, method: "get", params, signal }, options);
 };
 
 export const getGetUsersSearchQueryKey = (params: GetUsersSearchParams) => [
@@ -851,9 +746,7 @@ export const getGetUsersSearchQueryKey = (params: GetUsersSearchParams) => [
 	...(params ? [params] : []),
 ];
 
-export type GetUsersSearchQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getUsersSearch>>
->;
+export type GetUsersSearchQueryResult = NonNullable<Awaited<ReturnType<typeof getUsersSearch>>>;
 export type GetUsersSearchQueryError = ErrorType<unknown>;
 
 export const useGetUsersSearch = <
@@ -862,11 +755,7 @@ export const useGetUsersSearch = <
 >(
 	params: GetUsersSearchParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getUsersSearch>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getUsersSearch>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
@@ -874,21 +763,20 @@ export const useGetUsersSearch = <
 
 	const queryKey = queryOptions?.queryKey ?? getGetUsersSearchQueryKey(params);
 
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersSearch>>> = ({
-		signal,
-	}) => getUsersSearch(params, requestOptions, signal);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersSearch>>> = ({ signal }) =>
+		getUsersSearch(params, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getUsersSearch>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getUsersSearch>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -924,36 +812,29 @@ export const useGetUsersHandlePosts = <
 	handle: string,
 	params?: GetUsersHandlePostsParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getUsersHandlePosts>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getUsersHandlePosts>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
-	const queryKey =
-		queryOptions?.queryKey ?? getGetUsersHandlePostsQueryKey(handle, params);
+	const queryKey = queryOptions?.queryKey ?? getGetUsersHandlePostsQueryKey(handle, params);
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getUsersHandlePosts>>
-	> = ({ signal }) =>
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersHandlePosts>>> = ({ signal }) =>
 		getUsersHandlePosts(handle, params, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getUsersHandlePosts>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!handle,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getUsersHandlePosts>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			enabled: !!handle,
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -989,36 +870,29 @@ export const useGetUsersHandleLikes = <
 	handle: string,
 	params?: GetUsersHandleLikesParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getUsersHandleLikes>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getUsersHandleLikes>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
-	const queryKey =
-		queryOptions?.queryKey ?? getGetUsersHandleLikesQueryKey(handle, params);
+	const queryKey = queryOptions?.queryKey ?? getGetUsersHandleLikesQueryKey(handle, params);
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getUsersHandleLikes>>
-	> = ({ signal }) =>
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersHandleLikes>>> = ({ signal }) =>
 		getUsersHandleLikes(handle, params, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getUsersHandleLikes>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!handle,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getUsersHandleLikes>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			enabled: !!handle,
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -1040,16 +914,11 @@ export const postPosts = (
 	);
 };
 
-export type PostPostsMutationResult = NonNullable<
-	Awaited<ReturnType<typeof postPosts>>
->;
+export type PostPostsMutationResult = NonNullable<Awaited<ReturnType<typeof postPosts>>>;
 export type PostPostsMutationBody = NewPostBodyBody;
 export type PostPostsMutationError = ErrorType<Error>;
 
-export const usePostPosts = <
-	TError = ErrorType<Error>,
-	TContext = unknown
->(options?: {
+export const usePostPosts = <TError = ErrorType<Error>, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof postPosts>>,
 		TError,
@@ -1082,19 +951,12 @@ export const getPostsPostID = (
 	options?: SecondParameter<typeof customInstance>,
 	signal?: AbortSignal
 ) => {
-	return customInstance<PostResponse>(
-		{ url: `/posts/${postID}`, method: "get", signal },
-		options
-	);
+	return customInstance<PostResponse>({ url: `/posts/${postID}`, method: "get", signal }, options);
 };
 
-export const getGetPostsPostIDQueryKey = (postID: number) => [
-	`/posts/${postID}`,
-];
+export const getGetPostsPostIDQueryKey = (postID: number) => [`/posts/${postID}`];
 
-export type GetPostsPostIDQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getPostsPostID>>
->;
+export type GetPostsPostIDQueryResult = NonNullable<Awaited<ReturnType<typeof getPostsPostID>>>;
 export type GetPostsPostIDQueryError = ErrorType<Error>;
 
 export const useGetPostsPostID = <
@@ -1103,11 +965,7 @@ export const useGetPostsPostID = <
 >(
 	postID: number,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getPostsPostID>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getPostsPostID>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
@@ -1115,22 +973,21 @@ export const useGetPostsPostID = <
 
 	const queryKey = queryOptions?.queryKey ?? getGetPostsPostIDQueryKey(postID);
 
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getPostsPostID>>> = ({
-		signal,
-	}) => getPostsPostID(postID, requestOptions, signal);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getPostsPostID>>> = ({ signal }) =>
+		getPostsPostID(postID, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getPostsPostID>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!postID,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getPostsPostID>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			enabled: !!postID,
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -1141,10 +998,7 @@ export const deletePostsPostID = (
 	postID: number,
 	options?: SecondParameter<typeof customInstance>
 ) => {
-	return customInstance<void>(
-		{ url: `/posts/${postID}`, method: "delete" },
-		options
-	);
+	return customInstance<void>({ url: `/posts/${postID}`, method: "delete" }, options);
 };
 
 export type DeletePostsPostIDMutationResult = NonNullable<
@@ -1153,10 +1007,7 @@ export type DeletePostsPostIDMutationResult = NonNullable<
 
 export type DeletePostsPostIDMutationError = ErrorType<unknown>;
 
-export const useDeletePostsPostID = <
-	TError = ErrorType<unknown>,
-	TContext = unknown
->(options?: {
+export const useDeletePostsPostID = <TError = ErrorType<unknown>, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof deletePostsPostID>>,
 		TError,
@@ -1200,9 +1051,7 @@ export const getGetPostsSearchQueryKey = (params: GetPostsSearchParams) => [
 	...(params ? [params] : []),
 ];
 
-export type GetPostsSearchQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getPostsSearch>>
->;
+export type GetPostsSearchQueryResult = NonNullable<Awaited<ReturnType<typeof getPostsSearch>>>;
 export type GetPostsSearchQueryError = ErrorType<unknown>;
 
 export const useGetPostsSearch = <
@@ -1211,11 +1060,7 @@ export const useGetPostsSearch = <
 >(
 	params: GetPostsSearchParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getPostsSearch>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getPostsSearch>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
@@ -1223,21 +1068,20 @@ export const useGetPostsSearch = <
 
 	const queryKey = queryOptions?.queryKey ?? getGetPostsSearchQueryKey(params);
 
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getPostsSearch>>> = ({
-		signal,
-	}) => getPostsSearch(params, requestOptions, signal);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getPostsSearch>>> = ({ signal }) =>
+		getPostsSearch(params, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getPostsSearch>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getPostsSearch>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -1273,36 +1117,29 @@ export const useGetPostsPostIDReplies = <
 	postID: number,
 	params?: GetPostsPostIDRepliesParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getPostsPostIDReplies>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getPostsPostIDReplies>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
-	const queryKey =
-		queryOptions?.queryKey ?? getGetPostsPostIDRepliesQueryKey(postID, params);
+	const queryKey = queryOptions?.queryKey ?? getGetPostsPostIDRepliesQueryKey(postID, params);
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getPostsPostIDReplies>>
-	> = ({ signal }) =>
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getPostsPostIDReplies>>> = ({ signal }) =>
 		getPostsPostIDReplies(postID, params, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getPostsPostIDReplies>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!postID,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getPostsPostIDReplies>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			enabled: !!postID,
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -1331,10 +1168,7 @@ export type PostPostsPostIDRepliesMutationResult = NonNullable<
 export type PostPostsPostIDRepliesMutationBody = NewPostBodyBody;
 export type PostPostsPostIDRepliesMutationError = ErrorType<Error>;
 
-export const usePostPostsPostIDReplies = <
-	TError = ErrorType<Error>,
-	TContext = unknown
->(options?: {
+export const usePostPostsPostIDReplies = <TError = ErrorType<Error>, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof postPostsPostIDReplies>>,
 		TError,
@@ -1391,36 +1225,29 @@ export const useGetPostsPostIDLikes = <
 	postID: number,
 	params?: GetPostsPostIDLikesParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getPostsPostIDLikes>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getPostsPostIDLikes>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
-	const queryKey =
-		queryOptions?.queryKey ?? getGetPostsPostIDLikesQueryKey(postID, params);
+	const queryKey = queryOptions?.queryKey ?? getGetPostsPostIDLikesQueryKey(postID, params);
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getPostsPostIDLikes>>
-	> = ({ signal }) =>
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getPostsPostIDLikes>>> = ({ signal }) =>
 		getPostsPostIDLikes(postID, params, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getPostsPostIDLikes>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!postID,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getPostsPostIDLikes>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			enabled: !!postID,
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -1431,10 +1258,7 @@ export const putPostsPostIDLikes = (
 	postID: number,
 	options?: SecondParameter<typeof customInstance>
 ) => {
-	return customInstance<PostResponse>(
-		{ url: `/posts/${postID}/likes`, method: "put" },
-		options
-	);
+	return customInstance<PostResponse>({ url: `/posts/${postID}/likes`, method: "put" }, options);
 };
 
 export type PutPostsPostIDLikesMutationResult = NonNullable<
@@ -1443,10 +1267,7 @@ export type PutPostsPostIDLikesMutationResult = NonNullable<
 
 export type PutPostsPostIDLikesMutationError = ErrorType<Error>;
 
-export const usePutPostsPostIDLikes = <
-	TError = ErrorType<Error>,
-	TContext = unknown
->(options?: {
+export const usePutPostsPostIDLikes = <TError = ErrorType<Error>, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof putPostsPostIDLikes>>,
 		TError,
@@ -1478,10 +1299,7 @@ export const deletePostsPostIDLikes = (
 	postID: number,
 	options?: SecondParameter<typeof customInstance>
 ) => {
-	return customInstance<PostResponse>(
-		{ url: `/posts/${postID}/likes`, method: "delete" },
-		options
-	);
+	return customInstance<PostResponse>({ url: `/posts/${postID}/likes`, method: "delete" }, options);
 };
 
 export type DeletePostsPostIDLikesMutationResult = NonNullable<
@@ -1490,10 +1308,7 @@ export type DeletePostsPostIDLikesMutationResult = NonNullable<
 
 export type DeletePostsPostIDLikesMutationError = ErrorType<Error>;
 
-export const useDeletePostsPostIDLikes = <
-	TError = ErrorType<Error>,
-	TContext = unknown
->(options?: {
+export const useDeletePostsPostIDLikes = <TError = ErrorType<Error>, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof deletePostsPostIDLikes>>,
 		TError,
@@ -1539,16 +1354,11 @@ export const postImages = (
 	);
 };
 
-export type PostImagesMutationResult = NonNullable<
-	Awaited<ReturnType<typeof postImages>>
->;
+export type PostImagesMutationResult = NonNullable<Awaited<ReturnType<typeof postImages>>>;
 export type PostImagesMutationBody = ImageBodyBody;
 export type PostImagesMutationError = ErrorType<Error>;
 
-export const usePostImages = <
-	TError = ErrorType<Error>,
-	TContext = unknown
->(options?: {
+export const usePostImages = <TError = ErrorType<Error>, TContext = unknown>(options?: {
 	mutation?: UseMutationOptions<
 		Awaited<ReturnType<typeof postImages>>,
 		TError,
@@ -1581,15 +1391,10 @@ export const getUsersHandleThread = (
 	options?: SecondParameter<typeof customInstance>,
 	signal?: AbortSignal
 ) => {
-	return customInstance<Thread>(
-		{ url: `/users/${handle}/thread`, method: "get", signal },
-		options
-	);
+	return customInstance<Thread>({ url: `/users/${handle}/thread`, method: "get", signal }, options);
 };
 
-export const getGetUsersHandleThreadQueryKey = (handle: string) => [
-	`/users/${handle}/thread`,
-];
+export const getGetUsersHandleThreadQueryKey = (handle: string) => [`/users/${handle}/thread`];
 
 export type GetUsersHandleThreadQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getUsersHandleThread>>
@@ -1602,88 +1407,22 @@ export const useGetUsersHandleThread = <
 >(
 	handle: string,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getUsersHandleThread>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getUsersHandleThread>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
-	const queryKey =
-		queryOptions?.queryKey ?? getGetUsersHandleThreadQueryKey(handle);
+	const queryKey = queryOptions?.queryKey ?? getGetUsersHandleThreadQueryKey(handle);
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getUsersHandleThread>>
-	> = ({ signal }) => getUsersHandleThread(handle, requestOptions, signal);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getUsersHandleThread>>> = ({ signal }) =>
+		getUsersHandleThread(handle, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getUsersHandleThread>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!handle,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
-
-	query.queryKey = queryKey;
-
-	return query;
-};
-
-export const getThreads = (
-	params?: GetThreadsParams,
-	options?: SecondParameter<typeof customInstance>,
-	signal?: AbortSignal
-) => {
-	return customInstance<Threads>(
-		{ url: `/threads`, method: "get", params, signal },
-		options
-	);
-};
-
-export const getGetThreadsQueryKey = (params?: GetThreadsParams) => [
-	`/threads`,
-	...(params ? [params] : []),
-];
-
-export type GetThreadsQueryResult = NonNullable<
-	Awaited<ReturnType<typeof getThreads>>
->;
-export type GetThreadsQueryError = ErrorType<Error>;
-
-export const useGetThreads = <
-	TData = Awaited<ReturnType<typeof getThreads>>,
-	TError = ErrorType<Error>
->(
-	params?: GetThreadsParams,
-	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getThreads>>,
-			TError,
-			TData
-		>;
-		request?: SecondParameter<typeof customInstance>;
-	}
-): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
-	const { query: queryOptions, request: requestOptions } = options ?? {};
-
-	const queryKey = queryOptions?.queryKey ?? getGetThreadsQueryKey(params);
-
-	const queryFn: QueryFunction<Awaited<ReturnType<typeof getThreads>>> = ({
-		signal,
-	}) => getThreads(params, requestOptions, signal);
-
-	const query = useQuery<Awaited<ReturnType<typeof getThreads>>, TError, TData>(
+	const query = useQuery<Awaited<ReturnType<typeof getUsersHandleThread>>, TError, TData>(
 		queryKey,
 		queryFn,
 		{
+			enabled: !!handle,
 			refetchOnWindowFocus: false,
 			refetchOnMount: false,
 			refetchOnReconnect: false,
@@ -1697,20 +1436,61 @@ export const useGetThreads = <
 	return query;
 };
 
+export const getThreads = (
+	params?: GetThreadsParams,
+	options?: SecondParameter<typeof customInstance>,
+	signal?: AbortSignal
+) => {
+	return customInstance<Threads>({ url: `/threads`, method: "get", params, signal }, options);
+};
+
+export const getGetThreadsQueryKey = (params?: GetThreadsParams) => [
+	`/threads`,
+	...(params ? [params] : []),
+];
+
+export type GetThreadsQueryResult = NonNullable<Awaited<ReturnType<typeof getThreads>>>;
+export type GetThreadsQueryError = ErrorType<Error>;
+
+export const useGetThreads = <
+	TData = Awaited<ReturnType<typeof getThreads>>,
+	TError = ErrorType<Error>
+>(
+	params?: GetThreadsParams,
+	options?: {
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getThreads>>, TError, TData>;
+		request?: SecondParameter<typeof customInstance>;
+	}
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
+	const { query: queryOptions, request: requestOptions } = options ?? {};
+
+	const queryKey = queryOptions?.queryKey ?? getGetThreadsQueryKey(params);
+
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getThreads>>> = ({ signal }) =>
+		getThreads(params, requestOptions, signal);
+
+	const query = useQuery<Awaited<ReturnType<typeof getThreads>>, TError, TData>(queryKey, queryFn, {
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
+		retry: 1,
+		...queryOptions,
+	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+	query.queryKey = queryKey;
+
+	return query;
+};
+
 export const getThreadsThreadID = (
 	threadID: number,
 	options?: SecondParameter<typeof customInstance>,
 	signal?: AbortSignal
 ) => {
-	return customInstance<Thread>(
-		{ url: `/threads/${threadID}`, method: "get", signal },
-		options
-	);
+	return customInstance<Thread>({ url: `/threads/${threadID}`, method: "get", signal }, options);
 };
 
-export const getGetThreadsThreadIDQueryKey = (threadID: number) => [
-	`/threads/${threadID}`,
-];
+export const getGetThreadsThreadIDQueryKey = (threadID: number) => [`/threads/${threadID}`];
 
 export type GetThreadsThreadIDQueryResult = NonNullable<
 	Awaited<ReturnType<typeof getThreadsThreadID>>
@@ -1723,35 +1503,29 @@ export const useGetThreadsThreadID = <
 >(
 	threadID: number,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getThreadsThreadID>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getThreadsThreadID>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
-	const queryKey =
-		queryOptions?.queryKey ?? getGetThreadsThreadIDQueryKey(threadID);
+	const queryKey = queryOptions?.queryKey ?? getGetThreadsThreadIDQueryKey(threadID);
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getThreadsThreadID>>
-	> = ({ signal }) => getThreadsThreadID(threadID, requestOptions, signal);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getThreadsThreadID>>> = ({ signal }) =>
+		getThreadsThreadID(threadID, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getThreadsThreadID>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!threadID,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getThreadsThreadID>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			enabled: !!threadID,
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 
@@ -1787,37 +1561,31 @@ export const useGetThreadsThreadIDMessages = <
 	threadID: number,
 	params?: GetThreadsThreadIDMessagesParams,
 	options?: {
-		query?: UseQueryOptions<
-			Awaited<ReturnType<typeof getThreadsThreadIDMessages>>,
-			TError,
-			TData
-		>;
+		query?: UseQueryOptions<Awaited<ReturnType<typeof getThreadsThreadIDMessages>>, TError, TData>;
 		request?: SecondParameter<typeof customInstance>;
 	}
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } => {
 	const { query: queryOptions, request: requestOptions } = options ?? {};
 
 	const queryKey =
-		queryOptions?.queryKey ??
-		getGetThreadsThreadIDMessagesQueryKey(threadID, params);
+		queryOptions?.queryKey ?? getGetThreadsThreadIDMessagesQueryKey(threadID, params);
 
-	const queryFn: QueryFunction<
-		Awaited<ReturnType<typeof getThreadsThreadIDMessages>>
-	> = ({ signal }) =>
-		getThreadsThreadIDMessages(threadID, params, requestOptions, signal);
+	const queryFn: QueryFunction<Awaited<ReturnType<typeof getThreadsThreadIDMessages>>> = ({
+		signal,
+	}) => getThreadsThreadIDMessages(threadID, params, requestOptions, signal);
 
-	const query = useQuery<
-		Awaited<ReturnType<typeof getThreadsThreadIDMessages>>,
-		TError,
-		TData
-	>(queryKey, queryFn, {
-		enabled: !!threadID,
-		refetchOnWindowFocus: false,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		retry: 1,
-		...queryOptions,
-	}) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
+	const query = useQuery<Awaited<ReturnType<typeof getThreadsThreadIDMessages>>, TError, TData>(
+		queryKey,
+		queryFn,
+		{
+			enabled: !!threadID,
+			refetchOnWindowFocus: false,
+			refetchOnMount: false,
+			refetchOnReconnect: false,
+			retry: 1,
+			...queryOptions,
+		}
+	) as UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
 	query.queryKey = queryKey;
 

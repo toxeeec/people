@@ -1,66 +1,60 @@
 import { ActionIcon, FileButton, Flex, Group, Tooltip } from "@mantine/core";
 import { IconPhoto, IconX } from "@tabler/icons";
-import { useEffect, useRef, useState } from "react";
-import { Avatar } from "../../Avatar";
-import { User } from "../../models";
-import { postImages } from "../../spec.gen";
+import { useRef, useState } from "react";
+import { Avatar } from "@/components/user";
+import { type User } from "@/models";
+import { postImages } from "@/spec.gen";
 import "react-image-crop/dist/ReactCrop.css";
-import { Crop } from "./Crop";
+import { Crop } from "@/components/images/Crop";
 
-interface EditProfilePictureProps {
+type EditProfilePictureProps = {
 	user: User;
+	cropOpened: boolean;
 	setCropOpened: (opened: boolean) => void;
 	setImage?: (id: number | undefined) => void;
-	removeImage?: () => void;
-}
+	handleRemoveImage?: () => void;
+};
 
-export const EditProfilePicture = ({
-	user: initialUser,
+export function EditProfilePicture({
+	user,
 	setImage,
+	cropOpened,
 	setCropOpened,
-	removeImage,
-}: EditProfilePictureProps) => {
-	const [user, setUser] = useState(initialUser);
-	const [src, setSrc] = useState("");
+	handleRemoveImage,
+}: EditProfilePictureProps) {
+	const [src, setSrc] = useState(user.image ?? "");
 	const resetRef = useRef<() => void>(null);
-
-	useEffect(() => {
-		setCropOpened(!!src);
-	}, [src, setCropOpened]);
 
 	const handleChange = async (file: File | null) => {
 		if (!file) return;
 		const src = URL.createObjectURL(file);
-		const dimensions = await new Promise<{ width: number; height: number }>(
-			(resolve) => {
-				const img = new Image();
-				img.onload = () => {
-					const { width, height } = img;
-					resolve({ width, height });
-				};
-				img.src = src;
-			}
-		);
+		setSrc(src);
+		const dimensions = await new Promise<{ width: number; height: number }>((resolve) => {
+			const img = new Image();
+			img.onload = () => {
+				const { width, height } = img;
+				resolve({ width, height });
+			};
+			img.src = src;
+		});
 		if (dimensions.width !== dimensions.height) {
-			setSrc(src);
+			setCropOpened(true);
 			return;
 		}
-		setUser((user) => ({ ...user, image: src }));
 		postImages({ image: file })
 			.then((img) => {
-				setUser((user) => ({ ...user, image: src }));
 				resetRef.current?.();
 				setImage?.(img.id);
 			})
 			.catch((e) => e);
 	};
 
-	return src ? (
+	return cropOpened ? (
 		<Crop
 			user={user}
 			src={src}
 			handleChange={handleChange}
-			handleCancel={() => setSrc("")}
+			handleClose={() => setCropOpened(false)}
 		/>
 	) : (
 		<FileButton
@@ -70,7 +64,7 @@ export const EditProfilePicture = ({
 		>
 			{(props) => (
 				<Flex direction="column" align="center" gap="md">
-					<Avatar size={120} m="auto" user={user} />
+					<Avatar size={120} m="auto" user={{ ...user, image: src }} />
 					<Group>
 						<Tooltip label="Add picture">
 							<ActionIcon {...props}>
@@ -80,9 +74,9 @@ export const EditProfilePicture = ({
 						<Tooltip label="Remove picture">
 							<ActionIcon
 								onClick={() => {
-									setUser((user) => ({ ...user, image: undefined }));
 									resetRef.current?.();
-									removeImage?.();
+									setSrc("");
+									handleRemoveImage?.();
 								}}
 							>
 								<IconX />
@@ -93,4 +87,4 @@ export const EditProfilePicture = ({
 			)}
 		</FileButton>
 	);
-};
+}

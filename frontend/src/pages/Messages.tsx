@@ -1,21 +1,24 @@
 import { ActionIcon, Box, Flex, Tabs } from "@mantine/core";
-import {
-	useClickOutside,
-	useDebouncedValue,
-	useMediaQuery,
-} from "@mantine/hooks";
+import { useClickOutside, useDebouncedValue, useMediaQuery } from "@mantine/hooks";
 import { IconArrowLeft } from "@tabler/icons";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { MessagesTab } from "../components/messages/MessagesTab";
-import { MessagesTabs } from "../components/messages/MessagesTabs";
-import { SearchUsers } from "../components/messages/SearchUsers";
-import { Search } from "../components/Search";
-import { NotificationsContext } from "../context/NotificationsContext";
-import { Message, Thread } from "../models";
-import { getUsersHandleThread } from "../spec.gen";
+import { SearchBar } from "@/components/search";
+import { NotificationsContext } from "@/context/NotificationsContext";
+import { type Message, type Thread } from "@/models";
+import { getUsersHandleThread } from "@/spec.gen";
+import { InfiniteSearchUsers } from "@/components/search/InfiniteSearchUsers";
+import { InfiniteTabs } from "@/components/messages/InfiniteTabs";
+import { Tab } from "@/components/messages/Tab";
+import { HEADER_HEIGHT } from "@/layout/Header";
+import { RouteContext } from "@/context/RouteContext";
 
-const Messages = () => {
+function Messages() {
+	const { setRouteName } = useContext(RouteContext);
+	useEffect(() => {
+		setRouteName("Messages");
+	}, [setRouteName]);
+
 	const params = useParams();
 	const navigate = useNavigate();
 	const [query, setQuery] = useState("");
@@ -24,9 +27,7 @@ const Messages = () => {
 	const matches = useMediaQuery("(min-width: 720px)");
 	const { newMessages, addMessageCallback, removeMessageCallback } =
 		useContext(NotificationsContext);
-	const [currentThread, setCurrentThread] = useState<string | null>(
-		params.thread ?? null
-	);
+	const [currentThread, setCurrentThread] = useState<string | null>(params.thread ?? null);
 
 	const close = () => {
 		setHidden(true);
@@ -80,14 +81,11 @@ const Messages = () => {
 		const cb = (msg: Message) => {
 			setThreads((threads) =>
 				threads.map((thread) => {
-					return thread.id === msg.threadID
-						? { ...thread, latest: msg }
-						: thread;
+					return thread.id === msg.threadID ? { ...thread, latest: msg } : thread;
 				})
 			);
 			sortThreads();
 		};
-
 		addMessageCallback(cb);
 		return () => removeMessageCallback(cb);
 	}, [addMessageCallback, removeMessageCallback, threads]);
@@ -98,7 +96,7 @@ const Messages = () => {
 	return (
 		<Tabs
 			orientation="vertical"
-			h="calc(100% - 60px)"
+			h={`calc(100% - ${HEADER_HEIGHT}px)`}
 			value={currentThread}
 			onTabChange={handleChange}
 			styles={{
@@ -114,16 +112,17 @@ const Messages = () => {
 						<ActionIcon hidden={hidden} mx="xs" onClick={close}>
 							<IconArrowLeft />
 						</ActionIcon>
-						<Search value={query} setValue={setQuery} />
+						<SearchBar value={query} setValue={setQuery} />
 					</Flex>
-					<SearchUsers
+					<InfiniteSearchUsers
 						ref={ref}
 						hidden={hidden}
-						debounced={debounced}
+						query={debounced}
 						onClick={getNewThread}
+						enabled={debounced.length > 0}
 					/>
 					<Box hidden={!hidden} w="100%">
-						<MessagesTabs
+						<InfiniteTabs
 							threads={threads}
 							setThreads={setThreads}
 							initialThread={params.thread}
@@ -133,14 +132,10 @@ const Messages = () => {
 				</Flex>
 			</Tabs.List>
 			{threads.map((thread) => (
-				<MessagesTab
-					key={thread.id}
-					thread={thread}
-					newMessages={newMessages.get(thread.id)}
-				/>
+				<Tab key={thread.id} thread={thread} newMessages={newMessages.get(thread.id)} />
 			))}
 		</Tabs>
 	);
-};
+}
 
 export default Messages;

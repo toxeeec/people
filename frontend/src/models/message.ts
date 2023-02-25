@@ -4,12 +4,12 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { User } from "./user";
+import type { User } from "@/models/user";
 
-export interface Message {
+export type Message = {
 	id: number;
 	content: string;
 	from: User;
 	threadID: number;
 	sentAt: string;
-}
+};

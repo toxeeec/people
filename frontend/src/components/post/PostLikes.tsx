@@ -1,16 +1,16 @@
 import { Modal, Text } from "@mantine/core";
-import { Dispatch, SetStateAction } from "react";
-import { getPostsPostIDLikes } from "../../spec.gen";
-import { Users, Query } from "../Users";
+import { type Dispatch, type SetStateAction } from "react";
+import { getPostsPostIDLikes } from "@/spec.gen";
+import { InfiniteUsers, type UsersQuery } from "@/components/user";
 
-interface PostLikesProps {
+type PostLikesProps = {
 	opened: boolean;
 	setOpened: Dispatch<SetStateAction<boolean>>;
 	id: number;
-}
+};
 
-export const PostLikes = ({ opened, setOpened, id }: PostLikesProps) => {
-	const query: Query = (params) => {
+export function PostLikes({ opened, setOpened, id }: PostLikesProps) {
+	const query: UsersQuery = (params) => {
 		return getPostsPostIDLikes(id, params);
 	};
 	return (
@@ -22,7 +22,7 @@ export const PostLikes = ({ opened, setOpened, id }: PostLikesProps) => {
 			centered
 			title={<Text weight="bold">Liked by</Text>}
 		>
-			<Users queryKey={["users", id, "likes"]} query={query} />
+			<InfiniteUsers queryKey={["users", id, "likes"]} query={query} />
 		</Modal>
 	);
-};
+}

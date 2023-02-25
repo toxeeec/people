@@ -4,10 +4,10 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { QueryParamParameter } from "./queryParamParameter";
-import type { LimitParamParameter } from "./limitParamParameter";
-import type { BeforeHandleParamParameter } from "./beforeHandleParamParameter";
-import type { AfterHandleParamParameter } from "./afterHandleParamParameter";
+import type { QueryParamParameter } from "@/models/queryParamParameter";
+import type { LimitParamParameter } from "@/models/limitParamParameter";
+import type { BeforeHandleParamParameter } from "@/models/beforeHandleParamParameter";
+import type { AfterHandleParamParameter } from "@/models/afterHandleParamParameter";
 
 export type GetUsersSearchParams = {
 	query: QueryParamParameter;

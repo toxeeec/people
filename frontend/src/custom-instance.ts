@@ -1,6 +1,7 @@
-import Axios, { AxiosError, AxiosRequestConfig } from "axios";
-import { AuthValues, SetAuthProps } from "./context/AuthContext";
-import { postRefresh } from "./spec.gen";
+import { type AuthValues, type SetAuthProps } from "@/context/AuthContext";
+import { postRefresh } from "@/spec.gen";
+import Axios, { type AxiosError, type AxiosRequestConfig } from "axios";
+import { type Error } from "@/models";
 
 const port = BACKEND_PORT;
 export const baseURL = `${location.protocol}//${location.hostname}:${port}`;

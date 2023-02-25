@@ -25,5 +25,8 @@ export default defineConfig({
 		input: {
 			target: "./openapi.json",
 		},
+		hooks: {
+			afterAllFilesWrite: "eslint src/models/*.ts src/spec.gen.ts --fix",
+		},
 	},
 });

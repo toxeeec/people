@@ -4,7 +4,7 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { PostRegister200UserStatus } from "./postRegister200UserStatus";
+import type { PostRegister200UserStatus } from "@/models/postRegister200UserStatus";
 
 export type PostRegister200User = {
 	handle: string;

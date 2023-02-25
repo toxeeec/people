@@ -1,12 +1,12 @@
 import { Image as ImageComponent, Modal } from "@mantine/core";
 import { useState } from "react";
-import { baseURL } from "../../custom-instance";
+import { baseURL } from "@/custom-instance";
 
-interface ImageProps {
+type ImageProps = {
 	path: string;
-}
+};
 
-export const Image = ({ path }: ImageProps) => {
+export function Image({ path }: ImageProps) {
 	const [opened, setOpened] = useState(false);
 	return (
 		<>
@@ -40,4 +40,4 @@ export const Image = ({ path }: ImageProps) => {
 			</Modal>
 		</>
 	);
-};
+}

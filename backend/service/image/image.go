@@ -27,7 +27,7 @@ func path(t time.Time, name string) string {
 type Service interface {
 	Create(userID uint, r *multipart.Reader) (people.ImageResponse, error)
 	AddToPost(ids []uint, postID, userID uint) ([]string, error)
-	UpdateUserImage(id *uint, userID uint) (*string, error)
+	UpdateUserImage(id uint, userID uint) (*string, error)
 	ListPostImages(postID uint) ([]string, error)
 	ListPostsImages(postIDs []uint) (map[uint][]string, error)
 	GetUserImage(userID uint) (*string, error)
@@ -140,16 +140,15 @@ func (s *imageService) AddToPost(ids []uint, postID, userID uint) ([]string, err
 	return paths, nil
 }
 
-func (s *imageService) UpdateUserImage(imgID *uint, userID uint) (*string, error) {
-	if imgID == nil {
+func (s *imageService) UpdateUserImage(imgID uint, userID uint) (*string, error) {
+	if imgID == 0 {
 		s.ir.DeleteUserImage(userID)
 		return nil, nil
 
 	}
-	id := *imgID
-	img, err := s.ir.Get(id)
+	img, err := s.ir.Get(imgID)
 	if err != nil {
-		return nil, service.NewError(people.NotFoundError, fmt.Sprintf("Image not found: %v", id))
+		return nil, service.NewError(people.NotFoundError, fmt.Sprintf("Image not found: %v", imgID))
 	}
 	if err := validate(img, userID); err != nil {
 		return nil, err
@@ -167,13 +166,13 @@ func (s *imageService) UpdateUserImage(imgID *uint, userID uint) (*string, error
 		path := "/" + path(img.CreatedAt, img.Name)
 		return &path, nil
 	}
-	err = s.ir.CreateUserImage(id, userID)
+	err = s.ir.CreateUserImage(imgID, userID)
 	if err != nil {
 		return nil, err
 	}
-	err = s.ir.MarkUsed([]uint{id})
+	err = s.ir.MarkUsed([]uint{imgID})
 	if err != nil {
-		go s.ir.DeleteUserImage(id)
+		go s.ir.DeleteUserImage(imgID)
 		return nil, err
 	}
 	s.ir.DeleteMany([]uint{prev.ID})

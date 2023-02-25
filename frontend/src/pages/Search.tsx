@@ -1,19 +1,26 @@
 import { Box, Container, Paper, Tabs } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Posts, Query as PostsQuery } from "../components/Posts";
-import { Users, Query as UsersQuery } from "../components/Users";
-import { Search as SearchComponent } from "../components/Search";
-import { getPostsSearch, getUsersSearch } from "../spec.gen";
-import { Wrapper } from "../components/Wrapper";
+import { InfinitePosts, type PostsQuery } from "@/components/post";
+import { InfiniteUsers, type UsersQuery } from "@/components/user";
+import { SearchBar as SearchComponent } from "@/components/search";
+import { getPostsSearch, getUsersSearch } from "@/spec.gen";
+import { Wrapper } from "@/components/utils";
+import { RouteContext } from "@/context/RouteContext";
 
 export type SearchPage = "posts" | "people";
 
-const Search = ({ value }: { value: SearchPage }) => {
+function Search({ value }: { value: SearchPage }) {
+	const { setRouteName } = useContext(RouteContext);
+	useEffect(() => {
+		setRouteName("Search");
+	}, [setRouteName]);
+
 	const navigate = useNavigate();
 	const [query, setQuery] = useState("");
 	const [debounced] = useDebouncedValue(query, 200);
+
 	const postsQuery: PostsQuery = useCallback(
 		(params) => getPostsSearch({ query: debounced, ...params }),
 		[debounced]
@@ -24,10 +31,7 @@ const Search = ({ value }: { value: SearchPage }) => {
 	);
 
 	return (
-		<Tabs
-			value={value}
-			onTabChange={(value) => navigate(`/search/${value}`, { replace: true })}
-		>
+		<Tabs value={value} onTabChange={(value) => navigate(`/search/${value}`, { replace: true })}>
 			<Wrapper>
 				<Container pos="fixed" w="100%" p={0} style={{ zIndex: 1 }} m={-1}>
 					<Paper radius={0} withBorder>
@@ -38,17 +42,16 @@ const Search = ({ value }: { value: SearchPage }) => {
 						</Tabs.List>
 					</Paper>
 				</Container>
-
 				<Box pt="78px">
 					<Tabs.Panel value="posts">
-						<Posts
+						<InfinitePosts
 							queryKey={["posts", debounced]}
 							enabled={value === "posts" && debounced.length > 0}
 							query={postsQuery}
 						/>
 					</Tabs.Panel>
 					<Tabs.Panel value="people">
-						<Users
+						<InfiniteUsers
 							queryKey={["users", debounced]}
 							enabled={value === "people" && debounced.length > 0}
 							query={usersQuery}
@@ -58,6 +61,6 @@ const Search = ({ value }: { value: SearchPage }) => {
 			</Wrapper>
 		</Tabs>
 	);
-};
+}
 
 export default Search;

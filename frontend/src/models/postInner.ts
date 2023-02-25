@@ -4,9 +4,9 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { LikeStatus } from "./likeStatus";
+import type { LikeStatus } from "@/models/likeStatus";
 
-export interface PostInner {
+export type PostInner = {
 	id: number;
 	content: string;
 	likes: number;
@@ -14,4 +14,4 @@ export interface PostInner {
 	createdAt: string;
 	repliesTo?: number;
 	status?: LikeStatus;
-}
+};

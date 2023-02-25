@@ -1,33 +1,33 @@
 import { Tabs } from "@mantine/core";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { type Dispatch, type SetStateAction, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-import { Thread as ThreadType } from "../../models";
-import { getThreads, getThreadsThreadID } from "../../spec.gen";
-import { Thread } from "./Thread";
+import { type Thread as ThreadType } from "@/models";
+import { getThreads, getThreadsThreadID } from "@/spec.gen";
+import { Thread } from "@/components/messages/Thread";
 
-const queryLimit = 1;
+const LIMIT = 1;
 
-interface MessagesTabProps {
+type InfiniteTabsProps = {
 	threads: ThreadType[];
 	setThreads: Dispatch<SetStateAction<ThreadType[]>>;
 	initialThread?: string;
 	sortThreads: () => void;
-}
+};
 
-export const MessagesTabs = ({
+export function InfiniteTabs({
 	threads,
 	setThreads,
 	initialThread,
 	sortThreads,
-}: MessagesTabProps) => {
+}: InfiniteTabsProps) {
 	const { ref, inView } = useInView();
 	const { isFetchingNextPage, fetchNextPage, hasNextPage } = useInfiniteQuery({
 		queryKey: ["messages", "latest"],
-		queryFn({ pageParam }) {
-			return getThreads({ ...pageParam, limit: queryLimit });
+		queryFn: ({ pageParam }) => {
+			return getThreads({ ...pageParam, limit: LIMIT });
 		},
-		async onSuccess({ pages }) {
+		onSuccess: async ({ pages }) => {
 			const newThreads = pages.flatMap((p) => p.data);
 			if (initialThread && !newThreads.find((t) => t.id === +initialThread)) {
 				try {
@@ -41,7 +41,7 @@ export const MessagesTabs = ({
 			sortThreads();
 		},
 		getNextPageParam: (lastPage) => {
-			if (!lastPage.meta || lastPage.data.length < queryLimit) return undefined;
+			if (!lastPage.meta || lastPage.data.length < LIMIT) return undefined;
 			return { before: lastPage.meta?.oldest };
 		},
 		refetchOnMount: true,
@@ -63,4 +63,4 @@ export const MessagesTabs = ({
 			))}
 		</>
 	);
-};
+}

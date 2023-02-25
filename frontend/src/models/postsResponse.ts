@@ -4,10 +4,10 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { PostResponse } from "./postResponse";
-import type { IDPaginationMeta } from "./iDPaginationMeta";
+import type { PostResponse } from "@/models/postResponse";
+import type { IDPaginationMeta } from "@/models/iDPaginationMeta";
 
-export interface PostsResponse {
+export type PostsResponse = {
 	data: PostResponse[];
 	meta?: IDPaginationMeta;
-}
+};

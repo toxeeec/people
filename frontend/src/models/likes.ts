@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface Likes {
+export type Likes = {
 	likes: number;
 	isLiked: boolean;
-}
+};

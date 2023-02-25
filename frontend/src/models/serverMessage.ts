@@ -4,12 +4,12 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { Message } from "./message";
+import type { Message } from "@/models/message";
 
-export interface ServerMessage {
+export type ServerMessage = {
 	message: Message;
 	id: number;
 	from: string;
 	to: string;
 	sentAt: string;
-}
+};

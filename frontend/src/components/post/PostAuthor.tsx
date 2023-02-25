@@ -1,14 +1,13 @@
+import { Avatar, UserHoverCard } from "@/components/user";
+import { type User } from "@/models";
 import { Group, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
-import { Avatar } from "../../Avatar";
-import { User } from "../../models";
-import { UserHoverCard } from "../UserHoverCard";
 
-interface PostAuthorProps {
+type PostAuthorProps = {
 	user: User;
-}
+};
 
-export const PostAuthor = ({ user }: PostAuthorProps) => {
+export function PostAuthor({ user }: PostAuthorProps) {
 	return (
 		<Group align="center">
 			<UserHoverCard user={user}>
@@ -23,4 +22,4 @@ export const PostAuthor = ({ user }: PostAuthorProps) => {
 			</UserHoverCard>
 		</Group>
 	);
-};
+}

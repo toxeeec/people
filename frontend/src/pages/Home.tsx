@@ -1,18 +1,24 @@
+import { Wrapper } from "@/components/utils";
 import { Container } from "@mantine/core";
-import { CreatePost } from "../components/post/CreatePost";
-import { Posts } from "../components/Posts";
-import { Wrapper } from "../components/Wrapper";
-import { getMeFeed, postPosts } from "../spec.gen";
+import { CreatePost } from "@/components/post";
+import { InfinitePosts } from "@/components/post";
+import { getMeFeed, postPosts } from "@/spec.gen";
+import { useContext, useEffect } from "react";
+import { RouteContext } from "@/context/RouteContext";
 
-const Home = () => {
+function Home() {
+	const { setRouteName } = useContext(RouteContext);
+	useEffect(() => {
+		setRouteName("Home");
+	}, [setRouteName]);
 	return (
 		<Wrapper>
 			<Container p="md" pos="relative">
 				<CreatePost mutationFn={postPosts} placeholder={"Create post"} />
 			</Container>
-			<Posts query={getMeFeed} queryKey={["posts", "feed"]} />
+			<InfinitePosts query={getMeFeed} queryKey={["posts", "feed"]} />
 		</Wrapper>
 	);
-};
+}
 
 export default Home;

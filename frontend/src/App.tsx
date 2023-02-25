@@ -1,30 +1,38 @@
-import { useContext } from "react";
+import { AuthContext } from "@/context/AuthContext";
+import { NotificationsContextProvider } from "@/context/NotificationsContext";
+import { RouteContextProvider } from "@/context/RouteContext";
 import {
-	createBrowserRouter,
-	redirect,
-	RouterProvider,
-} from "react-router-dom";
-import { AuthContext } from "./context/AuthContext";
-import {
+	AXIOS_INSTANCE,
 	createRequestInterceptor,
 	createResponseInterceptor,
-} from "./custom-instance";
-import Layout from "./layout";
-import Auth from "./pages/Auth";
-import Follows from "./pages/Follows";
-import Home from "./pages/Home";
-import Post from "./pages/Post";
-import User from "./pages/User";
-import Search from "./pages/Search";
-import Settings from "./pages/Settings";
-import Messages from "./pages/Messages";
+} from "@/custom-instance";
+import { Layout } from "@/layout";
+import Auth from "@/pages/Auth";
+import Follows from "@/pages/Follows";
+import Home from "@/pages/Home";
+import Messages from "@/pages/Messages";
+import Post from "@/pages/Post";
+import Search from "@/pages/Search";
+import Settings from "@/pages/Settings";
+import User from "@/pages/User";
+import { MantineProvider } from "@mantine/core";
+import { NotificationsProvider } from "@mantine/notifications";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useContext, useEffect } from "react";
+import { createBrowserRouter, redirect, RouterProvider } from "react-router-dom";
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1 } } });
 
-const App = () => {
-	const { getAuth, setAuth, clearAuth, isAuthenticated } =
-		useContext(AuthContext);
+export default function App() {
+	const { getAuth, setAuth, clearAuth, isAuthenticated } = useContext(AuthContext);
 
-	createRequestInterceptor(getAuth);
-	createResponseInterceptor(getAuth, setAuth, clearAuth);
+	useEffect(() => {
+		const requestInterceptor = createRequestInterceptor(getAuth);
+		const responseInterceptor = createResponseInterceptor(getAuth, setAuth, clearAuth);
+		return () => {
+			AXIOS_INSTANCE.interceptors.request.eject(requestInterceptor);
+			AXIOS_INSTANCE.interceptors.response.eject(responseInterceptor);
+		};
+	}, [clearAuth, getAuth, setAuth]);
 
 	const router = createBrowserRouter([
 		{
@@ -37,6 +45,10 @@ const App = () => {
 			children: [
 				{
 					path: "/:handle",
+					element: <User value={"posts"} />,
+				},
+				{
+					path: "/:handle/posts",
 					element: <User value={"posts"} />,
 				},
 				{
@@ -88,7 +100,17 @@ const App = () => {
 		},
 	]);
 
-	return <RouterProvider router={router} />;
-};
-
-export default App;
+	return (
+		<MantineProvider withGlobalStyles withNormalizeCSS theme={{ colorScheme: "dark" }}>
+			<NotificationsProvider position="bottom-center">
+				<QueryClientProvider client={queryClient}>
+					<RouteContextProvider>
+						<NotificationsContextProvider>
+							<RouterProvider router={router} />
+						</NotificationsContextProvider>
+					</RouteContextProvider>
+				</QueryClientProvider>
+			</NotificationsProvider>
+		</MantineProvider>
+	);
+}

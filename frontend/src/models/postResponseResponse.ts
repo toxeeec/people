@@ -4,7 +4,7 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { PostInner } from "./postInner";
-import type { User } from "./user";
+import type { PostInner } from "@/models/postInner";
+import type { User } from "@/models/user";
 
 export type PostResponseResponse = PostInner & User;

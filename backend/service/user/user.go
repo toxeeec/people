@@ -254,11 +254,13 @@ func (s *userService) Update(userID uint, updatedUser people.UpdatedUser) (peopl
 			}
 		}
 	}
-	img, err := s.is.UpdateUserImage(updatedUser.Image, userID)
-	if err != nil {
-		return people.User{}, err
+	if updatedUser.Image != nil {
+		img, err := s.is.UpdateUserImage(*updatedUser.Image, userID)
+		if err != nil {
+			return people.User{}, err
+		}
+		u.Image = img
 	}
-	u.Image = img
 	return u, nil
 }
 

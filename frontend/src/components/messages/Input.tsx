@@ -2,15 +2,15 @@ import { ActionIcon, Box, Flex, Textarea } from "@mantine/core";
 import { useEventListener } from "@mantine/hooks";
 import { IconMoodSmile, IconSend } from "@tabler/icons";
 import Picker from "@emoji-mart/react";
-import { Dispatch, SetStateAction, useContext, useMemo, useState } from "react";
-import { NotificationsContext } from "../../context/NotificationsContext";
+import { type Dispatch, type SetStateAction, useContext, useMemo, useState } from "react";
+import { NotificationsContext } from "@/context/NotificationsContext";
 
-interface InputProps {
+type InputProps = {
 	message: string;
 	setMessage: Dispatch<SetStateAction<string>>;
 	threadID: number;
-}
-export const Input = ({ message, setMessage, threadID }: InputProps) => {
+};
+export function Input({ message, setMessage, threadID }: InputProps) {
 	const { sendMessage } = useContext(NotificationsContext);
 	const [opened, setOpened] = useState(false);
 	const empty = useMemo(() => message.trim().length === 0, [message]);
@@ -78,4 +78,4 @@ export const Input = ({ message, setMessage, threadID }: InputProps) => {
 			</Flex>
 		</>
 	);
-};
+}

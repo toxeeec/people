@@ -1,37 +1,40 @@
+import { EditButton, FollowButton } from "@/components/buttons";
+import { InfinitePosts, type PostsQuery } from "@/components/post";
+import { Avatar } from "@/components/user";
+import { CenterLoader, Wrapper } from "@/components/utils";
+import { AuthContext } from "@/context/AuthContext";
+import { RouteContext } from "@/context/RouteContext";
+import { getUsersHandleLikes, getUsersHandlePosts, useGetUsersHandle } from "@/spec.gen";
 import { Badge, Box, Group, Tabs, Text, UnstyledButton } from "@mantine/core";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Avatar } from "../Avatar";
-import { CenterLoader } from "../components/CenterLoader";
-import { EditButton } from "../components/EditButton";
-import { FollowButton } from "../components/FollowButton";
-import { Posts, Query } from "../components/Posts";
-import { Wrapper } from "../components/Wrapper";
-import { AuthContext } from "../context/AuthContext";
-import {
-	getUsersHandleLikes,
-	getUsersHandlePosts,
-	useGetUsersHandle,
-} from "../spec.gen";
 
 export type UserPage = "posts" | "likes";
 
-interface UserProps {
+type UserProps = {
 	value: UserPage;
-}
+};
 
-const User = ({ value }: UserProps) => {
+export default function User({ value }: UserProps) {
 	const params = useParams();
+	const handle = params.handle ?? "";
+	const { setRouteName } = useContext(RouteContext);
+	useEffect(() => {
+		setRouteName(handle);
+	}, [setRouteName, handle]);
 	const { isAuthenticated, getAuth } = useContext(AuthContext);
 	const navigate = useNavigate();
+	const { data: user, isLoading } = useGetUsersHandle(handle, {
+		query: {
+			onError: () => {
+				// TODO: 404
+			},
+		},
+	});
 
-	const postsQuery: Query = (params) => {
-		return getUsersHandlePosts(user!.handle, params);
-	};
-	const likesQuery: Query = (params) => {
-		return getUsersHandleLikes(user!.handle, params);
-	};
-	const { data: user, isLoading } = useGetUsersHandle(params.handle!);
+	const ownProfile = handle === getAuth().handle;
+	const postsQuery: PostsQuery = (params) => getUsersHandlePosts(handle, params);
+	const likesQuery: PostsQuery = (params) => getUsersHandleLikes(handle, params);
 
 	return isLoading || !user ? (
 		<CenterLoader />
@@ -40,15 +43,12 @@ const User = ({ value }: UserProps) => {
 			<Box p="xs">
 				<Group align="center" position="apart">
 					<Avatar user={user} size={120} mb="xs" />
-					{isAuthenticated && getAuth().handle === user.handle ? (
-						<EditButton user={user} />
-					) : (
-						<FollowButton user={user} />
-					)}
+					{isAuthenticated &&
+						(ownProfile ? <EditButton user={user} /> : <FollowButton user={user} />)}
 				</Group>
 				<Group>
 					<Text weight="bold">{user.handle}</Text>
-					{user.status?.isFollowing ? <Badge>follows you</Badge> : null}
+					{user.status?.isFollowing && <Badge>follows you</Badge>}
 				</Group>
 				<Group mt="xs">
 					<UnstyledButton component={Link} to={`/${user.handle}/following`}>
@@ -62,31 +62,19 @@ const User = ({ value }: UserProps) => {
 			</Box>
 			<Tabs
 				value={value}
-				onTabChange={(value) => {
-					const url =
-						value === "likes"
-							? `/${params.handle}/${value}`
-							: `/${params.handle}`;
-					navigate(url, { replace: true });
-				}}
+				onTabChange={(value) => navigate(`/${handle}/${value}`, { replace: true })}
 			>
 				<Tabs.List grow position="center">
 					<Tabs.Tab value="posts">Posts</Tabs.Tab>
 					<Tabs.Tab value="likes">Likes</Tabs.Tab>
 				</Tabs.List>
-
 				<Tabs.Panel value="posts">
-					<Posts query={postsQuery} queryKey={["posts", user.handle]} />
+					<InfinitePosts query={postsQuery} queryKey={["posts", user.handle]} />
 				</Tabs.Panel>
 				<Tabs.Panel value="likes">
-					<Posts
-						query={likesQuery}
-						queryKey={["posts", user.handle, "likes"]}
-					/>
+					<InfinitePosts query={likesQuery} queryKey={["posts", user.handle, "likes"]} />
 				</Tabs.Panel>
 			</Tabs>
 		</Wrapper>
 	);
-};
-
-export default User;
+}

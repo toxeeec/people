@@ -1,11 +1,11 @@
 import { Grid } from "@mantine/core";
-import { Image } from "./Image";
+import { Image } from "@/components/images/Image";
 
-interface ImagesProps {
+type ImagesProps = {
 	images?: string[];
-}
+};
 
-export const Images = ({ images }: ImagesProps) => {
+export function Images({ images }: ImagesProps) {
 	return (
 		<Grid grow gutter="xs" my="xs" style={{ cursor: "pointer" }}>
 			{images?.map((path) => (
@@ -15,4 +15,4 @@ export const Images = ({ images }: ImagesProps) => {
 			))}
 		</Grid>
 	);
-};
+}

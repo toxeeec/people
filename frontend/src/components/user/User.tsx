@@ -1,18 +1,19 @@
 import { Group, Stack, Text } from "@mantine/core";
 import { Link, useNavigate } from "react-router-dom";
-import { UserHoverCard } from "./UserHoverCard";
+import { UserHoverCard } from "@/components/user/UserHoverCard";
 import { forwardRef, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import { FollowButton } from "./FollowButton";
-import { User as UserType } from "../models";
-import { Avatar } from "../Avatar";
+import { AuthContext } from "@/context/AuthContext";
+import { FollowButton } from "@/components/buttons";
+import { type User as UserType } from "@/models";
+import { Avatar } from "@/components/user";
 
-interface UserProps {
+type UserProps = {
 	user: UserType;
-}
+};
 export const User = forwardRef<HTMLDivElement, UserProps>(({ user }, ref) => {
-	const { isAuthenticated, getAuth } = useContext(AuthContext);
+	const { getAuth } = useContext(AuthContext);
 	const navigate = useNavigate();
+	const ownProfile = user.handle === getAuth().handle;
 	return (
 		<>
 			<Group
@@ -41,9 +42,7 @@ export const User = forwardRef<HTMLDivElement, UserProps>(({ user }, ref) => {
 						</UserHoverCard>
 					</Stack>
 				</Group>
-				{isAuthenticated && getAuth().handle !== user.handle ? (
-					<FollowButton user={user} />
-				) : null}
+				{!ownProfile && <FollowButton user={user} />}
 			</Group>
 		</>
 	);

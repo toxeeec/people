@@ -1,48 +1,53 @@
-import { Posts, Query } from "../components/Posts";
-import { MainPost } from "../components/MainPost";
 import { useParams } from "react-router";
-import {
-	getPostsPostIDReplies,
-	postPostsPostIDReplies,
-	useGetPostsPostID,
-} from "../spec.gen";
-import { MutationFn, CreatePost } from "../components/post/CreatePost";
+import { getPostsPostIDReplies, postPostsPostIDReplies, useGetPostsPostID } from "@/spec.gen";
 import { Container } from "@mantine/core";
-import { PostParents } from "../components/post/PostParents";
 import { useScrollIntoView } from "@mantine/hooks";
-import { Wrapper } from "../components/Wrapper";
-import { CenterLoader } from "../components/CenterLoader";
+import { CenterLoader, Wrapper } from "@/components/utils";
+import {
+	CreatePost,
+	type MutationFn,
+	MainPost,
+	PostParents,
+	InfinitePosts,
+	type PostsQuery,
+} from "@/components/post";
+import { HEADER_HEIGHT } from "@/layout/Header";
+import { useContext, useEffect } from "react";
+import { RouteContext } from "@/context/RouteContext";
 
-const Post = () => {
-	const params = useParams();
-	const postID = parseInt(params.postID!)!;
-	const { data, isLoading } = useGetPostsPostID(postID);
-
-	const mutationFn: MutationFn = (newPost) => {
-		return postPostsPostIDReplies(postID, newPost);
-	};
-
-	const query: Query = (queryParams) => {
-		return getPostsPostIDReplies(postID, queryParams);
-	};
-
+export default function Post() {
+	const { setRouteName } = useContext(RouteContext);
+	useEffect(() => {
+		setRouteName("Post");
+	}, [setRouteName]);
 	const { scrollIntoView, targetRef } = useScrollIntoView<HTMLDivElement>({
-		offset: 60,
+		offset: HEADER_HEIGHT,
 		duration: 0,
 	});
 	const scroll = () => scrollIntoView({ alignment: "start" });
-	return isLoading || !data ? (
+	const params = useParams();
+	const postID = +(params.postID ?? "");
+	const { data: post, isLoading } = useGetPostsPostID(postID, {
+		query: {
+			onSuccess: () => {
+				// TODO: 404
+			},
+		},
+	});
+
+	const mutationFn: MutationFn = (newPost) => postPostsPostIDReplies(postID, newPost);
+	const query: PostsQuery = (queryParams) => getPostsPostIDReplies(postID, queryParams);
+
+	return isLoading || !post ? (
 		<CenterLoader />
 	) : (
 		<Wrapper>
-			<PostParents post={data.data} scroll={scroll} />
-			<MainPost post={data.data} user={data.user} ref={targetRef} />
+			<PostParents parentID={post.data.repliesTo} scroll={scroll} />
+			<MainPost post={post.data} user={post.user} ref={targetRef} />
 			<Container p="md" pos="relative">
 				<CreatePost mutationFn={mutationFn} placeholder={"Create reply"} />
 			</Container>
-			<Posts query={query} queryKey={["posts", postID, "replies"]} />
+			<InfinitePosts query={query} queryKey={["posts", postID, "replies"]} />
 		</Wrapper>
 	);
-};
-
-export default Post;
+}

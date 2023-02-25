@@ -4,7 +4,7 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { Tokens } from "./tokens";
+import type { Tokens } from "@/models/tokens";
 
 /**
  * OK

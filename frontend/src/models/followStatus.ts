@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface FollowStatus {
+export type FollowStatus = {
 	isFollowing: boolean;
 	isFollowed: boolean;
-}
+};

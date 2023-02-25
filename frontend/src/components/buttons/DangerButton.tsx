@@ -1,14 +1,14 @@
 import { Button, Tooltip } from "@mantine/core";
 
-interface DangerButtonProps {
+type DangerButtonProps = {
 	label?: string;
 	onClick: () => void;
 	text: string;
-}
+};
 
-export const DangerButton = ({ label, onClick, text }: DangerButtonProps) => {
+export function DangerButton({ label, onClick, text }: DangerButtonProps) {
 	return (
-		<Tooltip label={label} zIndex={9999} display={label ? "unset" : "none"}>
+		<Tooltip label={label} zIndex={9999} hidden={!label}>
 			<Button
 				fullWidth
 				variant="subtle"
@@ -21,4 +21,4 @@ export const DangerButton = ({ label, onClick, text }: DangerButtonProps) => {
 			</Button>
 		</Tooltip>
 	);
-};
+}

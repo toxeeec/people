@@ -4,8 +4,8 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { BeforeParamParameter } from "./beforeParamParameter";
-import type { AfterParamParameter } from "./afterParamParameter";
+import type { BeforeParamParameter } from "@/models/beforeParamParameter";
+import type { AfterParamParameter } from "@/models/afterParamParameter";
 
 export type GetMessagesParams = {
 	before?: BeforeParamParameter;

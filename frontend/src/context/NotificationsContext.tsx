@@ -1,15 +1,8 @@
 import { useInterval } from "@mantine/hooks";
-import {
-	createContext,
-	useCallback,
-	useContext,
-	useEffect,
-	useMemo,
-	useState,
-} from "react";
-import { wsURL } from "../custom-instance";
-import { Message } from "../models";
-import { AuthContext } from "./AuthContext";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { wsURL } from "@/custom-instance";
+import { type Message } from "@/models";
+import { AuthContext } from "@/context/AuthContext";
 
 const NotificationTypes = ["message"] as const;
 type NotificationType = typeof NotificationTypes[number];
@@ -27,26 +20,24 @@ export type UserMessage = {
 	threadID: number;
 };
 
-interface NotificationsContextType {
+type NotificationsContextType = {
 	newMessages: Messages;
 	sendMessage: (message: Omit<UserMessage, "type">) => void;
 	addMessageCallback: (cb: MessageCallback) => void;
 	removeMessageCallback: (cb: MessageCallback) => void;
-}
+};
 
 export const NotificationsContext = createContext<NotificationsContextType>(
-	null!
+	{} as NotificationsContextType
 );
 
-interface NotificationsContextProviderProps {
+type NotificationsContextProviderProps = {
 	children: React.ReactNode;
-}
+};
 
 type MessageCallback = (msg: Message) => void;
 
-export const NotificationsContextProvider = ({
-	children,
-}: NotificationsContextProviderProps) => {
+export function NotificationsContextProvider({ children }: NotificationsContextProviderProps) {
 	const { getAuth, isAuthenticated } = useContext(AuthContext);
 	const [socket, setSocket] = useState<WebSocket>();
 	const createConnection = useCallback(() => {
@@ -125,4 +116,4 @@ export const NotificationsContextProvider = ({
 			{children}
 		</NotificationsContext.Provider>
 	);
-};
+}

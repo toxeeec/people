@@ -1,40 +1,34 @@
-import { QueryKey, useInfiniteQuery } from "@tanstack/react-query";
+import { type Users } from "@/models";
+import { type QueryKey, useInfiniteQuery } from "@tanstack/react-query";
 import { Fragment, useEffect } from "react";
-import { Users as UsersType } from "../../models";
 import { useInView } from "react-intersection-observer";
-import { User } from "./User";
-import { CenterLoader } from "../CenterLoader";
+import { CenterLoader } from "@/components/utils";
+import { User } from "@/components/user/User";
 
-const queryLimit = 10;
+const LIMIT = 10;
 
-interface PaginationParams {
+type PaginationParams = {
 	limit?: number;
 	before?: string;
 	after?: string;
-}
+};
 
-export type Query = (params: PaginationParams) => Promise<UsersType>;
+export type UsersQuery = (params: PaginationParams) => Promise<Users>;
 
-interface UsersProps {
-	query: Query;
+type UsersProps = {
+	query: UsersQuery;
 	queryKey: QueryKey;
-	onClick: (handle: string) => void;
 	enabled?: boolean;
-}
+};
 
-interface QueryFunctionArgs {
+type QueryFunctionArgs = {
 	pageParam?: PaginationParams;
-}
+};
 
-export const Users = ({
-	query,
-	queryKey,
-	onClick,
-	enabled = true,
-}: UsersProps) => {
+export function InfiniteUsers({ query, queryKey, enabled = true }: UsersProps) {
 	const { ref, inView } = useInView();
 	const queryFn = ({ pageParam }: QueryFunctionArgs) => {
-		pageParam = { ...pageParam, limit: queryLimit };
+		pageParam = { ...pageParam, limit: LIMIT };
 		return query(pageParam);
 	};
 
@@ -43,7 +37,7 @@ export const Users = ({
 		queryFn,
 		enabled,
 		getNextPageParam: (lastPage) => {
-			if (!lastPage.meta || lastPage.data.length < queryLimit) return undefined;
+			if (!lastPage.meta || lastPage.data.length < LIMIT) return undefined;
 			return { before: lastPage.meta?.oldest };
 		},
 	});
@@ -62,7 +56,7 @@ export const Users = ({
 				data?.pages.map((page, i) => (
 					<Fragment key={i}>
 						{page.data.map((user) => (
-							<User key={user.handle} user={user} ref={ref} onClick={onClick} />
+							<User key={user.handle} user={user} ref={ref} />
 						))}
 					</Fragment>
 				))
@@ -70,4 +64,4 @@ export const Users = ({
 			{isFetchingNextPage && <CenterLoader />}
 		</>
 	);
-};
+}

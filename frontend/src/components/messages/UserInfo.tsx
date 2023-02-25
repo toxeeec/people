@@ -1,13 +1,13 @@
 import { Button, Group, Text } from "@mantine/core";
 import { Link } from "react-router-dom";
-import { Avatar } from "../../Avatar";
-import { User } from "../../models";
+import { Avatar } from "@/components/user";
+import { type User } from "@/models";
 
-interface PostAuthorProps {
+type PostAuthorProps = {
 	user: User;
-}
+};
 
-export const UserInfo = ({ user }: PostAuthorProps) => {
+export function UserInfo({ user }: PostAuthorProps) {
 	return (
 		<Button
 			component={Link}
@@ -24,4 +24,4 @@ export const UserInfo = ({ user }: PostAuthorProps) => {
 			</Group>
 		</Button>
 	);
-};
+}

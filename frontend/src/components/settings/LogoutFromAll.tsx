@@ -1,9 +1,9 @@
 import { useContext } from "react";
-import { AuthContext } from "../../context/AuthContext";
-import { usePostLogout } from "../../spec.gen";
-import { DangerButton } from "../DangerButton";
+import { AuthContext } from "@/context/AuthContext";
+import { usePostLogout } from "@/spec.gen";
+import { DangerButton } from "@/components/buttons";
 
-export const LogoutFromAll = () => {
+export function LogoutFromAll() {
 	const { getAuth, clearAuth } = useContext(AuthContext);
 	const { mutate } = usePostLogout({
 		mutation: { retry: 1, onSuccess: clearAuth },
@@ -21,4 +21,4 @@ export const LogoutFromAll = () => {
 			text="Log out of all sessions"
 		/>
 	);
-};
+}

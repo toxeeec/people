@@ -5,6 +5,6 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface Handle {
+export type Handle = {
 	handle: string;
-}
+};

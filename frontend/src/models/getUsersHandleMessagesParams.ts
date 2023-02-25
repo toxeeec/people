@@ -4,9 +4,9 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { LimitParamParameter } from "./limitParamParameter";
-import type { BeforeHandleParamParameter } from "./beforeHandleParamParameter";
-import type { AfterHandleParamParameter } from "./afterHandleParamParameter";
+import type { LimitParamParameter } from "@/models/limitParamParameter";
+import type { BeforeHandleParamParameter } from "@/models/beforeHandleParamParameter";
+import type { AfterHandleParamParameter } from "@/models/afterHandleParamParameter";
 
 export type GetUsersHandleMessagesParams = {
 	limit?: LimitParamParameter;

@@ -4,7 +4,7 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { Users } from "./users";
+import type { Users } from "@/models/users";
 
 /**
  * OK

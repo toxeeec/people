@@ -1,27 +1,18 @@
-import {
-	ActionIcon,
-	Divider,
-	Flex,
-	Group,
-	UnstyledButton,
-} from "@mantine/core";
+import { ActionIcon, Divider, Flex, Group, UnstyledButton } from "@mantine/core";
 import { IconHeart, IconMessageCircle2 } from "@tabler/icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
-import { Post, User } from "../../models";
-import {
-	useDeletePostsPostIDLikes,
-	usePutPostsPostIDLikes,
-} from "../../spec.gen";
-import { PostLikes } from "./PostLikes";
-import { PostReplyModal } from "./PostReplyModal";
+import { type Post, type User } from "@/models";
+import { useDeletePostsPostIDLikes, usePutPostsPostIDLikes } from "@/spec.gen";
+import { PostLikes } from "@/components/post/PostLikes";
+import { PostReplyModal } from "@/components/post/PostReplyModal";
 
-interface MainPostActionsProps {
+type MainPostActionsProps = {
 	post: Post;
 	user: User;
-}
+};
 
-export const MainPostActions = ({ post, user }: MainPostActionsProps) => {
+export function MainPostActions({ post, user }: MainPostActionsProps) {
 	const queryClient = useQueryClient();
 	const [likesOpened, setLikesOpened] = useState(false);
 	const [replyOpened, setReplyOpened] = useState(false);
@@ -64,20 +55,17 @@ export const MainPostActions = ({ post, user }: MainPostActionsProps) => {
 				</Group>
 				<Group align="center" spacing="xs">
 					<ActionIcon onClick={handleLike}>
-						<IconHeart
-							size={18}
-							fill={post.status?.isLiked ? "currentColor" : "none"}
-						/>
+						<IconHeart size={18} fill={post.status?.isLiked ? "currentColor" : "none"} />
 					</ActionIcon>
 				</Group>
 			</Flex>
 			<PostLikes opened={likesOpened} setOpened={setLikesOpened} id={post.id} />
 			<PostReplyModal
 				opened={replyOpened}
-				setOpened={setReplyOpened}
+				handleClose={() => setReplyOpened(false)}
 				post={post}
 				user={user}
 			/>
 		</>
 	);
-};
+}

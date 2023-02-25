@@ -4,10 +4,10 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { Post } from "./post";
-import type { IDPaginationMeta } from "./iDPaginationMeta";
+import type { Post } from "@/models/post";
+import type { IDPaginationMeta } from "@/models/iDPaginationMeta";
 
-export interface Posts {
+export type Posts = {
 	data: Post[];
 	meta?: IDPaginationMeta;
-}
+};

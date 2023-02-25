@@ -1,49 +1,39 @@
-import { createContext, Dispatch, SetStateAction, useState } from "react";
-import { Tokens } from "../models";
+import { createContext, type Dispatch, type SetStateAction, useState } from "react";
+import { type Tokens } from "@/models";
 
-export interface AuthValues {
-	handle: string | null;
-	accessToken: string | null;
-	refreshToken: string | null;
-}
+export type AuthValues = {
+	handle: string;
+	accessToken: string;
+	refreshToken: string;
+};
 
-export interface SetAuthProps {
+export type SetAuthProps = {
 	tokens?: Tokens;
 	handle?: string;
-}
+};
 
-interface AuthContextType {
+type AuthContextType = {
 	getAuth: () => AuthValues;
 	setAuth: (props: SetAuthProps) => void;
 	clearAuth: () => void;
 	isAuthenticated: boolean;
 	isNewAccount: boolean;
 	setIsNewAccount: Dispatch<SetStateAction<boolean>>;
-}
+};
 
-export const AuthContext = createContext<AuthContextType>(null!);
+export const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
-interface AuthContextProviderProps {
-	children: React.ReactNode;
-}
-
-export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
+export function AuthContextProvider({ children }: { children: React.ReactNode }) {
 	const getAuth = () => {
-		const accessToken = localStorage.getItem("accessToken");
-		const refreshToken = localStorage.getItem("refreshToken");
-		const handle = localStorage.getItem("handle");
+		const accessToken = localStorage.getItem("accessToken") ?? "";
+		const refreshToken = localStorage.getItem("refreshToken") ?? "";
+		const handle = localStorage.getItem("handle") ?? "";
 		return { accessToken, refreshToken, handle };
 	};
 
 	const [isAuthenticated, setIsAuthenticated] = useState(!!getAuth().handle);
 
-	const setAuth = ({
-		tokens,
-		handle,
-	}: {
-		tokens?: Tokens;
-		handle?: string;
-	}) => {
+	const setAuth = ({ tokens, handle }: SetAuthProps) => {
 		if (tokens) {
 			localStorage.setItem("accessToken", tokens.accessToken);
 			localStorage.setItem("refreshToken", tokens.refreshToken);
@@ -77,4 +67,4 @@ export const AuthContextProvider = ({ children }: AuthContextProviderProps) => {
 			{children}
 		</AuthContext.Provider>
 	);
-};
+}

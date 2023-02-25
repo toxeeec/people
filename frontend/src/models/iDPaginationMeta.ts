@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface IDPaginationMeta {
+export type IDPaginationMeta = {
 	oldest: number;
 	newest: number;
-}
+};

@@ -1,34 +1,28 @@
 import { Group, Modal, Text } from "@mantine/core";
 import { useFocusTrap } from "@mantine/hooks";
-import { Dispatch, SetStateAction } from "react";
-import { Avatar } from "../../Avatar";
-import { Post, User } from "../../models";
-import { postPostsPostIDReplies } from "../../spec.gen";
-import { MutationFn, CreatePost } from "./CreatePost";
+import { Avatar } from "@/components/user";
+import { type Post, type User } from "@/models";
+import { postPostsPostIDReplies } from "@/spec.gen";
+import { type MutationFn, CreatePost } from "@/components/post";
 
-interface PostReplyModalProps {
+type PostReplyModalProps = {
 	opened: boolean;
-	setOpened: Dispatch<SetStateAction<boolean>>;
+	handleClose: () => void;
 	post: Post;
 	user: User;
-}
+};
 
-export const PostReplyModal = ({
-	opened,
-	setOpened,
-	post,
-	user,
-}: PostReplyModalProps) => {
+export function PostReplyModal({ opened, handleClose, post, user }: PostReplyModalProps) {
+	const focusTrapRef = useFocusTrap(opened);
+
 	const mutationFn: MutationFn = (newPost) => {
 		return postPostsPostIDReplies(post.id, newPost);
 	};
-	const focusTrapRef = useFocusTrap(opened);
+
 	return (
 		<Modal
 			opened={opened}
-			onClose={() => {
-				setOpened(false);
-			}}
+			onClose={() => handleClose()}
 			title={
 				<Group align="center">
 					<Avatar user={user} size="md" />
@@ -38,13 +32,13 @@ export const PostReplyModal = ({
 			centered
 			padding="lg"
 		>
-			<Text my="xs">{post?.content}</Text>
+			<Text my="xs">{post.content}</Text>
 			<CreatePost
 				mutationFn={mutationFn}
-				setOpened={setOpened}
+				handleClose={handleClose}
 				ref={focusTrapRef}
 				placeholder={"Create reply"}
 			/>
 		</Modal>
 	);
-};
+}

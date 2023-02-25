@@ -4,10 +4,10 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { Message } from "./message";
-import type { IDPaginationMeta } from "./iDPaginationMeta";
+import type { Message } from "@/models/message";
+import type { IDPaginationMeta } from "@/models/iDPaginationMeta";
 
-export interface MessageResults {
+export type MessageResults = {
 	data: Message[];
 	meta?: IDPaginationMeta;
-}
+};

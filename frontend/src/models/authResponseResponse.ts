@@ -4,8 +4,8 @@
  * People API
  * OpenAPI spec version: 1.0.0
  */
-import type { Tokens } from "./tokens";
-import type { User } from "./user";
+import type { Tokens } from "@/models/tokens";
+import type { User } from "@/models/user";
 
 export type AuthResponseResponse = {
 	tokens: Tokens;
