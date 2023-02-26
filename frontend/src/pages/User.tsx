@@ -4,6 +4,7 @@ import { Avatar } from "@/components/user";
 import { CenterLoader, Wrapper } from "@/components/utils";
 import { AuthContext } from "@/context/AuthContext";
 import { RouteContext } from "@/context/RouteContext";
+import { MessageButton } from "@/MessageButton";
 import { getUsersHandleLikes, getUsersHandlePosts, useGetUsersHandle } from "@/spec.gen";
 import { Badge, Box, Group, Tabs, Text, UnstyledButton } from "@mantine/core";
 import { useContext, useEffect } from "react";
@@ -41,8 +42,13 @@ export default function User({ value }: UserProps) {
 			<Box p="xs">
 				<Group align="center" position="apart">
 					<Avatar user={user} size={120} mb="xs" />
-					{isAuthenticated &&
-						(ownProfile ? <EditButton user={user} /> : <FollowButton user={user} />)}
+
+					{isAuthenticated && (
+						<Group spacing="xs">
+							<MessageButton handle={user.handle} />
+							{ownProfile ? <EditButton user={user} /> : <FollowButton user={user} />}
+						</Group>
+					)}
 				</Group>
 				<Group>
 					<Text weight="bold">{user.handle}</Text>
