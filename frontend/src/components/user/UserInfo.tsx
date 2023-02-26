@@ -9,7 +9,6 @@ type UserInfoProps = {
 };
 
 export function UserInfo({ user, children }: UserInfoProps) {
-	// TODO: remove copy from pages/User
 	return (
 		<>
 			<Group align="start" position="apart">

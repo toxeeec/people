@@ -26,9 +26,7 @@ export default function User({ value }: UserProps) {
 	const navigate = useNavigate();
 	const { data: user, isLoading } = useGetUsersHandle(handle, {
 		query: {
-			onError: () => {
-				// TODO: 404
-			},
+			onError: () => navigate("/404"),
 		},
 	});
 

@@ -48,7 +48,6 @@ export function Header({ user }: LayoutHeaderProps) {
 	const isSearch = location.pathname.includes("/search");
 	const isMessages = location.pathname.includes("/messages");
 
-	// TODO: check if needed
 	useEffect(() => {
 		setOpened(false);
 	}, [location]);

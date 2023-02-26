@@ -11,6 +11,7 @@ import Auth from "@/pages/Auth";
 import Follows from "@/pages/Follows";
 import Home from "@/pages/Home";
 import Messages from "@/pages/Messages";
+import NotFound from "@/pages/NotFound";
 import Post from "@/pages/Post";
 import Search from "@/pages/Search";
 import Settings from "@/pages/Settings";
@@ -39,6 +40,7 @@ export default function App() {
 			index: true,
 			element: <Auth />,
 			loader: () => isAuthenticated && redirect("/home"),
+			errorElement: <NotFound />,
 		},
 		{
 			element: <Layout />,
@@ -56,7 +58,7 @@ export default function App() {
 					element: <User value={"likes"} />,
 				},
 				{
-					path: "/:handle/:postID",
+					path: "/posts/:postID",
 					element: <Post />,
 				},
 				{
@@ -97,6 +99,10 @@ export default function App() {
 					],
 				},
 			],
+		},
+		{
+			path: "/404",
+			element: <NotFound />,
 		},
 	]);
 

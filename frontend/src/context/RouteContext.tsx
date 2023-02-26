@@ -1,4 +1,4 @@
-import { createContext, type Dispatch, type SetStateAction, useState } from "react";
+import { createContext, type Dispatch, type SetStateAction, useState, useEffect } from "react";
 
 type RouteContextType = {
 	routeName: string;
@@ -9,6 +9,10 @@ export const RouteContext = createContext<RouteContextType>({} as RouteContextTy
 
 export function RouteContextProvider({ children }: { children: React.ReactNode }) {
 	const [routeName, setRouteName] = useState("");
+	useEffect(() => {
+		if (!routeName) return;
+		document.title = `${routeName} | People`;
+	}, [routeName]);
 	return (
 		<RouteContext.Provider value={{ routeName, setRouteName }}>{children}</RouteContext.Provider>
 	);

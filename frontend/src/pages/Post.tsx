@@ -1,4 +1,4 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { getPostsPostIDReplies, postPostsPostIDReplies, useGetPostsPostID } from "@/spec.gen";
 import { Container } from "@mantine/core";
 import { useScrollIntoView } from "@mantine/hooks";
@@ -16,6 +16,7 @@ import { useContext, useEffect } from "react";
 import { RouteContext } from "@/context/RouteContext";
 
 export default function Post() {
+	const navigate = useNavigate();
 	const { setRouteName } = useContext(RouteContext);
 	useEffect(() => {
 		setRouteName("Post");
@@ -29,9 +30,7 @@ export default function Post() {
 	const postID = +(params.postID ?? "");
 	const { data: post, isLoading } = useGetPostsPostID(postID, {
 		query: {
-			onSuccess: () => {
-				// TODO: 404
-			},
+			onError: () => navigate("/404"),
 		},
 	});
 
