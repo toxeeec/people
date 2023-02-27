@@ -25,6 +25,8 @@ type NotificationsContextType = {
 	sendMessage: (message: Omit<UserMessage, "type">) => void;
 	addMessageCallback: (cb: MessageCallback) => void;
 	removeMessageCallback: (cb: MessageCallback) => void;
+	unreadCount: number;
+	clearUnreadCount: () => void;
 };
 
 export const NotificationsContext = createContext<NotificationsContextType>(
@@ -60,6 +62,9 @@ export function NotificationsContextProvider({ children }: NotificationsContextP
 		[newMessages]
 	);
 
+	const [unreadCount, setUnreadAmount] = useState(0);
+	const clearUnreadCount = () => setUnreadAmount(0);
+
 	let messageCallbacks: MessageCallback[] = useMemo(() => [], []);
 	const addMessageCallback = (cb: MessageCallback) => {
 		messageCallbacks.push(cb);
@@ -70,13 +75,15 @@ export function NotificationsContextProvider({ children }: NotificationsContextP
 	const interval = useInterval(() => createConnection(), 2000);
 	const handleOpen = useCallback(() => interval.stop(), [interval]);
 	const handleClose = useCallback(() => interval.start(), [interval]);
+
 	const handleMessage = useCallback(
 		(e: MessageEvent<string>) => {
 			const { type, data } = JSON.parse(e.data) as Notification<unknown>;
 			if (type === "message") {
 				const msg = data as Message;
-				messageCallbacks.forEach((cb) => cb(msg));
 				addNewMessage(msg);
+				setUnreadAmount((amount) => amount + 1);
+				messageCallbacks.forEach((cb) => cb(msg));
 			}
 		},
 		[messageCallbacks, addNewMessage]
@@ -111,6 +118,8 @@ export function NotificationsContextProvider({ children }: NotificationsContextP
 				sendMessage,
 				addMessageCallback,
 				removeMessageCallback,
+				unreadCount,
+				clearUnreadCount,
 			}}
 		>
 			{children}

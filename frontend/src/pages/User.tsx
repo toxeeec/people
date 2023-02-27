@@ -4,7 +4,7 @@ import { Avatar } from "@/components/user";
 import { CenterLoader, Wrapper } from "@/components/utils";
 import { AuthContext } from "@/context/AuthContext";
 import { RouteContext } from "@/context/RouteContext";
-import { MessageButton } from "@/MessageButton";
+import { MessageButton } from "@/components/buttons";
 import { getUsersHandleLikes, getUsersHandlePosts, useGetUsersHandle } from "@/spec.gen";
 import { Badge, Box, Group, Tabs, Text, UnstyledButton } from "@mantine/core";
 import { useContext, useEffect } from "react";

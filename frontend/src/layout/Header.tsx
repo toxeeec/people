@@ -5,6 +5,7 @@ import {
 	Text,
 	UnstyledButton,
 	ActionIcon,
+	Indicator,
 } from "@mantine/core";
 import { useWindowScroll } from "@mantine/hooks";
 import { useContext, useEffect, useState } from "react";
@@ -16,6 +17,7 @@ import { RouteContext } from "@/context/RouteContext";
 import { AuthContext } from "@/context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { IconArrowLeft, IconMessage, IconSearch } from "@tabler/icons";
+import { NotificationsContext } from "@/context/NotificationsContext";
 
 export const HEADER_HEIGHT = 60;
 
@@ -29,6 +31,23 @@ function BackButton() {
 		<ActionIcon onClick={handleClick} radius="xl">
 			<IconArrowLeft size={20} />
 		</ActionIcon>
+	);
+}
+
+function MessagesButton() {
+	const { unreadCount, clearUnreadCount } = useContext(NotificationsContext);
+	const location = useLocation();
+	useEffect(() => {
+		if (location.pathname.includes("/messages")) {
+			clearUnreadCount();
+		}
+	}, [location, clearUnreadCount]);
+	return (
+		<Indicator inline label={unreadCount} size={16} overflowCount={9} showZero={false} dot={false}>
+			<ActionIcon component={Link} to={`/messages`}>
+				<IconMessage />
+			</ActionIcon>
+		</Indicator>
 	);
 }
 
@@ -70,14 +89,10 @@ export function Header({ user }: LayoutHeaderProps) {
 						</UnstyledButton>
 					</Group>
 					<Group hidden={isSearch || isMessages || isSettings}>
+						{isAuthenticated && <MessagesButton />}
 						<ActionIcon component={Link} to={`/search/posts`}>
 							<IconSearch />
 						</ActionIcon>
-						{isAuthenticated && (
-							<ActionIcon component={Link} to={`/messages`}>
-								<IconMessage />
-							</ActionIcon>
-						)}
 					</Group>
 				</Group>
 			</MantineHeader>
