@@ -53,7 +53,7 @@ export const createResponseInterceptor = (
 		(error: AxiosError) => {
 			if (error.response?.status === 403 && error.config?.url !== "/refresh") {
 				const err = (error as ErrorType<Error>).response?.data.message;
-				if (!err?.includes("token")) return;
+				if (!err?.toLowerCase().includes("token")) return;
 				const { refreshToken } = getAuth();
 				if (refreshToken) {
 					postRefresh({ refreshToken: refreshToken })
