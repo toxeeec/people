@@ -51,15 +51,16 @@ jobs:
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
 
-  update_linode:
-    name: Tell linode server to update
+  update_server:
+    name: Tell server to update
     needs: push_to_registry
     runs-on: ubuntu-latest
     steps:
-      - name: executing remote ssh commands using password
+      - name: Execute remote ssh commands
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.LINODE_HOST }}
-          username: ${{ secrets.LINODE_USERNAME }}
-          password: ${{ secrets.LINODE_PASSWORD }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: bash update.sh
